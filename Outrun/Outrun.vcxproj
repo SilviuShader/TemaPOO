@@ -165,6 +165,7 @@
     <ClInclude Include="Pseudo3DCamera.h" />
     <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="StepTimer.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture2D.h" />
   </ItemGroup>
   <ItemGroup>
@@ -180,6 +181,7 @@
     </ClCompile>
     <ClCompile Include="Pseudo3DCamera.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture2D.cpp" />
   </ItemGroup>
   <ItemGroup>

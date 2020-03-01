@@ -8,6 +8,7 @@
 #include <locale>
 #include <codecvt>
 #include <string>
+#include <vector>
 
 #include <winsdkver.h>
 #define _WIN32_WINNT 0x0601
@@ -69,6 +70,7 @@
 #include "Texture2D.h"
 #include "ContentManager.h"
 #include "Camera.h"
+#include "Terrain.h"
 #include "Pseudo3DCamera.h"
 
 namespace DX

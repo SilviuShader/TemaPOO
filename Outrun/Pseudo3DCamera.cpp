@@ -10,13 +10,21 @@ using namespace DirectX::SimpleMath;
 
 using VertexType = VertexPositionColor;
 
+Pseudo3DCamera::TerrainLineProjection::TerrainLineProjection(Vector2 position, 
+	                                                         float width) :
+	m_position(position),
+	m_width(width)
+{
+}
+
 Pseudo3DCamera::Pseudo3DCamera(ID3D11Device*        device,
 	                           ID3D11DeviceContext* deviceContext, 
 	                           int                  width, 
 	                           int                  height, 
 	                           int                  screenWidth, 
-	                           int                  screenHeight, 
-	                           float                fieldOfView) :
+	                           int                  screenHeight,
+	                           int                  linesDrawCount,
+	                           float                cameraDepth) :
 	Camera(device, 
 		   deviceContext, 
 		   width, 
@@ -25,8 +33,10 @@ Pseudo3DCamera::Pseudo3DCamera(ID3D11Device*        device,
 		   screenHeight),
 	
 	m_d3dDevice(device),
-	m_fieldOfView(fieldOfView),
-	m_runningBatch(RunningBatch::None)
+	m_linesDrawCount(linesDrawCount),
+	m_cameraDepth(cameraDepth),
+	m_runningBatch(Pseudo3DCamera::RunningBatch::None),
+	m_cameraPosition(Vector3::Zero)
 {
 	CreateWhiteTexture();
 
@@ -46,6 +56,8 @@ Pseudo3DCamera::Pseudo3DCamera(ID3D11Device*        device,
 		                                             m_inputLayout.ReleaseAndGetAddressOf()));
 
 	m_batch = make_unique<PrimitiveBatch<VertexType> >(m_d3dContext);
+
+	m_cameraPosition.y = 1500;
 }
 
 Pseudo3DCamera::Pseudo3DCamera(const Pseudo3DCamera& other) :
@@ -61,12 +73,43 @@ Pseudo3DCamera::~Pseudo3DCamera()
 	m_whiteTexture.reset();
 }
 
-void Pseudo3DCamera::DrawQuad(SpriteBatch* spriteBatch,
-	                          Vector4      color, 
-	                          Vector2      bottomPoint, 
-	                          Vector2      topPoint, 
-	                          float        bottomWidth, 
-	                          float        topWidth)
+void Pseudo3DCamera::End(ID3D11RenderTargetView* const* renderTargetViews,
+	                     ID3D11DepthStencilView*        depthStencilView,
+	                     int                            numViews)
+{
+	EndPolygon();
+
+	Camera::End(renderTargetViews, depthStencilView, numViews);
+}
+
+void Pseudo3DCamera::DrawTerrain(Terrain* terrain)
+{
+	//DrawQuad(Vector4(1.0f, 1.0f, 1.0f, 1.0f), Vector2(0.0f, 0.0f), Vector2(0.0f, -10.0f), 100, 20);
+
+	vector<Terrain::Line>& terrainLines = terrain->GetLines();
+
+	for (int i = 1; i < m_linesDrawCount; i++)
+	{
+		Terrain::Line& currentLine  = terrainLines[i       % terrainLines.size()];
+		Terrain::Line& previousLine = terrainLines[(i - 1) % terrainLines.size()];
+
+		TerrainLineProjection currentLineProj  = ProjectLine(terrain, currentLine);
+		TerrainLineProjection previousLineProj = ProjectLine(terrain, previousLine);
+
+		Vector4 grass = (i / 3) % 2 ? Vector4(0.3f, 0.7f, 0.5f, 1.0f) : Vector4(0.5f, 0.7f, 0.3f, 1.0f);
+
+		Vector2 currentProjectedPos = currentLineProj.GetPosition();
+		Vector2 previousProjectedPos = previousLineProj.GetPosition();
+
+		DrawQuad(grass, Vector2(0.0f, previousProjectedPos.y), Vector2(0.0f, currentProjectedPos.y), m_width, m_width);
+	}
+}
+
+void Pseudo3DCamera::DrawQuad(Vector4 color,
+	                          Vector2 bottomPoint,
+	                          Vector2 topPoint,
+	                          float   bottomWidth,
+	                          float   topWidth)
 {
 	m_d3dContext->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
 	m_d3dContext->OMSetDepthStencilState(m_states->DepthNone(), 0);
@@ -76,18 +119,18 @@ void Pseudo3DCamera::DrawQuad(SpriteBatch* spriteBatch,
 	m_effect->Apply(m_d3dContext);
 	m_d3dContext->IASetInputLayout(m_inputLayout.Get());
 
-	Vector2 bottomLeft  = Vector2(bottomPoint.x - (bottomWidth / 2.0f), bottomPoint.y);
+	Vector2 bottomLeft = Vector2(bottomPoint.x - (bottomWidth / 2.0f), bottomPoint.y);
 	Vector2 bottomRight = Vector2(bottomPoint.x + (bottomWidth / 2.0f), bottomPoint.y);
-	Vector2 topLeft     = Vector2(topPoint.x    - (topWidth    / 2.0f), topPoint.y);
-	Vector2 topRight    = Vector2(topPoint.x    + (topWidth    / 2.0f), topPoint.y);
+	Vector2 topLeft = Vector2(topPoint.x - (topWidth / 2.0f), topPoint.y);
+	Vector2 topRight = Vector2(topPoint.x + (topWidth / 2.0f), topPoint.y);
 
 	Vector2 vertices[] = { bottomLeft, bottomRight, topLeft, topRight };
 
 	for (int i = 0; i < sizeof(vertices) / sizeof(Vector2); i++)
 	{
-		vertices[i].x /= (m_width  / 2.0f);
+		vertices[i].x /= (m_width / 2.0f);
 		vertices[i].y /= (m_height / 2.0f);
-		vertices[i].y  = -vertices[i].y;
+		vertices[i].y = -vertices[i].y;
 	}
 
 	VertexPositionColor v1(Vector3(vertices[2].x, vertices[2].y, 0.5f), color);
@@ -103,15 +146,6 @@ void Pseudo3DCamera::DrawQuad(SpriteBatch* spriteBatch,
 	v3 = VertexPositionColor(Vector3(vertices[1].x, vertices[1].y, 0.5f), color);
 
 	m_batch->DrawTriangle(v1, v2, v3);
-}
-
-void Pseudo3DCamera::End(ID3D11RenderTargetView* const* renderTargetViews,
-	                     ID3D11DepthStencilView*        depthStencilView,
-	                     int                            numViews)
-{
-	EndPolygon();
-
-	Camera::End(renderTargetViews, depthStencilView, numViews);
 }
 
 void Pseudo3DCamera::Begin2D()
@@ -206,4 +240,19 @@ void Pseudo3DCamera::CreateWhiteTexture()
 	m_d3dDevice->CreateShaderResourceView(resource.Get(), &resourceDesc, shaderResourceView.GetAddressOf());
 
 	m_whiteTexture = make_unique<Texture2D>(shaderResourceView.Get(), desc);
+}
+
+Pseudo3DCamera::TerrainLineProjection Pseudo3DCamera::ProjectLine(Terrain*             terrain,
+	                                                              const Terrain::Line& line)
+{
+	Vector3 linePosition = line.GetPosition();
+	Vector2 projectedPosition = Vector2();
+
+	float scale = m_cameraDepth / (linePosition.z - m_cameraPosition.z);
+	projectedPosition.x = (scale * (linePosition.x - m_cameraPosition.x)) * (m_width / 2.0f);
+	projectedPosition.y = -(scale * (linePosition.y - m_cameraPosition.y)) * (m_height / 2.0f);
+
+	float width = scale * (float)terrain->GetRoadWidth() * (m_width / 2.0f);
+
+	return TerrainLineProjection(projectedPosition, width);
 }

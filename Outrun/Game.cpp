@@ -72,12 +72,11 @@ void Game::Render()
         return;
     }
 
-    Vector4 clearColor = { 0.0f, 5.0f, 1.0f, 1.0f };
+    Vector4 clearColor = { 0.3f, 0.5f, 0.7f, 1.0f };
     
     m_mainCamera->Begin(clearColor);
 
-    //m_mainCamera->DrawSprite(m_testTexture.get(), Vector2(0.0f, 75.0f), nullptr, 0.0f, Vector2::One);
-    m_mainCamera->DrawQuad(m_spriteBatch.get(), Vector4(1.0f, 1.0f, 1.0f, 1.0f), Vector2(0.0f, 0.0f), Vector2(0.0f, -10.0f), 100, 20);
+    m_mainCamera->DrawTerrain(m_terrain.get());
 
     m_mainCamera->End(m_renderTargetView.GetAddressOf(), 
                       m_depthStencilView.Get(),
@@ -246,16 +245,19 @@ void Game::CreateDevice()
 
     m_mainCamera  = make_unique<Pseudo3DCamera>(m_d3dDevice.Get(),
                                                 m_d3dContext.Get(),
-                                                150,
-                                                150, 
+                                                300,
+                                                300, 
                                                 800, 
                                                 600,
-                                                45.0f);
+                                                300,
+                                                0.84f);
 
     m_contentManager = make_unique<ContentManager>(m_d3dDevice.Get(), 
                                                    "Resources/");
 
-    m_testTexture = m_contentManager->Load<Texture2D>("Cat.png");
+    m_terrain        = make_unique<Terrain>(2000, 200, 300);
+
+    m_testTexture    = m_contentManager->Load<Texture2D>("Cat.png");
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -357,6 +359,9 @@ void Game::CreateResources()
 void Game::OnDeviceLost()
 {
     m_contentManager.reset();
+
+    m_testTexture.reset();
+    m_terrain.reset();
 
     m_mainCamera.reset();
     m_states.reset();

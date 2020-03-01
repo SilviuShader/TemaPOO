@@ -67,6 +67,7 @@ private:
 
     std::unique_ptr<Pseudo3DCamera>                  m_mainCamera;
     std::unique_ptr<ContentManager>                  m_contentManager;
+    std::unique_ptr<Terrain>                         m_terrain;
 
     std::shared_ptr<Texture2D>                       m_testTexture;
 };
