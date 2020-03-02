@@ -27,8 +27,9 @@ public:
 	Terrain(const Terrain&);
 	~Terrain();
 
-	inline std::vector<Line>& GetLines()           { return m_lines; }
-	inline int                GetRoadWidth() const { return m_roadWidth; }
+	inline std::vector<Line>& GetLines()               { return m_lines;         }
+	inline int                GetRoadWidth()     const { return m_roadWidth;     }
+	inline int                GetSegmentLength() const { return m_segmentLength; }
 
 private:
 

@@ -40,11 +40,14 @@ public:
 	Pseudo3DCamera(const Pseudo3DCamera&);
 	~Pseudo3DCamera();
 
-	void End(ID3D11RenderTargetView* const*,
-		     ID3D11DepthStencilView*,
-		     int) override;
+	void                                End(ID3D11RenderTargetView* const*,
+		                                    ID3D11DepthStencilView*,
+		                                    int) override;
 
-	void DrawTerrain(Terrain*);
+	void                                DrawTerrain(Terrain*);
+
+	inline void                         SetPosition(DirectX::SimpleMath::Vector3 position) { m_cameraPosition = position; }
+	inline DirectX::SimpleMath::Vector3 GetPosition() const                                { return m_cameraPosition;     }
 
 private:
 
@@ -62,7 +65,9 @@ private:
 
 	void CreateWhiteTexture();
 
-	TerrainLineProjection ProjectLine(Terrain*, const Terrain::Line&);
+	TerrainLineProjection ProjectLine(Terrain*, 
+		                              const Terrain::Line&, 
+		                              int);
 
 private:
 

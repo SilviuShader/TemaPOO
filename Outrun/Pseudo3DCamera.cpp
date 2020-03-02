@@ -11,20 +11,20 @@ using namespace DirectX::SimpleMath;
 using VertexType = VertexPositionColor;
 
 Pseudo3DCamera::TerrainLineProjection::TerrainLineProjection(Vector2 position, 
-	                                                         float width) :
+															 float width) :
 	m_position(position),
 	m_width(width)
 {
 }
 
 Pseudo3DCamera::Pseudo3DCamera(ID3D11Device*        device,
-	                           ID3D11DeviceContext* deviceContext, 
-	                           int                  width, 
-	                           int                  height, 
-	                           int                  screenWidth, 
-	                           int                  screenHeight,
-	                           int                  linesDrawCount,
-	                           float                cameraDepth) :
+							   ID3D11DeviceContext* deviceContext, 
+							   int                  width, 
+							   int                  height, 
+							   int                  screenWidth, 
+							   int                  screenHeight,
+							   int                  linesDrawCount,
+							   float                cameraDepth) :
 	Camera(device, 
 		   deviceContext, 
 		   width, 
@@ -47,13 +47,13 @@ Pseudo3DCamera::Pseudo3DCamera(ID3D11Device*        device,
 	size_t byteCodeLength;
 
 	m_effect->GetVertexShaderBytecode(&shaderByteCode, 
-		                              &byteCodeLength);
+									  &byteCodeLength);
 
 	DX::ThrowIfFailed(m_d3dDevice->CreateInputLayout(VertexType::InputElements,
-		                                             VertexType::InputElementCount,
-		                                             shaderByteCode,
-		                                             byteCodeLength,
-		                                             m_inputLayout.ReleaseAndGetAddressOf()));
+													 VertexType::InputElementCount,
+													 shaderByteCode,
+													 byteCodeLength,
+													 m_inputLayout.ReleaseAndGetAddressOf()));
 
 	m_batch = make_unique<PrimitiveBatch<VertexType> >(m_d3dContext);
 
@@ -74,8 +74,8 @@ Pseudo3DCamera::~Pseudo3DCamera()
 }
 
 void Pseudo3DCamera::End(ID3D11RenderTargetView* const* renderTargetViews,
-	                     ID3D11DepthStencilView*        depthStencilView,
-	                     int                            numViews)
+						 ID3D11DepthStencilView*        depthStencilView,
+						 int                            numViews)
 {
 	EndPolygon();
 
@@ -84,32 +84,46 @@ void Pseudo3DCamera::End(ID3D11RenderTargetView* const* renderTargetViews,
 
 void Pseudo3DCamera::DrawTerrain(Terrain* terrain)
 {
-	//DrawQuad(Vector4(1.0f, 1.0f, 1.0f, 1.0f), Vector2(0.0f, 0.0f), Vector2(0.0f, -10.0f), 100, 20);
-
 	vector<Terrain::Line>& terrainLines = terrain->GetLines();
+	int startPos = m_cameraPosition.z / terrain->GetSegmentLength();
 
-	for (int i = 1; i < m_linesDrawCount; i++)
+	const int linesRender = 300;
+
+	for (int i = startPos == 0 ? 2 : startPos; i < startPos + linesRender; i++)
 	{
 		Terrain::Line& currentLine  = terrainLines[i       % terrainLines.size()];
 		Terrain::Line& previousLine = terrainLines[(i - 1) % terrainLines.size()];
 
-		TerrainLineProjection currentLineProj  = ProjectLine(terrain, currentLine);
-		TerrainLineProjection previousLineProj = ProjectLine(terrain, previousLine);
+		float crtZDelta = currentLine.GetPosition().z - m_cameraPosition.z;
+		float prevZDelta = previousLine.GetPosition().z - m_cameraPosition.z;
+
+		TerrainLineProjection currentLineProj = ProjectLine(terrain, currentLine, i);
+		TerrainLineProjection previousLineProj = ProjectLine(terrain, previousLine, i - 1);
 
 		Vector4 grass = (i / 3) % 2 ? Vector4(0.3f, 0.7f, 0.5f, 1.0f) : Vector4(0.5f, 0.7f, 0.3f, 1.0f);
+		Vector4 rumble = (i / 3) % 2 ? Vector4(1.0f, 1.0f, 1.0f, 1.0f) : Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+		Vector4 road = (i / 3) % 2 ? Vector4(0.4f, 0.4f, 0.4f, 1.0f) : Vector4(0.3f, 0.3f, 0.3f, 1.0f);
 
 		Vector2 currentProjectedPos = currentLineProj.GetPosition();
 		Vector2 previousProjectedPos = previousLineProj.GetPosition();
 
-		DrawQuad(grass, Vector2(0.0f, previousProjectedPos.y), Vector2(0.0f, currentProjectedPos.y), m_width, m_width);
+		float previousWidth = previousLineProj.GetWidth();
+		float currentWidth = currentLineProj.GetWidth();
+
+		if (currentWidth < previousWidth)
+		{
+			DrawQuad(grass, Vector2(0.0f, previousProjectedPos.y), Vector2(0.0f, currentProjectedPos.y), m_width, m_width);
+			DrawQuad(rumble, previousProjectedPos, currentProjectedPos, previousWidth * 1.2f, currentWidth * 1.2f);
+			DrawQuad(road, previousProjectedPos, currentProjectedPos, previousWidth, currentWidth);
+		}
 	}
 }
 
 void Pseudo3DCamera::DrawQuad(Vector4 color,
-	                          Vector2 bottomPoint,
-	                          Vector2 topPoint,
-	                          float   bottomWidth,
-	                          float   topWidth)
+							  Vector2 bottomPoint,
+							  Vector2 topPoint,
+							  float   bottomWidth,
+							  float   topWidth)
 {
 	m_d3dContext->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
 	m_d3dContext->OMSetDepthStencilState(m_states->DepthNone(), 0);
@@ -128,22 +142,25 @@ void Pseudo3DCamera::DrawQuad(Vector4 color,
 
 	for (int i = 0; i < sizeof(vertices) / sizeof(Vector2); i++)
 	{
+		vertices[i] = Vector2((int)vertices[i].x, 
+			                  (int)vertices[i].y);
+
 		vertices[i].x /= (m_width / 2.0f);
 		vertices[i].y /= (m_height / 2.0f);
 		vertices[i].y = -vertices[i].y;
 	}
 
-	VertexPositionColor v1(Vector3(vertices[2].x, vertices[2].y, 0.5f), color);
-	VertexPositionColor v2(Vector3(vertices[1].x, vertices[1].y, 0.5f), color);
-	VertexPositionColor v3(Vector3(vertices[0].x, vertices[0].y, 0.5f), color);
+	VertexPositionColor v1(Vector3(vertices[2].x, vertices[2].y, 1.0f), color);
+	VertexPositionColor v2(Vector3(vertices[1].x, vertices[1].y, 1.0f), color);
+	VertexPositionColor v3(Vector3(vertices[0].x, vertices[0].y, 1.0f), color);
 
 	BeginPolygon();
 
 	m_batch->DrawTriangle(v1, v2, v3);
 
-	v1 = VertexPositionColor(Vector3(vertices[3].x, vertices[3].y, 0.5f), color);
-	v2 = VertexPositionColor(Vector3(vertices[2].x, vertices[2].y, 0.5f), color);
-	v3 = VertexPositionColor(Vector3(vertices[1].x, vertices[1].y, 0.5f), color);
+	v1 = VertexPositionColor(Vector3(vertices[3].x, vertices[3].y, 1.0f), color);
+	v2 = VertexPositionColor(Vector3(vertices[2].x, vertices[2].y, 1.0f), color);
+	v3 = VertexPositionColor(Vector3(vertices[1].x, vertices[1].y, 1.0f), color);
 
 	m_batch->DrawTriangle(v1, v2, v3);
 }
@@ -242,13 +259,18 @@ void Pseudo3DCamera::CreateWhiteTexture()
 	m_whiteTexture = make_unique<Texture2D>(shaderResourceView.Get(), desc);
 }
 
-Pseudo3DCamera::TerrainLineProjection Pseudo3DCamera::ProjectLine(Terrain*             terrain,
-	                                                              const Terrain::Line& line)
+Pseudo3DCamera::TerrainLineProjection Pseudo3DCamera::ProjectLine(      Terrain*       terrain,
+																  const Terrain::Line& line, 
+	                                                                    int            lineIndex)
 {
 	Vector3 linePosition = line.GetPosition();
 	Vector2 projectedPosition = Vector2();
 
-	float scale = m_cameraDepth / (linePosition.z - m_cameraPosition.z);
+	float camZ = m_cameraPosition.z;
+	int linesCount = terrain->GetLines().size();
+	camZ -= linesCount * (terrain->GetSegmentLength()) * (lineIndex / linesCount);
+
+	float scale = m_cameraDepth / (linePosition.z - camZ);
 	projectedPosition.x = (scale * (linePosition.x - m_cameraPosition.x)) * (m_width / 2.0f);
 	projectedPosition.y = -(scale * (linePosition.y - m_cameraPosition.y)) * (m_height / 2.0f);
 

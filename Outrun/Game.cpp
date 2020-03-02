@@ -35,12 +35,10 @@ void Game::Initialize(HWND window, int width, int height)
 
     CreateResources();
 
-    // TODO: Change the timer settings if you want something other than the default variable timestep mode.
-    // e.g. for 60 FPS fixed timestep update logic, call:
-    /*
-    m_timer.SetFixedTimeStep(true);
-    m_timer.SetTargetElapsedSeconds(1.0 / 60);
-    */
+    m_keyboard = make_unique<Keyboard>();
+    m_mouse    = make_unique<Mouse>();
+
+    m_mouse->SetWindow(window);
 }
 
 // Executes the basic game loop.
@@ -59,8 +57,28 @@ void Game::Update(DX::StepTimer const& timer)
 {
     float elapsedTime = float(timer.GetElapsedSeconds());
 
-    // TODO: Add your game logic here.
-    elapsedTime;
+    auto kb = m_keyboard->GetState();
+    if (kb.Escape)
+        ExitGame();
+
+    Vector3 movementVector = Vector3::Zero;
+
+    if (kb.W)
+        movementVector.z += 1.0f;
+    if (kb.S)
+        movementVector.z += -1.0f;
+    if (kb.A)
+        movementVector.x += -1.0f;
+    if (kb.D)
+        movementVector.x += 1.0f;
+
+    movementVector.Normalize();
+
+    movementVector *= elapsedTime * 10000.0f;
+
+    m_mainCamera->SetPosition(m_mainCamera->GetPosition() + movementVector);
+
+    auto mouse = m_mouse->GetState();
 }
 
 // Draws the scene.
@@ -245,8 +263,8 @@ void Game::CreateDevice()
 
     m_mainCamera  = make_unique<Pseudo3DCamera>(m_d3dDevice.Get(),
                                                 m_d3dContext.Get(),
-                                                300,
-                                                300, 
+                                                100,
+                                                75, 
                                                 800, 
                                                 600,
                                                 300,
@@ -255,7 +273,7 @@ void Game::CreateDevice()
     m_contentManager = make_unique<ContentManager>(m_d3dDevice.Get(), 
                                                    "Resources/");
 
-    m_terrain        = make_unique<Terrain>(2000, 200, 300);
+    m_terrain        = make_unique<Terrain>(4000, 300, 300);
 
     m_testTexture    = m_contentManager->Load<Texture2D>("Cat.png");
 }
