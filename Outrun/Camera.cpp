@@ -23,7 +23,8 @@ Camera::Camera(ID3D11Device*        d3dDevice,
 	m_height(height),
 	m_screenWidth(screenWidth),
 	m_screenHeight(screenHeight),
-	m_states(make_unique<CommonStates>(d3dDevice))
+	m_states(make_unique<CommonStates>(d3dDevice)),
+	m_customBeginFunction(nullptr)
 {
 }
 
@@ -71,7 +72,7 @@ void Camera::DrawSprite(Texture2D*  sprite,
 	                    float       rotation        = 0.0f, 
 	                    Vector2     scale           = Vector2::One)
 {
-	Begin2D();
+	Begin2D(m_customBeginFunction);
 
 	Vector2 centerPosition = Vector2::Zero;
 	Vector2 zoom           = Vector2::One;
@@ -149,15 +150,24 @@ void Camera::End(ID3D11RenderTargetView* const* renderTargetViews,
 		                             depthStencilView);
 }
 
-void Camera::Begin2D()
+void Camera::Begin2D(function<void _cdecl()> customFunction)
 {
+	if (m_rendering2D)
+		if (m_customBeginFunction == nullptr && customFunction != nullptr ||
+			m_customBeginFunction != nullptr && customFunction == nullptr)
+			End2D();
+
 	if (!m_rendering2D)
 	{
-		m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred,
+		m_spriteBatch->Begin(DirectX::SpriteSortMode_Immediate,
 			                 nullptr,
-			                 m_states->PointClamp());
+			                 m_states->PointClamp(), 
+			                 nullptr, 
+			                 nullptr, 
+			                 customFunction);
 
 		m_rendering2D = true;
+		m_customBeginFunction = customFunction;
 	}
 }
 

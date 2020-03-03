@@ -19,6 +19,7 @@
     <ClInclude Include="ContentManager.h" />
     <ClInclude Include="Pseudo3DCamera.h" />
     <ClInclude Include="Terrain.h" />
+    <ClInclude Include="ReadData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -46,5 +47,8 @@
     <Manifest Include="settings.manifest">
       <Filter>Assets</Filter>
     </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="TerrainPixelShader.hlsl" />
   </ItemGroup>
 </Project>

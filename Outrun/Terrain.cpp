@@ -5,44 +5,48 @@ using namespace std;
 
 using namespace DirectX::SimpleMath;
 
-Terrain::Line::Line() :
-	m_position(Vector3::Zero)
-{
-}
-
-Terrain::Line::Line(Vector3 position) :
-	m_position(position)
-{
-}
-
-Terrain::Line::Line(const Line& other) :
-	m_position(other.m_position)
-{
-}
-
-Terrain::Line::~Line()
-{
-}
-
-Terrain::Terrain(int roadWidth,
-	             int segmentLength,
-	             int linesCount) :
+Terrain::Terrain(Camera*       camera,
+	             ID3D11Device* d3dDevice,
+	             int           roadWidth,
+	             int           segmentLength,
+	             int           linesCount) :
 	
 	m_roadWidth(roadWidth),
 	m_segmentLength(segmentLength),
-	m_linesCount(linesCount),
-	m_lines(vector<Line>())
+	m_linesCount(linesCount)
 
 {
-	for (int i = 0; i < m_linesCount; i++)
-	{
-		Line line = Line();
-		Vector3 linePos = line.GetPosition();
-		linePos.z = i * m_segmentLength;
-		line.SetPosition(linePos);
+	int cameraWidth  = camera->GetWidth();
+	int cameraHeight = camera->GetHeight();
 
-		m_lines.push_back(line);
+	float* textureData = new float[cameraWidth * cameraHeight * 4];
+
+	for (int i = 0; i < cameraHeight; i++)
+	{
+		for (int j = 0; j < cameraWidth; j++)
+		{
+			float& r = textureData[(i * cameraWidth * 4) + (j * 4)];
+			float& g = textureData[(i * cameraWidth * 4) + (j * 4) + 1];
+			float& b = textureData[(i * cameraWidth * 4) + (j * 4) + 2];
+			float& a = textureData[(i * cameraWidth * 4) + (j * 4) + 3];
+
+			float screenX = j - ((float)cameraWidth / 2.0f);
+			float screenY = i - ((float)cameraHeight / 2.0f);
+			screenY = -screenY;
+			screenY /= (float)cameraHeight;
+
+			float z = -1.0f / screenY;
+
+			int div = (int)z / m_segmentLength;
+
+			r = div % 2 ? 0.0f : 1.0f;
+			g = z > 0 ? 1.0f : 0.0f;
+			b = 0.0f;
+			a = 1.0f;
+		}
 	}
+
+	m_zMap = make_unique<Texture2D>(d3dDevice, cameraWidth, cameraHeight, textureData);
 }
 
 Terrain::Terrain(const Terrain& other)

@@ -113,8 +113,8 @@ void Game::Render()
     
     // Now that we finish rendering the texture,
     // we must let the computer render to it again
-    ID3D11ShaderResourceView* const null[1] = { nullptr };
-    m_d3dContext->PSSetShaderResources(0, 1, null);
+    ID3D11ShaderResourceView* const null[] = { nullptr, nullptr };
+    m_d3dContext->PSSetShaderResources(0, 2, null);
 
     Present();
 }
@@ -263,8 +263,8 @@ void Game::CreateDevice()
 
     m_mainCamera  = make_unique<Pseudo3DCamera>(m_d3dDevice.Get(),
                                                 m_d3dContext.Get(),
-                                                100,
-                                                75, 
+                                                300,
+                                                300, 
                                                 800, 
                                                 600,
                                                 300,
@@ -273,7 +273,7 @@ void Game::CreateDevice()
     m_contentManager = make_unique<ContentManager>(m_d3dDevice.Get(), 
                                                    "Resources/");
 
-    m_terrain        = make_unique<Terrain>(4000, 300, 300);
+    m_terrain        = make_unique<Terrain>(m_mainCamera.get(), m_d3dDevice.Get(), 4000, 10, 300);
 
     m_testTexture    = m_contentManager->Load<Texture2D>("Cat.png");
 }

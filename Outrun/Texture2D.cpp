@@ -31,6 +31,50 @@ Texture2D::Texture2D(ID3D11ShaderResourceView* shaderResourceView,
 {
 }
 
+Texture2D::Texture2D(ID3D11Device* device, 
+                     int           width, 
+                     int           height, 
+                     float*        textureData)
+{
+    float pixelsCount = width * height;
+
+    CD3D11_TEXTURE2D_DESC desc;
+    ZeroMemory(&desc, sizeof(desc));
+
+    desc.Width = width;
+    desc.Height = height;
+    desc.MipLevels = desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DYNAMIC;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    desc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA data;
+
+    data.pSysMem = textureData;
+    data.SysMemPitch = 4 * sizeof(float) * width;
+    data.SysMemSlicePitch = 4 * sizeof(float);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC resourceDesc;
+
+    resourceDesc.Format = desc.Format;
+    resourceDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    resourceDesc.Texture2D.MostDetailedMip = 0;
+    resourceDesc.Texture2D.MipLevels = 1;
+
+    ComPtr<ID3D11Texture2D>          resource;
+    ComPtr<ID3D11ShaderResourceView> shaderResourceView;
+
+    ThrowIfFailed(device->CreateTexture2D(&desc, &data, resource.GetAddressOf()));
+    
+    ThrowIfFailed(device->CreateShaderResourceView(resource.Get(), &resourceDesc, shaderResourceView.GetAddressOf()));
+
+    m_shaderResourceView = shaderResourceView;
+    m_textureDesc = desc;
+}
+
 Texture2D::Texture2D(const Texture2D& other)
 {
 }

@@ -65,6 +65,7 @@
 #include "VertexTypes.h"
 #include "WICTextureLoader.h"
 
+#include "ReadData.h"
 
 #include "RenderTexture.h"
 #include "Texture2D.h"
