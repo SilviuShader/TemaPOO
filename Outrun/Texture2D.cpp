@@ -24,13 +24,6 @@ Texture2D::Texture2D(ID3D11Device* device,
     texture->GetDesc(&m_textureDesc);
 }
 
-Texture2D::Texture2D(ID3D11ShaderResourceView* shaderResourceView, 
-                     CD3D11_TEXTURE2D_DESC     textureDesc) :
-    m_shaderResourceView(shaderResourceView),
-    m_textureDesc(textureDesc)
-{
-}
-
 Texture2D::Texture2D(ID3D11Device* device, 
                      int           width, 
                      int           height, 

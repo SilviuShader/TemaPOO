@@ -76,8 +76,8 @@ void Game::Update(DX::StepTimer const& timer)
 
     movementVector *= elapsedTime * 10000.0f;
 
-    m_mainCamera->SetPosition(m_mainCamera->GetPosition() + movementVector);
-
+    m_terrain->Update(elapsedTime);
+    
     auto mouse = m_mouse->GetState();
 }
 
@@ -268,12 +268,12 @@ void Game::CreateDevice()
                                                 800, 
                                                 600,
                                                 300,
-                                                0.84f);
+                                                15.0f);
 
     m_contentManager = make_unique<ContentManager>(m_d3dDevice.Get(), 
                                                    "Resources/");
 
-    m_terrain        = make_unique<Terrain>(m_mainCamera.get(), m_d3dDevice.Get(), 4000, 10, 300);
+    m_terrain        = make_unique<Terrain>(m_mainCamera.get(), m_d3dDevice.Get(), 1.0f, 0.1f, 1, 300);
 
     m_testTexture    = m_contentManager->Load<Texture2D>("Cat.png");
 }

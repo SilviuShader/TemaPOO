@@ -11,14 +11,24 @@ private:
 	public:
 
 		TerrainShaderParameters();
-		TerrainShaderParameters(int, int, int);
+		TerrainShaderParameters(float, float, float, float, int, DirectX::SimpleMath::Vector2, DirectX::SimpleMath::Vector2, int);
 
 	private:
 
-		int m_screenWidth;
-		int m_screenHeight;
-		int m_segmentLength;
-		int m_padding;
+		float              m_roadWidth;
+		float              m_sideWidth;
+		float              m_translation;
+		float              m_drawDistance;
+
+		int                m_segmentLength;
+		float              m_segment1X;
+		float              m_segment1Y;
+		int                m_padding2;
+		float              m_segment2X;
+		float              m_segment2Y;
+
+		int                m_screenHeight;
+		int                m_padding3;
 	};
 
 public:

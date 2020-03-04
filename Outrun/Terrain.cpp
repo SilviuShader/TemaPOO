@@ -7,17 +7,21 @@ using namespace DirectX::SimpleMath;
 
 Terrain::Terrain(Camera*       camera,
 	             ID3D11Device* d3dDevice,
-	             int           roadWidth,
+	             float         roadWidth,
+	             float         sideWidth,
 	             int           segmentLength,
 	             int           linesCount) :
-	
+
 	m_roadWidth(roadWidth),
+	m_sideWidth(sideWidth),
 	m_segmentLength(segmentLength),
 	m_linesCount(linesCount)
 
 {
 	int cameraWidth  = camera->GetWidth();
 	int cameraHeight = camera->GetHeight();
+
+	m_cameraHeight = cameraHeight;
 
 	float* textureData = new float[cameraWidth * cameraHeight * 4];
 
@@ -30,23 +34,16 @@ Terrain::Terrain(Camera*       camera,
 			float& b = textureData[(i * cameraWidth * 4) + (j * 4) + 2];
 			float& a = textureData[(i * cameraWidth * 4) + (j * 4) + 3];
 
-			float screenX = j - ((float)cameraWidth / 2.0f);
-			float screenY = i - ((float)cameraHeight / 2.0f);
-			screenY = -screenY;
-			screenY /= (float)cameraHeight;
-
-			float z = -1.0f / screenY;
-
-			int div = (int)z / m_segmentLength;
-
-			r = div % 2 ? 0.0f : 1.0f;
-			g = z > 0 ? 1.0f : 0.0f;
+			r = 1.0f;
+			g = 0.0f;
 			b = 0.0f;
 			a = 1.0f;
 		}
 	}
 
 	m_zMap = make_unique<Texture2D>(d3dDevice, cameraWidth, cameraHeight, textureData);
+	m_topSegment = Vector2(cameraHeight, 0.0002f);
+	m_bottomSegment = Vector2(0.0f, -0.0002f);
 }
 
 Terrain::Terrain(const Terrain& other)
@@ -55,4 +52,24 @@ Terrain::Terrain(const Terrain& other)
 
 Terrain::~Terrain()
 {
+}
+
+void Terrain::Update(float deltaTime)
+{
+	float alpha = 100.0f;
+	m_topSegment.x += deltaTime * alpha;
+	m_bottomSegment.x += deltaTime * alpha;
+
+	float diff = m_topSegment.x - m_cameraHeight;
+
+	if (diff >= 0)
+	{
+		m_bottomSegment = m_topSegment;
+		m_topSegment = Vector2(diff + (m_cameraHeight / 2.0f), RandomFloat() * 0.0002f * (rand() % 2 ? -1.0f : 1.0f));
+	}
+}
+
+float Terrain::RandomFloat()
+{
+	return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 }

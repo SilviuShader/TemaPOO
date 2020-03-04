@@ -16,10 +16,17 @@ Pseudo3DCamera::TerrainShaderParameters::TerrainShaderParameters()
 {
 }
 
-Pseudo3DCamera::TerrainShaderParameters::TerrainShaderParameters(int sw, int sh, int stw) :
-	m_screenWidth(sw),
-	m_screenHeight(sh),
-	m_segmentLength(stw)
+Pseudo3DCamera::TerrainShaderParameters::TerrainShaderParameters(float rw, float sw, float tr, float dd, int sl, Vector2 segment1, Vector2 segment2, int screenHeight) :
+	m_roadWidth(rw),
+	m_sideWidth(sw),
+	m_translation(tr),
+	m_drawDistance(dd),
+	m_segmentLength(sl),
+	m_segment1X(segment1.x),
+	m_segment1Y(segment1.y),
+	m_segment2X(segment2.x),
+	m_segment2Y(segment2.y),
+	m_screenHeight(screenHeight)
 {
 }
 
@@ -45,7 +52,7 @@ Pseudo3DCamera::Pseudo3DCamera(ID3D11Device*        device,
 {
 	m_cameraPosition.y = 1500;
 
-	m_terrainParameters = TerrainShaderParameters(width, height, 1);
+	m_terrainParameters = TerrainShaderParameters(0.0f, 0.0f, 0.0f, 0.0f, 0, Vector2(m_height, 0.0f), Vector2(0.0f, 0.0f), m_height);
 
 	static_assert(!(sizeof(TerrainShaderParameters) % 16), "TerrainShaderParameters needs to be 16 bytes aligned");
 	
@@ -86,7 +93,9 @@ void Pseudo3DCamera::End(ID3D11RenderTargetView* const* renderTargetViews,
 
 void Pseudo3DCamera::DrawTerrain(Terrain* terrain)
 {
-	m_terrainParameters = TerrainShaderParameters(m_width, m_height, terrain->GetSegmentLength());
+	static float trans = 0.0f;
+	trans += 0.1f;
+	m_terrainParameters = TerrainShaderParameters(terrain->GetRoadWidth(), terrain->GetSideWidth(), trans, m_cameraDepth, terrain->GetSegmentLength(), terrain->GetBottomSegment(), terrain->GetTopSegment(), m_height);
 
 	m_d3dContext->UpdateSubresource(m_terrainShaderParams.Get(), 0, nullptr, &m_terrainParameters, sizeof(TerrainShaderParameters), 0);
 

@@ -31,8 +31,8 @@ public:
 	        void Begin2D(std::function<void _cdecl()> = nullptr);
 	        void End2D();
 
-	inline  int GetWidth()  { return m_width + 100; }
-	inline  int GetHeight() { return m_height + 100; }
+	inline  int GetWidth()  { return m_width; }
+	inline  int GetHeight() { return m_height; }
 
 private:
 

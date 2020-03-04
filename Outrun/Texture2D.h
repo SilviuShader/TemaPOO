@@ -6,9 +6,6 @@ public:
 	
 	Texture2D(ID3D11Device*, 
 		      std::string);
-
-	Texture2D(ID3D11ShaderResourceView*,
-		      CD3D11_TEXTURE2D_DESC);
 	
 	Texture2D(ID3D11Device*, int, int, float*);
 
