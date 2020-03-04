@@ -31,14 +31,14 @@ void Game::Initialize(HWND window, int width, int height)
     m_outputWidth  = std::max(width, 1);
     m_outputHeight = std::max(height, 1);
 
+    m_keyboard = make_shared<Keyboard>();
+    m_mouse = make_unique<Mouse>();
+
+    m_mouse->SetWindow(window);
+
     CreateDevice();
 
     CreateResources();
-
-    m_keyboard = make_unique<Keyboard>();
-    m_mouse    = make_unique<Mouse>();
-
-    m_mouse->SetWindow(window);
 }
 
 // Executes the basic game loop.
@@ -61,24 +61,10 @@ void Game::Update(DX::StepTimer const& timer)
     if (kb.Escape)
         ExitGame();
 
-    Vector3 movementVector = Vector3::Zero;
-
-    if (kb.W)
-        movementVector.z += 1.0f;
-    if (kb.S)
-        movementVector.z += -1.0f;
-    if (kb.A)
-        movementVector.x += -1.0f;
-    if (kb.D)
-        movementVector.x += 1.0f;
-
-    movementVector.Normalize();
-
-    movementVector *= elapsedTime * 10000.0f;
-
-    m_terrain->Update(elapsedTime);
-    
     auto mouse = m_mouse->GetState();
+
+    for (shared_ptr<GameObject>& gameObj : m_gameObjects)
+        gameObj->Update(elapsedTime);
 }
 
 // Draws the scene.
@@ -94,7 +80,8 @@ void Game::Render()
     
     m_mainCamera->Begin(clearColor);
 
-    m_mainCamera->DrawTerrain(m_terrain.get());
+    for (shared_ptr<GameObject>& gameObj : m_gameObjects)
+        gameObj->Render(m_mainCamera.get());
 
     m_mainCamera->End(m_renderTargetView.GetAddressOf(), 
                       m_depthStencilView.Get(),
@@ -263,8 +250,8 @@ void Game::CreateDevice()
 
     m_mainCamera  = make_unique<Pseudo3DCamera>(m_d3dDevice.Get(),
                                                 m_d3dContext.Get(),
-                                                300,
-                                                300, 
+                                                150,
+                                                150, 
                                                 800, 
                                                 600,
                                                 300,
@@ -273,9 +260,22 @@ void Game::CreateDevice()
     m_contentManager = make_unique<ContentManager>(m_d3dDevice.Get(), 
                                                    "Resources/");
 
-    m_terrain        = make_unique<Terrain>(m_mainCamera.get(), m_d3dDevice.Get(), 1.0f, 0.1f, 1, 300);
+    m_terrain        = make_shared<Terrain>(m_mainCamera.get(), m_d3dDevice.Get(), 1.0f, 0.1f, 1, 300);
 
     m_testTexture    = m_contentManager->Load<Texture2D>("Cat.png");
+
+    m_gameObjects    = list<shared_ptr<GameObject> >();
+    
+    // Add the terrain
+    shared_ptr<GameObject> terrainObj = make_shared<GameObject>();
+    terrainObj->AddComponent(m_terrain);
+    m_gameObjects.push_back(terrainObj);
+
+    // Add the player
+    shared_ptr<GameObject> playerObj = make_shared<GameObject>();
+    shared_ptr<Player> playerComponent = make_shared<Player>(m_keyboard, m_terrain);
+    playerObj->AddComponent(playerComponent);
+    m_gameObjects.push_back(playerObj);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -376,6 +376,7 @@ void Game::CreateResources()
 
 void Game::OnDeviceLost()
 {
+    m_gameObjects.clear();
     m_contentManager.reset();
 
     m_testTexture.reset();

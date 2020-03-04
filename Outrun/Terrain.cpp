@@ -14,6 +14,7 @@ Terrain::Terrain(Camera*       camera,
 
 	m_roadWidth(roadWidth),
 	m_sideWidth(sideWidth),
+	m_playerSpeed(0.0f),
 	m_segmentLength(segmentLength),
 	m_linesCount(linesCount)
 
@@ -42,8 +43,8 @@ Terrain::Terrain(Camera*       camera,
 	}
 
 	m_zMap = make_unique<Texture2D>(d3dDevice, cameraWidth, cameraHeight, textureData);
-	m_topSegment = Vector2(cameraHeight, 0.0002f);
-	m_bottomSegment = Vector2(0.0f, -0.0002f);
+	m_topSegment = Vector2(cameraHeight, 0.0f);
+	m_bottomSegment = Vector2(0.0f, 0.0f);
 }
 
 Terrain::Terrain(const Terrain& other)
@@ -56,17 +57,25 @@ Terrain::~Terrain()
 
 void Terrain::Update(float deltaTime)
 {
-	float alpha = 100.0f;
-	m_topSegment.x += deltaTime * alpha;
-	m_bottomSegment.x += deltaTime * alpha;
+	float alpha = 10.0f;
 
-	float diff = m_topSegment.x - m_cameraHeight;
+	m_topSegment.x    += deltaTime * alpha * m_playerSpeed;
+	m_bottomSegment.x += deltaTime * alpha * m_playerSpeed;
+
+	float startY = m_cameraHeight * 1.0f;
+
+	float diff = m_topSegment.x - startY;
 
 	if (diff >= 0)
 	{
 		m_bottomSegment = m_topSegment;
-		m_topSegment = Vector2(diff + (m_cameraHeight / 2.0f), RandomFloat() * 0.0002f * (rand() % 2 ? -1.0f : 1.0f));
+		m_topSegment = Vector2(m_cameraHeight - startY, RandomFloat() * 0.0006f * (rand() % 2 ? -1.0f : 1.0f));
 	}
+}
+
+void Terrain::Render(Pseudo3DCamera* camera)
+{
+	camera->DrawTerrain(this);
 }
 
 float Terrain::RandomFloat()

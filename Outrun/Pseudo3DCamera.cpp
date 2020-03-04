@@ -16,7 +16,7 @@ Pseudo3DCamera::TerrainShaderParameters::TerrainShaderParameters()
 {
 }
 
-Pseudo3DCamera::TerrainShaderParameters::TerrainShaderParameters(float rw, float sw, float tr, float dd, int sl, Vector2 segment1, Vector2 segment2, int screenHeight) :
+Pseudo3DCamera::TerrainShaderParameters::TerrainShaderParameters(float rw, float sw, float tr, float dd, int sl, Vector2 segment1, Vector2 segment2, int screenHeight, float positionX) :
 	m_roadWidth(rw),
 	m_sideWidth(sw),
 	m_translation(tr),
@@ -26,7 +26,8 @@ Pseudo3DCamera::TerrainShaderParameters::TerrainShaderParameters(float rw, float
 	m_segment1Y(segment1.y),
 	m_segment2X(segment2.x),
 	m_segment2Y(segment2.y),
-	m_screenHeight(screenHeight)
+	m_screenHeight(screenHeight),
+	m_positionX(positionX)
 {
 }
 
@@ -48,11 +49,11 @@ Pseudo3DCamera::Pseudo3DCamera(ID3D11Device*        device,
 	m_d3dDevice(device),
 	m_linesDrawCount(linesDrawCount),
 	m_cameraDepth(cameraDepth),
-	m_cameraPosition(Vector3::Zero)
+	m_positionX(0.0f),
+	m_stripesTranslation(0.0f)
 {
-	m_cameraPosition.y = 1500;
 
-	m_terrainParameters = TerrainShaderParameters(0.0f, 0.0f, 0.0f, 0.0f, 0, Vector2(m_height, 0.0f), Vector2(0.0f, 0.0f), m_height);
+	m_terrainParameters = TerrainShaderParameters(0.0f, 0.0f, 0.0f, 0.0f, 0, Vector2(m_height, 0.0f), Vector2(0.0f, 0.0f), m_height, m_positionX);
 
 	static_assert(!(sizeof(TerrainShaderParameters) % 16), "TerrainShaderParameters needs to be 16 bytes aligned");
 	
@@ -93,9 +94,7 @@ void Pseudo3DCamera::End(ID3D11RenderTargetView* const* renderTargetViews,
 
 void Pseudo3DCamera::DrawTerrain(Terrain* terrain)
 {
-	static float trans = 0.0f;
-	trans += 0.1f;
-	m_terrainParameters = TerrainShaderParameters(terrain->GetRoadWidth(), terrain->GetSideWidth(), trans, m_cameraDepth, terrain->GetSegmentLength(), terrain->GetBottomSegment(), terrain->GetTopSegment(), m_height);
+	m_terrainParameters = TerrainShaderParameters(terrain->GetRoadWidth(), terrain->GetSideWidth(), m_stripesTranslation, m_cameraDepth, terrain->GetSegmentLength(), terrain->GetBottomSegment(), terrain->GetTopSegment(), m_height, m_positionX);
 
 	m_d3dContext->UpdateSubresource(m_terrainShaderParams.Get(), 0, nullptr, &m_terrainParameters, sizeof(TerrainShaderParameters), 0);
 

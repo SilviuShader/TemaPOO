@@ -20,6 +20,9 @@
     <ClInclude Include="Pseudo3DCamera.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="ReadData.h" />
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GameComponent.h" />
+    <ClInclude Include="Player.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -31,6 +34,9 @@
     <ClCompile Include="ContentManager.cpp" />
     <ClCompile Include="Pseudo3DCamera.cpp" />
     <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GameComponent.cpp" />
+    <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

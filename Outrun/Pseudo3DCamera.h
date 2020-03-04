@@ -11,7 +11,7 @@ private:
 	public:
 
 		TerrainShaderParameters();
-		TerrainShaderParameters(float, float, float, float, int, DirectX::SimpleMath::Vector2, DirectX::SimpleMath::Vector2, int);
+		TerrainShaderParameters(float, float, float, float, int, DirectX::SimpleMath::Vector2, DirectX::SimpleMath::Vector2, int, float);
 
 	private:
 
@@ -28,7 +28,7 @@ private:
 		float              m_segment2Y;
 
 		int                m_screenHeight;
-		int                m_padding3;
+		float              m_positionX;
 	};
 
 public:
@@ -45,14 +45,14 @@ public:
 	Pseudo3DCamera(const Pseudo3DCamera&);
 	~Pseudo3DCamera();
 
-	void                                End(ID3D11RenderTargetView* const*,
-		                                    ID3D11DepthStencilView*,
-		                                    int) override;
+	void        End(ID3D11RenderTargetView* const*,
+		            ID3D11DepthStencilView*,
+		            int) override;
 
-	void                                DrawTerrain(Terrain*);
+	void        DrawTerrain(Terrain*);
 
-	inline void                         SetPosition(DirectX::SimpleMath::Vector3 position) { m_cameraPosition = position; }
-	inline DirectX::SimpleMath::Vector3 GetPosition() const                                { return m_cameraPosition;     }
+	inline void SetPositionX(float posX)            { m_positionX = posX;                  }
+	inline void TranslateStripes(float translation) { m_stripesTranslation += translation; }
 
 private:
 
@@ -61,8 +61,9 @@ private:
 
 	int                                                                     m_linesDrawCount;
 	float                                                                   m_cameraDepth;
+	float                                                                   m_positionX;
+	float                                                                   m_stripesTranslation;
 
-	DirectX::SimpleMath::Vector3                                            m_cameraPosition;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>                               m_terrainPixelShader;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>                                    m_terrainShaderParams;
 	TerrainShaderParameters                                                 m_terrainParameters;

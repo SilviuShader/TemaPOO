@@ -45,6 +45,7 @@
 #include <exception>
 #include <memory>
 #include <stdexcept>
+#include <list>
 
 #include "CommonStates.h"
 #include "DDSTextureLoader.h"
@@ -71,8 +72,11 @@
 #include "Texture2D.h"
 #include "ContentManager.h"
 #include "Camera.h"
+#include "GameComponent.h"
 #include "Terrain.h"
+#include "Player.h"
 #include "Pseudo3DCamera.h"
+#include "GameObject.h"
 
 namespace DX
 {

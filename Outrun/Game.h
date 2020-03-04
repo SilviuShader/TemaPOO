@@ -62,7 +62,7 @@ private:
     // Rendering loop timer.
     DX::StepTimer                                    m_timer;
 
-    std::unique_ptr<DirectX::Keyboard>               m_keyboard;
+    std::shared_ptr<DirectX::Keyboard>               m_keyboard;
     std::unique_ptr<DirectX::Mouse>                  m_mouse;
 
     std::unique_ptr<DirectX::SpriteBatch>            m_spriteBatch;
@@ -70,7 +70,9 @@ private:
 
     std::unique_ptr<Pseudo3DCamera>                  m_mainCamera;
     std::unique_ptr<ContentManager>                  m_contentManager;
-    std::unique_ptr<Terrain>                         m_terrain;
+    std::shared_ptr<Terrain>                         m_terrain;
 
     std::shared_ptr<Texture2D>                       m_testTexture;
+
+    std::list<std::shared_ptr<GameObject> >          m_gameObjects;
 };
