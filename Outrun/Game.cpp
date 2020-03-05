@@ -244,6 +244,8 @@ void Game::CreateDevice()
     DX::ThrowIfFailed(device.As(&m_d3dDevice));
     DX::ThrowIfFailed(context.As(&m_d3dContext));
 
+    InputManager::CreateInstance(m_keyboard);
+
     m_spriteBatch = make_unique<SpriteBatch>(m_d3dContext.Get());
 
     m_states      = make_unique<CommonStates>(m_d3dDevice.Get());
@@ -273,7 +275,7 @@ void Game::CreateDevice()
 
     // Add the player
     shared_ptr<GameObject> playerObj = make_shared<GameObject>();
-    shared_ptr<Player> playerComponent = make_shared<Player>(m_keyboard, m_terrain);
+    shared_ptr<Player> playerComponent = make_shared<Player>(m_terrain);
     playerObj->AddComponent(playerComponent);
     m_gameObjects.push_back(playerObj);
 }
@@ -392,7 +394,8 @@ void Game::OnDeviceLost()
     m_d3dContext.Reset();
     m_d3dDevice.Reset();
 
-    CreateDevice();
+    InputManager::Reset();
 
+    CreateDevice();
     CreateResources();
 }

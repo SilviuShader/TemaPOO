@@ -68,6 +68,7 @@
 
 #include "ReadData.h"
 
+#include "InputManager.h"
 #include "RenderTexture.h"
 #include "Texture2D.h"
 #include "ContentManager.h"

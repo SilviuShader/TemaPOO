@@ -10,8 +10,7 @@ private:
 
 public:
 
-    Player(std::shared_ptr<DirectX::Keyboard>, 
-           std::shared_ptr<Terrain>);
+    Player(std::shared_ptr<Terrain>);
     Player(const Player&);
     ~Player();
 
@@ -20,10 +19,9 @@ public:
 
 private:
 
-    std::shared_ptr<DirectX::Keyboard> m_keyboard;
-    std::shared_ptr<Terrain>           m_terrain;
-    float                              m_positionX;
-    float                              m_posXVelocity;
-    float                              m_speed;
-    float                              m_accumultedStripesTranslation;
+    std::shared_ptr<Terrain> m_terrain;
+    float                    m_positionX;
+    float                    m_posXVelocity;
+    float                    m_speed;
+    float                    m_accumultedStripesTranslation;
 };

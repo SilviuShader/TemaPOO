@@ -4,9 +4,7 @@
 using namespace std;
 using namespace DirectX;
 
-Player::Player(shared_ptr<Keyboard> kb, 
-               shared_ptr<Terrain> terrain) :
-    m_keyboard(kb),
+Player::Player(shared_ptr<Terrain> terrain) :
     m_terrain(terrain),
     m_positionX(0.0f),
     m_posXVelocity(0.0f),
@@ -25,9 +23,9 @@ Player::~Player()
 
 void Player::Update(float deltaTime)
 {
-    auto kb = m_keyboard->GetState();
+    InputManager* inputManager = InputManager::GetInstance();
 
-    if (kb.W)
+    if (inputManager->GetKey(InputManager::GameKey::Up))
         m_speed += SPEED_ACCELERATION_MULTIP * deltaTime;
     else
         m_speed -= SPEED_ACCELERATION_MULTIP * deltaTime;
@@ -39,12 +37,12 @@ void Player::Update(float deltaTime)
 
     bool steer = false;
       
-    if (kb.A)
+    if (inputManager->GetKey(InputManager::GameKey::Left))
     {
         m_posXVelocity -= STEER_ACCELERATION_MULTIP * deltaTime;
         steer = true;
     }
-    if (kb.D)
+    if (inputManager->GetKey(InputManager::GameKey::Right))
     {
         m_posXVelocity += STEER_ACCELERATION_MULTIP * deltaTime;
         steer = true;
