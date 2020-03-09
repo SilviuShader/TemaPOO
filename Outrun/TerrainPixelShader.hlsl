@@ -7,7 +7,7 @@ cbuffer TerrainShaderParameters : register(b0)
 
 	int    segmentLength;
 	float2 segment1;
-	int    padding2;
+	float  maxRoadX;
 	float2 segment2;
 
 	int    screenHeight;
@@ -16,36 +16,6 @@ cbuffer TerrainShaderParameters : register(b0)
 
 Texture2D<float4> BaseTexture : register(t0);
 sampler TextureSampler : register(s0);
-
-int ScreenHeight(float texY)
-{
-	return (int)((float)texY * (float)screenHeight);
-}
-
-float GetRoadX(float2 texCoord, float z)
-{
-	float result = 0.0f;
-	int crtHeight  = ScreenHeight(texCoord.y);
-	int topSegH    = segment2.x;
-	int bottomSegH = segment1.x;
-
-	int linesDiff = screenHeight - max(crtHeight, topSegH);
-	float dx = segment1.y;
-	float ddx = dx * linesDiff * z;
-
-	result = linesDiff * (dx + ddx) / 2.0f;
-
-	if (crtHeight <= topSegH)
-	{
-		linesDiff = topSegH - crtHeight;
-		dx = segment2.y;
-		float prevStr = ddx;
-		ddx += dx * linesDiff * z;
-		result += linesDiff * (prevStr + ddx) / 2.0f;
-	}
-
-	return result;
-}
 
 float4 main(float4 color : COLOR0, float2 texCoord : TEXCOORD0) : SV_TARGET
 {
@@ -60,7 +30,8 @@ float4 main(float4 color : COLOR0, float2 texCoord : TEXCOORD0) : SV_TARGET
 
 	if (z < 15.0f)
 	{
-		float roadX = GetRoadX(texCoord, z);
+		float4 sampledData = BaseTexture.Sample(TextureSampler, texCoord);
+		float roadX = sampledData.x * maxRoadX + positionX;
 		float x = screenPos.x * z;
 		
 		int div = (z + translation) / segmentLength;
