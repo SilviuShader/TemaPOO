@@ -164,6 +164,8 @@
     <ClInclude Include="GameComponent.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="ObjectsGenerator.h" />
+    <ClInclude Include="ObjectTranslator.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Pseudo3DCamera.h" />
@@ -183,6 +185,8 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="ObjectsGenerator.cpp" />
+    <ClCompile Include="ObjectTranslator.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -202,6 +206,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="directx.ico" />
+    <Image Include="Resources\Car.png" />
     <Image Include="Resources\Cat.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

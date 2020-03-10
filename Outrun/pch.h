@@ -9,6 +9,7 @@
 #include <codecvt>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <winsdkver.h>
 #define _WIN32_WINNT 0x0601
@@ -74,6 +75,8 @@
 #include "ContentManager.h"
 #include "Camera.h"
 #include "GameComponent.h"
+#include "ObjectTranslator.h"
+#include "ObjectsGenerator.h"
 #include "Terrain.h"
 #include "SpriteRenderer.h"
 #include "Transform.h"

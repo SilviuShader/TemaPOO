@@ -50,10 +50,10 @@ void Player::Update(float deltaTime)
     }
 
     m_positionX += m_posXVelocity * deltaTime * m_speed;
-    m_accumultedStripesTranslation += m_speed * deltaTime * SENSE_OF_SPEED;
+    m_accumultedStripesTranslation += m_speed * deltaTime;
     m_parent->GetGame()->GetTerrain()->SetPlayerSpeed(m_speed);
 
-    transform->SetPositionX(m_positionX - game->GetTerrain()->GetAccumulatedTranslation());
+    transform->SetPositionX(m_positionX - game->GetTerrain()->GetAccumulatedTranslation(camera->GetHeight() - 1));
 }
 
 void Player::Render(Pseudo3DCamera* pseudo3DCamera)

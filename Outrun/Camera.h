@@ -37,6 +37,7 @@ public:
 private:
 
 	float GetPresentScale();
+	float Clamp(float, float, float);
 
 protected:
 

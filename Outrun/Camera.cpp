@@ -100,6 +100,8 @@ void Camera::DrawSprite(Texture2D*  sprite,
 	calculatedPosition -= Vector2(((int)centerPosition.x * zoom.x) - (m_width / 2.0f),
 		                          ((int)centerPosition.y * zoom.y) - (m_height / 2.0f));
 
+	calculatedPosition = Vector2((int)calculatedPosition.x, (int)calculatedPosition.y);
+
 	Vector2 calculatedScale = zoom * textureScale;
 
 	// This is for camera clamping..
@@ -124,8 +126,10 @@ void Camera::DrawSprite(Texture2D*  sprite,
 			                rotation, 
 			                Vector2::Zero, 
 			                calculatedScale, 
-			                SpriteEffects::SpriteEffects_None, 
-			                0.0f);
+			                SpriteEffects::SpriteEffects_None,
+			                Clamp((calculatedPosition.y + (centerTranslation.y * 2.0f)) / (m_height * 2.0f), 
+								  0.0f, 
+								  1.0f));
 }
 
 void Camera::Begin(Vector4 clearColor)
@@ -159,8 +163,8 @@ void Camera::Begin2D(function<void _cdecl()> customFunction)
 
 	if (!m_rendering2D)
 	{
-		m_spriteBatch->Begin(DirectX::SpriteSortMode_Immediate,
-			                 nullptr,
+		m_spriteBatch->Begin(DirectX::SpriteSortMode_FrontToBack,
+			                 m_states->NonPremultiplied(),
 			                 m_states->PointClamp(), 
 			                 nullptr, 
 			                 nullptr, 
@@ -197,4 +201,14 @@ float Camera::GetPresentScale()
 	scale = (int)scale;
 
 	return scale;
+}
+
+float Camera::Clamp(float value, float min, float max)
+{
+	if (value <= min)
+		value = min;
+	if (value >= max)
+		value = max;
+
+	return value;
 }

@@ -55,11 +55,14 @@ public:
 	~Pseudo3DCamera();
 
 	float       GetZ(int);
+	int         GetLine(float);
 
 	void        DrawTerrain(Terrain*);
 
+
+	       void TranslateStripes(float translation);
+
 	inline void SetPositionX(float posX)            { m_positionX           = posX;        }
-	inline void TranslateStripes(float translation) { m_stripesTranslation += translation; }
 
 private:
 
@@ -70,6 +73,7 @@ private:
 	float                                                                   m_cameraDepth;
 	float                                                                   m_positionX;
 	float                                                                   m_stripesTranslation;
+	float                                                                   m_segmentLength;
 
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>                               m_terrainPixelShader;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>                                    m_terrainShaderParams;

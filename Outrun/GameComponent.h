@@ -12,8 +12,10 @@ public:
     GameComponent(const GameComponent&);
     ~GameComponent();
 
-    virtual void Update(float)           = 0;
-    virtual void Render(Pseudo3DCamera*) = 0;
+    virtual void       Update(float)           = 0;
+    virtual void       Render(Pseudo3DCamera*) = 0;
+
+    inline GameObject* GetParent() const { return m_parent; }
 
 protected:
 

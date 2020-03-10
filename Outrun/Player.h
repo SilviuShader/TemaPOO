@@ -6,7 +6,6 @@ private:
 
     const float STEER_ACCELERATION_MULTIP = 1.0f;
     const float SPEED_ACCELERATION_MULTIP = 1.0f;
-    const float SENSE_OF_SPEED            = 2.5f;
 
 public:
 
@@ -17,6 +16,7 @@ public:
     void Render(Pseudo3DCamera*) override;
 
     inline float GetPositionX()  const { return m_positionX; }
+    inline float GetSpeed()      const { return m_speed;     }
 
 private:
 

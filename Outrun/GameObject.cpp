@@ -4,7 +4,8 @@
 using namespace std;
 
 GameObject::GameObject(Game* game) :
-    m_game(game)
+    m_game(game),
+    m_dead(false)
 {
     m_gameComponents = list<shared_ptr<GameComponent> >();
     // Every game object needs to have a transform component

@@ -26,6 +26,8 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="SpriteRenderer.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="ObjectsGenerator.h" />
+    <ClInclude Include="ObjectTranslator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -43,6 +45,8 @@
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="SpriteRenderer.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="ObjectsGenerator.cpp" />
+    <ClCompile Include="ObjectTranslator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -52,6 +56,9 @@
       <Filter>Assets</Filter>
     </Image>
     <Image Include="Resources\Cat.png">
+      <Filter>Resources</Filter>
+    </Image>
+    <Image Include="Resources\Car.png">
       <Filter>Resources</Filter>
     </Image>
   </ItemGroup>

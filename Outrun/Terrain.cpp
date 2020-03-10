@@ -5,13 +5,14 @@ using namespace std;
 
 using namespace DirectX::SimpleMath;
 
-Terrain::Terrain(GameObject*   gameObject, 
-	             Camera*       camera,
-	             ID3D11Device* d3dDevice,
-	             float         roadWidth,
-	             float         sideWidth,
-	             int           segmentLength,
-	             int           linesCount) :
+Terrain::Terrain(GameObject*     gameObject, 
+	             Camera*         camera,
+	             ContentManager* contentManager,
+	             ID3D11Device*   d3dDevice,
+	             float           roadWidth,
+	             float           sideWidth,
+	             int             segmentLength,
+	             int             linesCount) :
 
 	GameComponent(gameObject),
 	m_camera(camera),
@@ -19,7 +20,7 @@ Terrain::Terrain(GameObject*   gameObject,
 	m_roadWidth(roadWidth),
 	m_sideWidth(sideWidth),
 	m_playerSpeed(0.0f),
-	m_accumulatedTranslation(0.0f),
+	m_accumulatedTranslations(NULL),
 	m_segmentLength(segmentLength),
 	m_linesCount(linesCount),
 	m_maxRoadX(MIN_MAX_ROAD_X),
@@ -27,7 +28,13 @@ Terrain::Terrain(GameObject*   gameObject,
 
 {
 
-	m_cameraHeight = m_camera->GetHeight();
+	m_cameraHeight            = m_camera->GetHeight();
+	m_accumulatedTranslations = new float[m_cameraHeight];
+
+	for (int i = 0; i < m_cameraHeight; i++)
+		m_accumulatedTranslations[i] = 0.0f;
+
+	m_objectsGenerator        = make_unique<ObjectsGenerator>(contentManager);
 
 	CreateTexture();
 
@@ -37,6 +44,8 @@ Terrain::Terrain(GameObject*   gameObject,
 
 Terrain::~Terrain()
 {
+	delete[] m_accumulatedTranslations;
+	m_accumulatedTranslations = NULL;
 }
 
 void Terrain::Update(float deltaTime)
@@ -60,8 +69,11 @@ void Terrain::Update(float deltaTime)
 	
 	m_accumultatedBottomDifference += m_bottomSegment.x - prevBottomHeight;
 
-	float depthZ = camera->GetZ((m_cameraHeight / 2));
-	m_accumulatedTranslation += GetRoadX(m_cameraHeight - 1, camera->GetZ(m_cameraHeight - 1)) * depthZ * m_accumultatedBottomDifference;
+	for (int i = m_cameraHeight / 2; i < m_cameraHeight; i++)
+	{
+		float depthZ = camera->GetZ((m_cameraHeight / 2) + (m_cameraHeight - i));
+		m_accumulatedTranslations[i] += GetRoadX(i, camera->GetZ(i)) * depthZ * m_accumultatedBottomDifference;
+	}
 	m_accumultatedBottomDifference = 0.0f;
 
 	if (diff >= 0)
@@ -69,6 +81,11 @@ void Terrain::Update(float deltaTime)
 		m_bottomSegment = m_topSegment;
 		m_topSegment = Vector2(m_cameraHeight - startY, RandomFloat() * 0.00015f * (rand() % 2 ? -1.0f : 1.0f));
 	}
+
+	m_objectsGenerator->Update(game->GetGameObjects(),
+		                       this,
+		                       m_playerSpeed,
+		                       deltaTime);
 }
 
 void Terrain::Render(Pseudo3DCamera* camera)
@@ -102,6 +119,7 @@ float Terrain::GetRoadX(int crtHeight, float z)
 
 float Terrain::RandomFloat()
 {
+	// took this from stackoverflow: https://stackoverflow.com/questions/686353/random-float-number-generation
 	return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 }
 
@@ -127,6 +145,8 @@ void Terrain::CreateTexture()
 			roadX = GetRoadX(i, z);
 
 		r = roadX;
+		// such a waste of memory, huh?
+		// not gonna bother optimizing stuff like that
 		g = 0.0f;
 		b = 0.0f;
 		a = 1.0f;

@@ -65,6 +65,11 @@ void Game::Update(DX::StepTimer const& timer)
 
     for (shared_ptr<GameObject>& gameObj : m_gameObjects)
         gameObj->Update(elapsedTime);
+
+    m_gameObjects.remove_if([](const shared_ptr<GameObject>& gameObj) 
+        {
+            return gameObj->Dead();
+        });
 }
 
 // Draws the scene.
@@ -195,6 +200,11 @@ Player* Game::GetPlayer()
     return m_player.get();
 }
 
+list<shared_ptr<GameObject>>& Game::GetGameObjects()
+{
+    return m_gameObjects;
+}
+
 // These are the resources that depend on the device.
 void Game::CreateDevice()
 {
@@ -278,6 +288,7 @@ void Game::CreateDevice()
                                                    "Resources/");
 
     m_testTexture    = m_contentManager->Load<Texture2D>("Cat.png");
+    m_carTexture     = m_contentManager->Load<Texture2D>("Car.png");
 
     m_gameObjects    = list<shared_ptr<GameObject> >();
     
@@ -285,7 +296,8 @@ void Game::CreateDevice()
     shared_ptr<GameObject> terrainObj = make_shared<GameObject>(this);
     
     m_terrain = make_shared<Terrain>(terrainObj.get(), 
-                                     m_mainCamera.get(), 
+                                     m_mainCamera.get(),
+                                     m_contentManager.get(),
                                      m_d3dDevice.Get(), 
                                      1.0f, 
                                      0.05f, 
@@ -300,7 +312,7 @@ void Game::CreateDevice()
     m_player = make_shared<Player>(playerObj.get());
     playerObj->AddComponent(m_player);
 
-    shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(playerObj.get(), m_testTexture.get());
+    shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(playerObj.get(), m_carTexture.get());
     playerObj->AddComponent(spriteRenderer);
     
     m_gameObjects.push_back(playerObj);
