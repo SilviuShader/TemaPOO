@@ -10,18 +10,19 @@ private:
 
 public:
 
-    Player(std::shared_ptr<Terrain>);
-    Player(const Player&);
+    Player(GameObject*);
     ~Player();
 
     void Update(float)           override;
     void Render(Pseudo3DCamera*) override;
 
+    inline float GetPositionX()  const { return m_positionX; }
+
 private:
 
-    std::shared_ptr<Terrain> m_terrain;
-    float                    m_positionX;
-    float                    m_posXVelocity;
-    float                    m_speed;
-    float                    m_accumultedStripesTranslation;
+    std::shared_ptr<SpriteRenderer> m_spriteRenderer;
+    float                           m_positionX;
+    float                           m_posXVelocity;
+    float                           m_speed;
+    float                           m_accumultedStripesTranslation;
 };

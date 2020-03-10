@@ -26,12 +26,14 @@ float4 main(float4 color : COLOR0, float2 texCoord : TEXCOORD0) : SV_TARGET
 	screenPos.y = -screenPos.y;
 
 	float z = roadY / screenPos.y;
-	float4 col = float4(0.2f, 0.4f, 0.6f, 1.0f);
+	float4 col = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	if (z < 15.0f)
 	{
 		float4 sampledData = BaseTexture.Sample(TextureSampler, texCoord);
 		float roadX = sampledData.x * maxRoadX + positionX;
+		float4 sampledBottomX = BaseTexture.Sample(TextureSampler, float2(0.0f, 1.0f));
+		float bottomRoadX = sampledBottomX.x * maxRoadX + positionX;
 		float x = screenPos.x * z;
 		
 		int div = (z + translation) / segmentLength;
@@ -41,21 +43,23 @@ float4 main(float4 color : COLOR0, float2 texCoord : TEXCOORD0) : SV_TARGET
 			if (abs(roadX - x) <= roadWidth)
 			{
 				if (div % 2 == 0)
-					col = float4(0.5f, 0.5f, 0.5f, 1.0f);
+					col = float4(0.415, 0.027, 1, 1.0f);
 				else
-					col = float4(0.4f, 0.4f, 0.4f, 1.0f);
+					col = float4(0.415 * 0.5f, 0.027 * 0.5f, 0.5f, 1.0f);
 			}
 			else
 			{
 				float lx = roadX - roadWidth - (sideWidth / 2.0f);
 				float rx = roadX + roadWidth + (sideWidth / 2.0f);
 
+				int div2 = (x - bottomRoadX) / segmentLength;
+
 				if (abs(lx - x) <= sideWidth || abs(rx - x) <= sideWidth)
-					col = float4(1.0f, 0.0f, 0.4f, 1.0f);
-				else if (div % 2 == 0)
-					col = float4(0.0f, 1.0f, 0.0f, 1.0f);
+					col = float4(1, 0.627, 0, 1.0f);
+				else if ((div) % 2 == 0)
+					col = float4(1, 0, 0.423, 1.0f);
 				else
-					col = float4(0.0f, 0.6f, 0.5f, 1.0f);
+					col = float4(0.5f, 0, 0.423 * 0.5f, 1.0f);
 			}
 		}
 	}

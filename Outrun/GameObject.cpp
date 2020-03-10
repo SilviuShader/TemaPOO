@@ -3,9 +3,14 @@
 
 using namespace std;
 
-GameObject::GameObject()
+GameObject::GameObject(Game* game) :
+    m_game(game)
 {
     m_gameComponents = list<shared_ptr<GameComponent> >();
+    // Every game object needs to have a transform component
+    // Like in Unity...
+    m_transform = make_shared<Transform>(this);
+    m_gameComponents.push_back(m_transform);
 }
 
 GameObject::GameObject(const GameObject& other)

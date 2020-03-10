@@ -95,11 +95,16 @@ Pseudo3DCamera::~Pseudo3DCamera()
 	m_terrainShaderParams.Reset();
 }
 
-void Pseudo3DCamera::End(ID3D11RenderTargetView* const* renderTargetViews,
-						 ID3D11DepthStencilView*        depthStencilView,
-						 int                            numViews)
+float Pseudo3DCamera::GetZ(int line)
 {
-	Camera::End(renderTargetViews, depthStencilView, numViews);
+	float roadY = -1.0f;
+	Vector2 screenPos = Vector2(0.0f, line / (float)(m_height - 1)) * 2.0f;
+	screenPos -= Vector2(1.0f, 1.0f);
+	screenPos.y = -screenPos.y;
+
+	float z = roadY / screenPos.y;
+
+	return z;
 }
 
 void Pseudo3DCamera::DrawTerrain(Terrain* terrain)
@@ -113,7 +118,7 @@ void Pseudo3DCamera::DrawTerrain(Terrain* terrain)
 		                                          terrain->GetMaxRoadX(), 
 		                                          terrain->GetTopSegment(), 
 		                                          m_height, 
-		                                          terrain->GetAccumulatedTranslation());
+		                                          terrain->GetAccumulatedTranslation() - m_positionX);
 
 	m_d3dContext->UpdateSubresource(m_terrainShaderParams.Get(), 0, nullptr, &m_terrainParameters, sizeof(TerrainShaderParameters), 0);
 
@@ -123,5 +128,5 @@ void Pseudo3DCamera::DrawTerrain(Terrain* terrain)
 			m_d3dContext->PSSetShader(m_terrainPixelShader.Get(), nullptr, 0);
 		});
 
-	DrawSprite(terrain->GetZMap(), Vector2(0.0f, 0.0f), nullptr, 0.0f, Vector2::One);
+	DrawSprite(terrain->GetZMap(), Vector2(0.0f, 0.0f), nullptr, 0.0f, Vector2(m_width, 1.0f));
 }

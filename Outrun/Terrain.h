@@ -8,8 +8,7 @@ private:
 
 public:
 
-	Terrain(Camera*, ID3D11Device*, float, float, int, int);
-	Terrain(const Terrain&);
+	Terrain(GameObject*, Camera*, ID3D11Device*, float, float, int, int);
 	~Terrain();
 
 	       void                         Update(float)           override;
@@ -29,7 +28,6 @@ public:
 
 private:
 
-	float GetZ(int);
 	float GetRoadX(int, float);
 	float RandomFloat();
 	void  CreateTexture();

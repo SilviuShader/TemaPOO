@@ -54,13 +54,11 @@ public:
 	Pseudo3DCamera(const Pseudo3DCamera&);
 	~Pseudo3DCamera();
 
-	void        End(ID3D11RenderTargetView* const*,
-		            ID3D11DepthStencilView*,
-		            int) override;
+	float       GetZ(int);
 
 	void        DrawTerrain(Terrain*);
 
-	inline void SetPositionX(float posX)            { m_positionX = posX;                  }
+	inline void SetPositionX(float posX)            { m_positionX           = posX;        }
 	inline void TranslateStripes(float translation) { m_stripesTranslation += translation; }
 
 private:

@@ -75,9 +75,12 @@
 #include "Camera.h"
 #include "GameComponent.h"
 #include "Terrain.h"
+#include "SpriteRenderer.h"
+#include "Transform.h"
 #include "Player.h"
 #include "Pseudo3DCamera.h"
 #include "GameObject.h"
+#include "Game.h"
 
 namespace DX
 {

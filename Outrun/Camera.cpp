@@ -81,8 +81,8 @@ void Camera::DrawSprite(Texture2D*  sprite,
 	RECT rect   = RECT();
 	rect.left   = 0;
 	rect.top    = 0;
-	rect.bottom = sprite->GetWidth();
-	rect.right  = sprite->GetHeight();
+	rect.bottom = sprite->GetHeight();
+	rect.right  = sprite->GetWidth();
 
 	if (!sourceRectangle)
 		sourceRectangle = &rect;

@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "GameComponent.h"
 
-GameComponent::GameComponent()
+GameComponent::GameComponent(GameObject* parent) : 
+    m_parent(parent)
 {
 }
 

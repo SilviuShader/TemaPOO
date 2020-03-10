@@ -180,6 +180,21 @@ void Game::GetDefaultSize(int& width, int& height) const
     height = 600;
 }
 
+Pseudo3DCamera* Game::GetPseudo3DCamera()
+{
+    return m_mainCamera.get();
+}
+
+Terrain* Game::GetTerrain()
+{
+    return m_terrain.get();
+}
+
+Player* Game::GetPlayer()
+{
+    return m_player.get();
+}
+
 // These are the resources that depend on the device.
 void Game::CreateDevice()
 {
@@ -252,8 +267,8 @@ void Game::CreateDevice()
 
     m_mainCamera  = make_unique<Pseudo3DCamera>(m_d3dDevice.Get(),
                                                 m_d3dContext.Get(),
-                                                150,
-                                                150, 
+                                                300,
+                                                300, 
                                                 800, 
                                                 600,
                                                 300,
@@ -262,21 +277,32 @@ void Game::CreateDevice()
     m_contentManager = make_unique<ContentManager>(m_d3dDevice.Get(), 
                                                    "Resources/");
 
-    m_terrain        = make_shared<Terrain>(m_mainCamera.get(), m_d3dDevice.Get(), 1.0f, 0.1f, 1, 300);
-
     m_testTexture    = m_contentManager->Load<Texture2D>("Cat.png");
 
     m_gameObjects    = list<shared_ptr<GameObject> >();
     
     // Add the terrain
-    shared_ptr<GameObject> terrainObj = make_shared<GameObject>();
+    shared_ptr<GameObject> terrainObj = make_shared<GameObject>(this);
+    
+    m_terrain = make_shared<Terrain>(terrainObj.get(), 
+                                     m_mainCamera.get(), 
+                                     m_d3dDevice.Get(), 
+                                     1.0f, 
+                                     0.05f, 
+                                     1, 
+                                     300);
+
     terrainObj->AddComponent(m_terrain);
     m_gameObjects.push_back(terrainObj);
 
     // Add the player
-    shared_ptr<GameObject> playerObj = make_shared<GameObject>();
-    shared_ptr<Player> playerComponent = make_shared<Player>(m_terrain);
-    playerObj->AddComponent(playerComponent);
+    shared_ptr<GameObject> playerObj = make_shared<GameObject>(this);
+    m_player = make_shared<Player>(playerObj.get());
+    playerObj->AddComponent(m_player);
+
+    shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(playerObj.get(), m_testTexture.get());
+    playerObj->AddComponent(spriteRenderer);
+    
     m_gameObjects.push_back(playerObj);
 }
 

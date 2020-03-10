@@ -16,20 +16,25 @@ public:
     Game() noexcept;
 
     // Initialization and management
-    void Initialize(HWND window, int width, int height);
+    void            Initialize(HWND window, int width, int height);
 
     // Basic game loop
-    void Tick();
+    void            Tick();
 
     // Messages
-    void OnActivated();
-    void OnDeactivated();
-    void OnSuspending();
-    void OnResuming();
-    void OnWindowSizeChanged(int width, int height);
+    void            OnActivated();
+    void            OnDeactivated();
+    void            OnSuspending();
+    void            OnResuming();
+    void            OnWindowSizeChanged(int width, int height);
 
     // Properties
-    void GetDefaultSize( int& width, int& height ) const;
+    void            GetDefaultSize( int& width, int& height ) const;
+
+    // Getters
+    Pseudo3DCamera* GetPseudo3DCamera();
+    Terrain*        GetTerrain();
+    Player*         GetPlayer();
 
 private:
 
@@ -71,6 +76,7 @@ private:
     std::unique_ptr<Pseudo3DCamera>                  m_mainCamera;
     std::unique_ptr<ContentManager>                  m_contentManager;
     std::shared_ptr<Terrain>                         m_terrain;
+    std::shared_ptr<Player>                          m_player;
 
     std::shared_ptr<Texture2D>                       m_testTexture;
 

@@ -169,9 +169,11 @@
     <ClInclude Include="Pseudo3DCamera.h" />
     <ClInclude Include="ReadData.h" />
     <ClInclude Include="RenderTexture.h" />
+    <ClInclude Include="SpriteRenderer.h" />
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -190,8 +192,10 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Pseudo3DCamera.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="SpriteRenderer.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
