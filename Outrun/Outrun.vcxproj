@@ -210,6 +210,7 @@
     <Image Include="Resources\Cat.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="Resources\Palm.png" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest" />

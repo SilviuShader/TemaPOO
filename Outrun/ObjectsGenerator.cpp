@@ -7,7 +7,7 @@ ObjectsGenerator::ObjectsGenerator(ContentManager* contentManager) :
     m_zone(ObjectsGenerator::Zone::Beach),
     m_accumulatedDistance(0.0f)
 {
-    shared_ptr<Texture2D> palmTree = contentManager->Load<Texture2D>("Cat.png");
+    shared_ptr<Texture2D> palmTree = contentManager->Load<Texture2D>("Palm.png");
     m_textures["Palm"] = palmTree;
 }
 
