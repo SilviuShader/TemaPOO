@@ -4,13 +4,9 @@ class ObjectTranslator : public GameComponent
 {
 public:
 
-    ObjectTranslator(GameObject*);
+    ObjectTranslator(std::shared_ptr<GameObject>);
     ~ObjectTranslator();
 
-    void Update(float)           override;
-    void Render(Pseudo3DCamera*) override;
-
-private:
-
-    float m_translation;
+           void Update(float) override;
+    inline void Render()      override { };
 };

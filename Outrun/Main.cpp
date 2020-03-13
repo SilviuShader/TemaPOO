@@ -1,18 +1,24 @@
 //
 // Main.cpp
+// This source file is also part of the templete I mentioned
+// in the Game.h header, the changes I made here were minor
 //
 
 #include "pch.h"
 #include "Game.h"
 
+using namespace std;
 using namespace DirectX;
 
 namespace
 {
-    std::unique_ptr<Game> g_game;
+    shared_ptr<Game> g_game;
 };
 
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK WndProc(HWND, 
+                         UINT, 
+                         WPARAM, 
+                         LPARAM);
 
 // Indicates to hybrid graphics systems to prefer the discrete part by default
 extern "C"
@@ -22,7 +28,10 @@ extern "C"
 }
 
 // Entry point
-int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
+int WINAPI wWinMain(_In_     HINSTANCE hInstance, 
+                    _In_opt_ HINSTANCE hPrevInstance, 
+                    _In_     LPWSTR    lpCmdLine, 
+                    _In_     int       nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
@@ -30,11 +39,12 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     if (!XMVerifyCPUSupport())
         return 1;
 
-    HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+    HRESULT hr = CoInitializeEx(nullptr, 
+                                COINITBASE_MULTITHREADED);
     if (FAILED(hr))
         return 1;
 
-    g_game = std::make_unique<Game>();
+    g_game = make_shared<Game>();
 
     // Register class and create window
     {
@@ -44,46 +54,68 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         wcex.style = CS_HREDRAW | CS_VREDRAW;
         wcex.lpfnWndProc = WndProc;
         wcex.hInstance = hInstance;
-        wcex.hIcon = LoadIconW(hInstance, L"IDI_ICON");
-        wcex.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+        wcex.hIcon = LoadIconW(hInstance,
+                               L"IDI_ICON");
+        wcex.hCursor = LoadCursorW(nullptr, 
+                                   IDC_ARROW);
         wcex.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
         wcex.lpszClassName = L"OutrunWindowClass";
-        wcex.hIconSm = LoadIconW(wcex.hInstance, L"IDI_ICON");
+        wcex.hIconSm = LoadIconW(wcex.hInstance, 
+                                 L"IDI_ICON");
         if (!RegisterClassExW(&wcex))
             return 1;
 
         // Create window
         int w, h;
-        g_game->GetDefaultSize(w, h);
+        g_game->GetDefaultSize(w, 
+                               h);
 
         RECT rc = { 0, 0, static_cast<LONG>(w), static_cast<LONG>(h) };
 
-        AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+        AdjustWindowRect(&rc, 
+                         WS_OVERLAPPEDWINDOW, 
+                         FALSE);
 
-        HWND hwnd = CreateWindowExW(0, L"OutrunWindowClass", L"Outrun", WS_OVERLAPPEDWINDOW,
-            CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
-            nullptr);
-        // TODO: Change to CreateWindowExW(WS_EX_TOPMOST, L"OutrunWindowClass", L"Outrun", WS_POPUP,
-        // to default to fullscreen.
+        HWND hwnd = CreateWindowExW(0, 
+                                    L"OutrunWindowClass", 
+                                    L"Outrun", 
+                                    WS_OVERLAPPEDWINDOW,
+                                    CW_USEDEFAULT, 
+                                    CW_USEDEFAULT, 
+                                    rc.right - rc.left, 
+                                    rc.bottom - rc.top, 
+                                    nullptr, 
+                                    nullptr, 
+                                    hInstance,
+                                    nullptr);
 
         if (!hwnd)
             return 1;
 
-        ShowWindow(hwnd, nCmdShow);
-        // TODO: Change nCmdShow to SW_SHOWMAXIMIZED to default to fullscreen.
+        ShowWindow(hwnd,  
+                   nCmdShow);
 
-        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(g_game.get()) );
+        SetWindowLongPtr(hwnd, 
+                         GWLP_USERDATA, 
+                         reinterpret_cast<LONG_PTR>(g_game.get()));
 
-        GetClientRect(hwnd, &rc);
+        GetClientRect(hwnd, 
+                      &rc);
 
-        g_game->Initialize(hwnd, rc.right - rc.left, rc.bottom - rc.top);
+        g_game->Initialize(hwnd, 
+                           rc.right - rc.left, 
+                           rc.bottom - rc.top);
     }
 
     // Main message loop
     MSG msg = {};
     while (WM_QUIT != msg.message)
     {
-        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        if (PeekMessage(&msg, 
+                        nullptr, 
+                        0, 
+                        0, 
+                        PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -98,22 +130,29 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
     CoUninitialize();
 
-    return (int) msg.wParam;
+    return (int)msg.wParam;
 }
 
 // Windows procedure
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+// Here, I call the DirectX::Keyboard and
+// DirectX::Mouse methods for handling the input
+// The code it pretty much the same as in this tutorial:
+// https://github.com/microsoft/DirectXTK/wiki/Mouse-and-keyboard-input
+LRESULT CALLBACK WndProc(HWND   hWnd, 
+                         UINT   message, 
+                         WPARAM wParam, 
+                         LPARAM lParam)
 {
     PAINTSTRUCT ps;
-    HDC hdc;
+    HDC         hdc;
 
     static bool s_in_sizemove = false;
-    static bool s_in_suspend = false;
-    static bool s_minimized = false;
-    static bool s_fullscreen = false;
-    // TODO: Set s_fullscreen to true if defaulting to fullscreen.
-
-    auto game = reinterpret_cast<Game*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    static bool s_in_suspend  = false;
+    static bool s_minimized   = false;
+    static bool s_fullscreen  = false;
+    
+    auto game = reinterpret_cast<Game*>(GetWindowLongPtr(hWnd, 
+                                                         GWLP_USERDATA));
 
     switch (message)
     {
@@ -149,7 +188,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         else if (!s_in_sizemove && game)
         {
-            game->OnWindowSizeChanged(LOWORD(lParam), HIWORD(lParam));
+            game->OnWindowSizeChanged(LOWORD(lParam), 
+                                      HIWORD(lParam));
         }
         break;
 
@@ -162,15 +202,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (game)
         {
             RECT rc;
-            GetClientRect(hWnd, &rc);
+            GetClientRect(hWnd, 
+                          &rc);
 
-            game->OnWindowSizeChanged(rc.right - rc.left, rc.bottom - rc.top);
+            game->OnWindowSizeChanged(rc.right - rc.left, 
+                                      rc.bottom - rc.top);
         }
         break;
 
     case WM_GETMINMAXINFO:
         {
-            auto info = reinterpret_cast<MINMAXINFO*>(lParam);
+            auto info              = reinterpret_cast<MINMAXINFO*>(lParam);
             info->ptMinTrackSize.x = 320;
             info->ptMinTrackSize.y = 200;
         }
@@ -189,8 +231,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
 
-        Keyboard::ProcessMessage(message, wParam, lParam);
-        Mouse::ProcessMessage(message, wParam, lParam);
+        Keyboard::ProcessMessage(message, 
+                                 wParam, 
+                                 lParam);
+        Mouse::ProcessMessage(message, 
+                              wParam, 
+                              lParam);
 
         break;
 
@@ -224,28 +270,55 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Implements the classic ALT+ENTER fullscreen toggle
             if (s_fullscreen)
             {
-                SetWindowLongPtr(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
-                SetWindowLongPtr(hWnd, GWL_EXSTYLE, 0);
+                SetWindowLongPtr(hWnd, 
+                                 GWL_STYLE, 
+                                 WS_OVERLAPPEDWINDOW);
 
-                int width = 800;
-                int height = 600;
+                SetWindowLongPtr(hWnd, 
+                                 GWL_EXSTYLE, 
+                                 0);
+
+                int width  = 900;
+                int height = 900;
                 if (game)
-                    game->GetDefaultSize(width, height);
+                    game->GetDefaultSize(width, 
+                                         height);
 
-                ShowWindow(hWnd, SW_SHOWNORMAL);
+                ShowWindow(hWnd, 
+                           SW_SHOWNORMAL);
 
-                SetWindowPos(hWnd, HWND_TOP, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
+                SetWindowPos(hWnd, 
+                             HWND_TOP, 
+                             0, 
+                             0, 
+                             width, 
+                             height, 
+                             SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
             }
             else
             {
-                SetWindowLongPtr(hWnd, GWL_STYLE, 0);
-                SetWindowLongPtr(hWnd, GWL_EXSTYLE, WS_EX_TOPMOST);
+                SetWindowLongPtr(hWnd, 
+                                 GWL_STYLE, 
+                                 0);
 
-                SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+                SetWindowLongPtr(hWnd, 
+                                 GWL_EXSTYLE, 
+                                 WS_EX_TOPMOST);
 
-                ShowWindow(hWnd, SW_SHOWMAXIMIZED);
+                SetWindowPos(hWnd, 
+                             HWND_TOP, 
+                             0, 
+                             0, 
+                             0, 
+                             0, 
+                             SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+
+                ShowWindow(hWnd, 
+                           SW_SHOWMAXIMIZED);
             }
-            Keyboard::ProcessMessage(message, wParam, lParam);
+            Keyboard::ProcessMessage(message, 
+                                     wParam, 
+                                     lParam);
             s_fullscreen = !s_fullscreen;
         }
         break;
@@ -253,7 +326,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_MENUCHAR:
         // A menu is active and the user presses a key that does not correspond
         // to any mnemonic or accelerator key. Ignore so we don't produce an error beep.
-        return MAKELRESULT(0, MNC_CLOSE);
+        return MAKELRESULT(0, 
+                           MNC_CLOSE);
 
     case WM_INPUT:
     case WM_MOUSEMOVE:
@@ -267,17 +341,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_XBUTTONDOWN:
     case WM_XBUTTONUP:
     case WM_MOUSEHOVER:
-        Mouse::ProcessMessage(message, wParam, lParam);
+        Mouse::ProcessMessage(message, 
+                              wParam, 
+                              lParam);
         break;
 
     case WM_KEYDOWN:
     case WM_KEYUP:
     case WM_SYSKEYUP:
-        Keyboard::ProcessMessage(message, wParam, lParam);
+        Keyboard::ProcessMessage(message, 
+                                 wParam, 
+                                 lParam);
         break;
     }
 
-    return DefWindowProc(hWnd, message, wParam, lParam);
+    return DefWindowProc(hWnd, 
+                         message, 
+                         wParam, 
+                         lParam);
 }
 
 

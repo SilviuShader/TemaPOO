@@ -1,15 +1,14 @@
 #include "pch.h"
 #include "GameComponent.h"
 
-GameComponent::GameComponent(GameObject* parent) : 
-    m_parent(parent)
-{
-}
+using namespace std;
 
-GameComponent::GameComponent(const GameComponent& other)
+GameComponent::GameComponent(shared_ptr<GameObject> parent) : 
+    m_parent(parent)
 {
 }
 
 GameComponent::~GameComponent()
 {
+    m_parent.reset();
 }

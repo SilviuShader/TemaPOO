@@ -3,7 +3,7 @@
 
 using namespace std;
 
-ObjectsGenerator::ObjectsGenerator(ContentManager* contentManager) :
+ObjectsGenerator::ObjectsGenerator(shared_ptr<ContentManager> contentManager) :
     m_zone(ObjectsGenerator::Zone::Beach),
     m_accumulatedDistance(0.0f)
 {
@@ -11,12 +11,11 @@ ObjectsGenerator::ObjectsGenerator(ContentManager* contentManager) :
     m_textures["Palm"] = palmTree;
 }
 
-ObjectsGenerator::ObjectsGenerator(const ObjectsGenerator& other)
-{
-}
-
 ObjectsGenerator::~ObjectsGenerator()
 {
+    for (auto& texture : m_textures)
+        texture.second.reset();
+    m_textures.clear();
 }
 
 void ObjectsGenerator::Update(list<shared_ptr<GameObject> >& gameObjects, 
@@ -28,22 +27,13 @@ void ObjectsGenerator::Update(list<shared_ptr<GameObject> >& gameObjects,
 
     if (m_accumulatedDistance > ACCUMULATE_TO_SPAWN)
     {
-        shared_ptr<GameObject> gameObject = make_shared<GameObject>(terrain->GetParent()->GetGame());
-
-        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject.get());
-        gameObject->AddComponent(objTranslator);
-
-        gameObject->GetTransform()->SetPositionX((rand() % 2 ? 1.0f : -1.0f) * (terrain->GetRoadWidth() / 2.0f + 1.0f));
+        string textureIndex = "";
 
         switch (m_zone)
         {
-        case ObjectsGenerator::Zone::Beach:
-        {
-            shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject.get(),
-                                                                                    m_textures["Palm"].get());
-            gameObject->AddComponent(spriteRenderer);
-        }   
-        break;
+        case ObjectsGenerator::Zone::Beach:   
+            textureIndex = "Palm";
+            break;
 
         case ObjectsGenerator::Zone::City:
             break;
@@ -51,9 +41,23 @@ void ObjectsGenerator::Update(list<shared_ptr<GameObject> >& gameObjects,
         case ObjectsGenerator::Zone::Mountains:
             break;
         }
-        
-        gameObjects.push_back(gameObject);
 
-        m_accumulatedDistance -= ACCUMULATE_TO_SPAWN;
+        if (m_textures.find(textureIndex) != m_textures.end())
+        {
+            shared_ptr<GameObject> gameObject          = make_shared<GameObject>(terrain->GetParent()->GetGame());
+
+            shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject);
+            gameObject->AddComponent(objTranslator);
+
+            gameObject->GetTransform()->SetPositionX((rand() % 2 ? 1.0f : -1.0f) * (terrain->GetParent()->GetGame()->GetRoadWidth() / 2.0f + 1.0f));
+
+            shared_ptr<SpriteRenderer> spriteRenderer  = make_shared<SpriteRenderer>(gameObject,
+                                                                                     m_textures[textureIndex]);
+            gameObject->AddComponent(spriteRenderer);
+
+            gameObjects.push_back(gameObject);
+
+            m_accumulatedDistance -= ACCUMULATE_TO_SPAWN;
+        }
     }
 }

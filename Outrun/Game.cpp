@@ -18,8 +18,8 @@ using Microsoft::WRL::ComPtr;
 
 Game::Game() noexcept :
     m_window(nullptr),
-    m_outputWidth(800),
-    m_outputHeight(600),
+    m_outputWidth(900),
+    m_outputHeight(900),
     m_featureLevel(D3D_FEATURE_LEVEL_9_1)
 {
 }
@@ -28,8 +28,8 @@ Game::Game() noexcept :
 void Game::Initialize(HWND window, int width, int height)
 {
     m_window = window;
-    m_outputWidth  = std::max(width, 1);
-    m_outputHeight = std::max(height, 1);
+    m_outputWidth  = max(width, 1);
+    m_outputHeight = max(height, 1);
 
     m_keyboard = make_shared<Keyboard>();
     m_mouse = make_unique<Mouse>();
@@ -68,6 +68,9 @@ void Game::Update(DX::StepTimer const& timer)
 
     m_gameObjects.remove_if([](const shared_ptr<GameObject>& gameObj) 
         {
+            if (gameObj->Dead())
+                gameObj->ClearComponents();
+
             return gameObj->Dead();
         });
 }
@@ -83,14 +86,14 @@ void Game::Render()
 
     Vector4 clearColor = { 0.3f, 0.5f, 0.7f, 1.0f };
     
-    m_mainCamera->Begin(clearColor);
+    m_pseudo3DCamera->Begin(clearColor);
 
     for (shared_ptr<GameObject>& gameObj : m_gameObjects)
-        gameObj->Render(m_mainCamera.get());
+        gameObj->Render();
 
-    m_mainCamera->End(m_renderTargetView.GetAddressOf(), 
-                      m_depthStencilView.Get(),
-                      1);
+    m_pseudo3DCamera->End(1, 
+                          m_renderTargetView,
+                          m_depthStencilView);
     
     Clear();
 
@@ -99,7 +102,7 @@ void Game::Render()
                          m_states->PointClamp());
 
 
-    m_mainCamera->Present(m_spriteBatch.get());
+    m_pseudo3DCamera->Present(m_spriteBatch);
     
     m_spriteBatch->End();
     
@@ -174,35 +177,15 @@ void Game::OnWindowSizeChanged(int width, int height)
 
     CreateResources();
 
-    // TODO: Game window is being resized.
+    if (m_pseudo3DCamera != nullptr)
+        m_pseudo3DCamera->OnScreenResize(m_outputWidth, m_outputHeight);
 }
 
 // Properties
 void Game::GetDefaultSize(int& width, int& height) const
 {
-    // TODO: Change to desired default window size (note minimum size is 320x200).
-    width = 800;
-    height = 600;
-}
-
-Pseudo3DCamera* Game::GetPseudo3DCamera()
-{
-    return m_mainCamera.get();
-}
-
-Terrain* Game::GetTerrain()
-{
-    return m_terrain.get();
-}
-
-Player* Game::GetPlayer()
-{
-    return m_player.get();
-}
-
-list<shared_ptr<GameObject>>& Game::GetGameObjects()
-{
-    return m_gameObjects;
+    width  = 900;
+    height = 900;
 }
 
 // These are the resources that depend on the device.
@@ -271,51 +254,10 @@ void Game::CreateDevice()
 
     InputManager::CreateInstance(m_keyboard);
 
-    m_spriteBatch = make_unique<SpriteBatch>(m_d3dContext.Get());
+    m_spriteBatch = make_shared<SpriteBatch>(m_d3dContext.Get());
+    m_states = make_unique<CommonStates>(m_d3dDevice.Get());
 
-    m_states      = make_unique<CommonStates>(m_d3dDevice.Get());
-
-    m_mainCamera  = make_unique<Pseudo3DCamera>(m_d3dDevice.Get(),
-                                                m_d3dContext.Get(),
-                                                300,
-                                                300, 
-                                                800, 
-                                                600,
-                                                300,
-                                                15.0f);
-
-    m_contentManager = make_unique<ContentManager>(m_d3dDevice.Get(), 
-                                                   "Resources/");
-
-    m_testTexture    = m_contentManager->Load<Texture2D>("Cat.png");
-    m_carTexture     = m_contentManager->Load<Texture2D>("Car.png");
-
-    m_gameObjects    = list<shared_ptr<GameObject> >();
-    
-    // Add the terrain
-    shared_ptr<GameObject> terrainObj = make_shared<GameObject>(this);
-    
-    m_terrain = make_shared<Terrain>(terrainObj.get(), 
-                                     m_mainCamera.get(),
-                                     m_contentManager.get(),
-                                     m_d3dDevice.Get(), 
-                                     1.0f, 
-                                     0.05f, 
-                                     1, 
-                                     300);
-
-    terrainObj->AddComponent(m_terrain);
-    m_gameObjects.push_back(terrainObj);
-
-    // Add the player
-    shared_ptr<GameObject> playerObj = make_shared<GameObject>(this);
-    m_player = make_shared<Player>(playerObj.get());
-    playerObj->AddComponent(m_player);
-
-    shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(playerObj.get(), m_carTexture.get());
-    playerObj->AddComponent(spriteRenderer);
-    
-    m_gameObjects.push_back(playerObj);
+    CreateGameResources();
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -416,13 +358,8 @@ void Game::CreateResources()
 
 void Game::OnDeviceLost()
 {
-    m_gameObjects.clear();
-    m_contentManager.reset();
+    ReleaseGameResources();
 
-    m_testTexture.reset();
-    m_terrain.reset();
-
-    m_mainCamera.reset();
     m_states.reset();
     m_spriteBatch.reset();
 
@@ -436,4 +373,65 @@ void Game::OnDeviceLost()
 
     CreateDevice();
     CreateResources();
+}
+
+void Game::CreateGameResources()
+{
+    m_contentManager                          = make_shared<ContentManager>(m_d3dDevice,
+                                                                            "Resources/");
+
+    m_pseudo3DCamera                          = make_shared<Pseudo3DCamera>(m_d3dDevice,
+                                                                            m_d3dContext,
+                                                                            shared_from_this(),
+                                                                            GAME_WIDTH,
+                                                                            GAME_HEIGHT,
+                                                                            m_outputWidth,
+                                                                            m_outputHeight,
+                                                                            CAMERA_DEPTH);
+
+    m_gameObjects                             = list<shared_ptr<GameObject> >();
+    
+    // Add the terrain
+    shared_ptr<GameObject> terrainObj         = make_shared<GameObject>(shared_from_this());
+
+    m_terrain                                 = make_shared<Terrain>(terrainObj,
+                                                                     m_contentManager,
+                                                                     m_d3dDevice);
+
+    terrainObj->AddComponent(m_terrain);
+    m_gameObjects.push_back(terrainObj);
+
+    // Add the player
+    shared_ptr<GameObject> playerObj          = make_shared<GameObject>(shared_from_this());
+    m_player                                  = make_shared<Player>(playerObj);
+    playerObj->AddComponent(m_player);
+
+    m_carTexture                              = m_contentManager->Load<Texture2D>("Car.png");
+
+    shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(playerObj,  
+                                                                            m_carTexture);
+    playerObj->AddComponent(spriteRenderer);
+
+    m_gameObjects.push_back(playerObj);
+}
+
+void Game::ReleaseGameResources()
+{
+    m_carTexture.reset();
+    m_player.reset();
+    m_terrain.reset();
+
+    for (auto& gameObject : m_gameObjects)
+    {
+        if (gameObject != nullptr)
+        {
+            gameObject->ClearComponents();
+            gameObject.reset();
+        }
+    }
+    m_gameObjects.clear();
+
+    m_carTexture.reset();
+    m_pseudo3DCamera.reset();
+    m_contentManager.reset();
 }

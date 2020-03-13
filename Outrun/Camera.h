@@ -1,22 +1,44 @@
 #pragma once
 
+class Game;
+
 class Camera
 {
 public:
+
+	class CameraBeginFunction
+	{
+	public:
+
+		CameraBeginFunction(std::function<void _cdecl()> = nullptr, 
+			                int                          = 0);
+		
+		inline std::function<void _cdecl()> GetFunction() const { return m_function; }
+		inline int                          GetID()       const { return m_id;       }
+
+	private:
+
+		int                          m_id;
+	    std::function<void _cdecl()> m_function;
+	};
+
+public:
 	
-	Camera(ID3D11Device*,
-		   ID3D11DeviceContext*,
+	Camera(Microsoft::WRL::ComPtr<ID3D11Device>,
+		   Microsoft::WRL::ComPtr<ID3D11DeviceContext>,
+		   std::shared_ptr<Game>,
 		   int, 
 		   int, 
 		   int, 
 		   int);
 
-	Camera(const Camera&);
 	~Camera();
 
-	void         Present(DirectX::SpriteBatch*);
+	void         Present(std::shared_ptr<DirectX::SpriteBatch>);
+	void         OnScreenResize(int, 
+		                        int);
 
-	void         DrawSprite(Texture2D*,
+	void         DrawSprite(std::shared_ptr<Texture2D>,
 		                    DirectX::SimpleMath::Vector2,
 		                    const RECT*,
 		                    float,
@@ -24,34 +46,34 @@ public:
 
 	void         Begin(DirectX::SimpleMath::Vector4) ;
 
-	virtual void End(ID3D11RenderTargetView* const*,
-		             ID3D11DepthStencilView*,
-		             int);
+	virtual void End(int,
+		             Microsoft::WRL::ComPtr<ID3D11RenderTargetView>,
+		             Microsoft::WRL::ComPtr<ID3D11DepthStencilView>);
 
-	        void Begin2D(std::function<void _cdecl()> = nullptr);
+	        void Begin2D(std::shared_ptr<CameraBeginFunction> = nullptr);
 	        void End2D();
 
-	inline  int GetWidth()  { return m_width; }
+	inline  int GetWidth()  { return m_width;  }
 	inline  int GetHeight() { return m_height; }
 
 private:
 
 	float GetPresentScale();
-	float Clamp(float, float, float);
 
 protected:
 
 
-	ID3D11DeviceContext* m_d3dContext;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_d3dContext;
+	std::shared_ptr<Game>                       m_game;
 
-	int                  m_width;
-	int                  m_height;
+	int                                         m_width;
+	int                                         m_height;
 
 private:
 
 	bool                                   m_rendering2D;
 	std::unique_ptr<DirectX::CommonStates> m_states;
-	std::function<void _cdecl()>           m_customBeginFunction;
+	std::shared_ptr<CameraBeginFunction>   m_customBeginFunction;
 
 	std::unique_ptr<RenderTexture>         m_renderTexture;
 	std::unique_ptr<DirectX::SpriteBatch>  m_spriteBatch;

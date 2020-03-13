@@ -12,10 +12,6 @@ InputManager::InputManager(shared_ptr<Keyboard> keyboard) :
 {
 }
 
-InputManager::InputManager(const InputManager& other)
-{
-}
-
 InputManager::~InputManager()
 {
 }

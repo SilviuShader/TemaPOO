@@ -1,5 +1,7 @@
 //
 // StepTimer.h - A simple timer that provides elapsed time information
+// This class is also part of the template I used to create the project
+// In Game.h there is a link to that template.
 //
 
 #pragma once

@@ -9,6 +9,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 //-------------------------------------------------------------------------------------
+// This header file is downloaded from a DirectXTK tutorial: https://github.com/microsoft/DirectXTK/wiki/Writing-custom-shaders
 
 #pragma once
 

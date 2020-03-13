@@ -20,7 +20,6 @@ public:
 public:
     
     InputManager(std::shared_ptr<DirectX::Keyboard>);
-    InputManager(const InputManager&);
     ~InputManager();
 
            static void          CreateInstance(std::shared_ptr<DirectX::Keyboard>);

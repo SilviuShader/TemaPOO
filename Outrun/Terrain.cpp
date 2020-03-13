@@ -3,83 +3,62 @@
 
 using namespace std;
 
+using namespace Microsoft::WRL;
 using namespace DirectX::SimpleMath;
 
-Terrain::Terrain(GameObject*     gameObject, 
-	             Camera*         camera,
-	             ContentManager* contentManager,
-	             ID3D11Device*   d3dDevice,
-	             float           roadWidth,
-	             float           sideWidth,
-	             int             segmentLength,
-	             int             linesCount) :
+Terrain::Terrain(shared_ptr<GameObject>     gameObject, 
+	             shared_ptr<ContentManager> contentManager,
+	             ComPtr<ID3D11Device>       d3dDevice) :
 
 	GameComponent(gameObject),
-	m_camera(camera),
 	m_d3dDevice(d3dDevice),
-	m_roadWidth(roadWidth),
-	m_sideWidth(sideWidth),
 	m_playerSpeed(0.0f),
-	m_accumulatedTranslations(NULL),
-	m_segmentLength(segmentLength),
-	m_linesCount(linesCount),
-	m_maxRoadX(MIN_MAX_ROAD_X),
-	m_accumultatedBottomDifference(0.0f)
+	m_accumulatedTranslation(0.0f),
+	m_maxRoadX(MIN_MAX_ROAD_X)
 
 {
-
-	m_cameraHeight            = m_camera->GetHeight();
-	m_accumulatedTranslations = new float[m_cameraHeight];
-
-	for (int i = 0; i < m_cameraHeight; i++)
-		m_accumulatedTranslations[i] = 0.0f;
-
-	m_objectsGenerator        = make_unique<ObjectsGenerator>(contentManager);
+	float cameraHeight = m_parent->GetGame()->GetPseudo3DCamera()->GetHeight();
+	m_objectsGenerator = make_unique<ObjectsGenerator>(contentManager);
 
 	CreateTexture();
 
-	m_topSegment = Vector2(m_cameraHeight, 0.0000f);
-	m_bottomSegment = Vector2(0.0f, 0.0f);
+	m_topSegment       = Vector2(cameraHeight, 0.0f);
+	m_bottomSegment    = Vector2(0.0f, 0.0f);
 }
 
 Terrain::~Terrain()
 {
-	delete[] m_accumulatedTranslations;
-	m_accumulatedTranslations = NULL;
+	m_objectsGenerator.reset();
+	m_dataMap.reset();
+	m_d3dDevice.Reset();
 }
 
 void Terrain::Update(float deltaTime)
 {
-	m_maxRoadX = MIN_MAX_ROAD_X;
+	m_maxRoadX                              = MIN_MAX_ROAD_X;
 	CreateTexture();
 
-	Game*           game   = m_parent->GetGame();
-	Pseudo3DCamera* camera = game->GetPseudo3DCamera();
-
-	float alpha = 10.0f;
+	shared_ptr<Game>           game         = m_parent->GetGame();
+	shared_ptr<Pseudo3DCamera> camera       = game->GetPseudo3DCamera();
+	float                      cameraHeight = camera->GetHeight();
 
 	float prevBottomHeight = m_bottomSegment.x;
 
-	m_topSegment.x    += deltaTime * alpha * m_playerSpeed;
-	m_bottomSegment.x += deltaTime * alpha * m_playerSpeed;
-
-	float startY = m_cameraHeight * 1.0f;
-
-	float diff = m_topSegment.x - startY;
+	m_topSegment.x    += deltaTime * ROAD_MOVE_SPEED * m_playerSpeed * camera->GetHeight();
+	m_bottomSegment.x += deltaTime * ROAD_MOVE_SPEED * m_playerSpeed * camera->GetHeight();
 	
-	m_accumultatedBottomDifference += m_bottomSegment.x - prevBottomHeight;
+	float bottomDifference = m_bottomSegment.x - prevBottomHeight;
 
-	for (int i = m_cameraHeight / 2; i < m_cameraHeight; i++)
-	{
-		float depthZ = camera->GetZ((m_cameraHeight / 2) + (m_cameraHeight - i));
-		m_accumulatedTranslations[i] += GetRoadX(i, camera->GetZ(i)) * depthZ * m_accumultatedBottomDifference;
-	}
-	m_accumultatedBottomDifference = 0.0f;
+	float alpha = camera->GetWidth() / 2.0f;
+	m_accumulatedTranslation += GetRoadX(cameraHeight - 1) * alpha * (1.0f / abs(m_parent->GetGame()->GetRoadHeight())) * bottomDifference;
+
+	float startY = cameraHeight * 1.0f;
+	float diff   = m_topSegment.x - startY;
 
 	if (diff >= 0)
 	{
 		m_bottomSegment = m_topSegment;
-		m_topSegment = Vector2(m_cameraHeight - startY, RandomFloat() * 0.00015f * (rand() % 2 ? -1.0f : 1.0f));
+		m_topSegment = Vector2(cameraHeight - startY, RandomFloat() * (1.0f / (camera->GetHeight() * camera->GetHeight())) * MAX_CURVE_SLOPE * (rand() % 2 ? -1.0f : 1.0f));
 	}
 
 	m_objectsGenerator->Update(game->GetGameObjects(),
@@ -88,18 +67,20 @@ void Terrain::Update(float deltaTime)
 		                       deltaTime);
 }
 
-void Terrain::Render(Pseudo3DCamera* camera)
+void Terrain::Render()
 {
-	camera->DrawTerrain(this);
+	m_parent->GetGame()->GetPseudo3DCamera()->DrawTerrain(this);
 }
 
-float Terrain::GetRoadX(int crtHeight, float z)
+float Terrain::GetRoadX(int crtHeight)
 {
+	shared_ptr<Pseudo3DCamera> camera = m_parent->GetGame()->GetPseudo3DCamera();
 	float result = 0.0f;
 	int topSegH = m_topSegment.x;
 	int bottomSegH = m_bottomSegment.x;
+	float z = camera->GetZ(crtHeight);
 
-	int linesDiff = m_cameraHeight - max(crtHeight, topSegH);
+	int linesDiff = camera->GetHeight() - max(crtHeight, topSegH);
 	float dx = m_bottomSegment.y;
 	float ddx = dx * linesDiff * z;
 
@@ -125,9 +106,9 @@ float Terrain::RandomFloat()
 
 void Terrain::CreateTexture()
 {
-	Game*           game         = m_parent->GetGame();
-	Pseudo3DCamera* camera       = game->GetPseudo3DCamera();
-	int             cameraHeight = m_camera->GetHeight();
+	shared_ptr<Game>           game         = m_parent->GetGame();
+	shared_ptr<Pseudo3DCamera> camera       = game->GetPseudo3DCamera();
+	int                        cameraHeight = camera->GetHeight();
 
 	float* textureData = new float[cameraHeight * 4];
 
@@ -142,7 +123,7 @@ void Terrain::CreateTexture()
 		float roadX = 0.0f;
 
 		if (z <= 15.0f)
-			roadX = GetRoadX(i, z);
+			roadX = GetRoadX(i);
 
 		r = roadX;
 		// such a waste of memory, huh?
@@ -161,7 +142,7 @@ void Terrain::CreateTexture()
 		r /= m_maxRoadX;
 	}
 
-	m_zMap = make_unique<Texture2D>(m_d3dDevice, 1, cameraHeight, textureData);
+	m_dataMap = make_shared<Texture2D>(m_d3dDevice, 1, cameraHeight, textureData);
 
 	// Almost forgot this.. RIP
 	delete[] textureData;

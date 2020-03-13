@@ -6,7 +6,8 @@ using namespace std;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-SpriteRenderer::SpriteRenderer(GameObject* parent, Texture2D* texture) :
+SpriteRenderer::SpriteRenderer(shared_ptr<GameObject> parent, 
+                               shared_ptr<Texture2D>  texture) :
     GameComponent(parent),
     m_texture(texture)
 {
@@ -14,24 +15,23 @@ SpriteRenderer::SpriteRenderer(GameObject* parent, Texture2D* texture) :
 
 SpriteRenderer::~SpriteRenderer()
 {
-    // not deleting it here because the texture id not created inside this class
-    // whoever created it has to delete it himself... it was probably created and stored
-    // in some smart pointers anyways.
-    m_texture = NULL;
+    m_texture.reset();
 }
 
-void SpriteRenderer::Update(float deltaTime)
+void SpriteRenderer::Render()
 {
-}
+    shared_ptr<Transform>      transform = m_parent->GetTransform();
+    shared_ptr<Game>           game      = m_parent->GetGame();
 
-void SpriteRenderer::Render(Pseudo3DCamera* camera)
-{
-    shared_ptr<Transform> transform = m_parent->GetTransform();
-    Terrain*              terrain   = m_parent->GetGame()->GetTerrain();
-    Player*               player    = m_parent->GetGame()->GetPlayer();
+    shared_ptr<Terrain>        terrain   = game->GetTerrain();
+    shared_ptr<Player>         player    = game->GetPlayer();
+    shared_ptr<Pseudo3DCamera> camera    = game->GetPseudo3DCamera();
 
-    float normalizedDifference = (terrain->GetRoadX(transform->GetLine(), camera->GetZ(transform->GetLine())) + terrain->GetAccumulatedTranslation(camera->GetHeight() - 1) - player->GetPositionX() + transform->GetPositionX()) * (transform->GetScale());
-    float rawDifference = normalizedDifference * camera->GetWidth() / 2.0f;
+    float scale = transform->GetScale() * ((float)camera->GetHeight() / BASE_TEXTURES_RESOLUTION);
+
+    // That's a big-ass formula.. unfortunately I can't really make it look prettier.
+    float normalizedDifference = (terrain->GetRoadX(camera->GetLine(transform->GetPositionZ())) + terrain->GetAccumulatedTranslation() - player->GetPositionX() + transform->GetPositionX()) * transform->GetScale();
+    float rawDifference        = normalizedDifference * camera->GetWidth() / 2.0f;
 
     if (transform->GetScale() > 0.0f)
     {
@@ -39,10 +39,10 @@ void SpriteRenderer::Render(Pseudo3DCamera* camera)
 
         camera->DrawSprite(m_texture,
                            Vector2(rawDifference,
-                                   (transform->GetLine() - camera->GetHeight() / 2.0f) - ((m_texture->GetHeight() / 2.0f) * transform->GetScale())),
+                                   (camera->GetLine(transform->GetPositionZ()) - (camera->GetHeight() / 2.0f)) - ((m_texture->GetHeight() / 2.0f) * scale)),
                            nullptr,
                            0.0f,
-                           Vector2(transform->GetScale(),
-                                   transform->GetScale()));
+                           Vector2(scale,
+                                   scale));
     }
 }

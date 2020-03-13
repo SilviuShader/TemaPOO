@@ -8,13 +8,13 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 using namespace DX;
 
-Texture2D::Texture2D(ID3D11Device* device, 
-	                 string        filename)
+Texture2D::Texture2D(ComPtr<ID3D11Device> d3dDevice, 
+	                 string               filename)
 {
     wstring_convert<codecvt_utf8_utf16<wchar_t> > converter;
 
     ComPtr<ID3D11Resource> resource;
-    ThrowIfFailed(CreateWICTextureFromFile(device,
+    ThrowIfFailed(CreateWICTextureFromFile(d3dDevice.Get(),
                                            converter.from_bytes(filename).c_str(),
                                            resource.GetAddressOf(),
                                            m_shaderResourceView.ReleaseAndGetAddressOf()));
@@ -24,10 +24,10 @@ Texture2D::Texture2D(ID3D11Device* device,
     texture->GetDesc(&m_textureDesc);
 }
 
-Texture2D::Texture2D(ID3D11Device* device, 
-                     int           width, 
-                     int           height, 
-                     float*        textureData)
+Texture2D::Texture2D(ComPtr<ID3D11Device> d3dDevice, 
+                     int                  width, 
+                     int                  height, 
+                     float*               textureData)
 {
     float pixelsCount = width * height;
 
@@ -60,9 +60,9 @@ Texture2D::Texture2D(ID3D11Device* device,
     ComPtr<ID3D11Texture2D>          resource;
     ComPtr<ID3D11ShaderResourceView> shaderResourceView;
 
-    ThrowIfFailed(device->CreateTexture2D(&desc, &data, resource.GetAddressOf()));
+    ThrowIfFailed(d3dDevice->CreateTexture2D(&desc, &data, resource.GetAddressOf()));
     
-    ThrowIfFailed(device->CreateShaderResourceView(resource.Get(), &resourceDesc, shaderResourceView.GetAddressOf()));
+    ThrowIfFailed(d3dDevice->CreateShaderResourceView(resource.Get(), &resourceDesc, shaderResourceView.GetAddressOf()));
 
     m_shaderResourceView = shaderResourceView;
     m_textureDesc = desc;

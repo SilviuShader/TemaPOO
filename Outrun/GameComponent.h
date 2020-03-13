@@ -8,16 +8,15 @@ class GameComponent
 {
 public:
 
-    GameComponent(GameObject*);
-    GameComponent(const GameComponent&);
+    GameComponent(std::shared_ptr<GameObject>);
     ~GameComponent();
 
-    virtual void       Update(float)           = 0;
-    virtual void       Render(Pseudo3DCamera*) = 0;
+    virtual void                        Update(float) = 0;
+    virtual void                        Render()      = 0;
 
-    inline GameObject* GetParent() const { return m_parent; }
+    inline  std::shared_ptr<GameObject> GetParent() const { return m_parent; }
 
 protected:
 
-    GameObject* m_parent;
+    std::shared_ptr<GameObject> m_parent;
 };

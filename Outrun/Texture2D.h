@@ -4,10 +4,13 @@ class Texture2D
 {
 public:
 	
-	Texture2D(ID3D11Device*, 
+	Texture2D(Microsoft::WRL::ComPtr<ID3D11Device>, 
 		      std::string);
 	
-	Texture2D(ID3D11Device*, int, int, float*);
+	Texture2D(Microsoft::WRL::ComPtr<ID3D11Device>, 
+		      int, 
+		      int, 
+		      float*);
 
 	Texture2D(const Texture2D&);
 	~Texture2D();

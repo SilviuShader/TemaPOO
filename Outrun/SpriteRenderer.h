@@ -2,15 +2,20 @@
 
 class SpriteRenderer : public GameComponent
 {
+private:
+
+    const float BASE_TEXTURES_RESOLUTION = 300;
+
 public:
     
-    SpriteRenderer(GameObject*, Texture2D*);
+    SpriteRenderer(std::shared_ptr<GameObject>, 
+                   std::shared_ptr<Texture2D>);
     ~SpriteRenderer();
 
-    void Update(float)           override;
-    void Render(Pseudo3DCamera*) override;
+    inline void Update(float) override { };
+           void Render()      override;
 
 private:
 
-    Texture2D* m_texture;
+    std::shared_ptr<Texture2D> m_texture;
 };

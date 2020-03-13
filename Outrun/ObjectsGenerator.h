@@ -19,8 +19,7 @@ private:
 
 public:
     
-    ObjectsGenerator(ContentManager*);
-    ObjectsGenerator(const ObjectsGenerator&);
+    ObjectsGenerator(std::shared_ptr<ContentManager>);
     ~ObjectsGenerator();
 
     void Update(std::list<std::shared_ptr<GameObject> >&, 

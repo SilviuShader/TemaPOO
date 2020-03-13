@@ -1,47 +1,53 @@
-#include "pch.h"
+ #include "pch.h"
 #include "Camera.h"
 
 using namespace std;
 
+using namespace Microsoft::WRL;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-Camera::Camera(ID3D11Device*        d3dDevice,
-	           ID3D11DeviceContext* d3dContext,
-	  		   int                  width,
-			   int                  height,
-			   int                  screenWidth,
-			   int                  screenHeight) :
+Camera::CameraBeginFunction::CameraBeginFunction(function<void _cdecl()> function, int id) :
+	m_function(function),
+	m_id(id)
+{
+}
+
+Camera::Camera(ComPtr<ID3D11Device>        d3dDevice,
+	           ComPtr<ID3D11DeviceContext> d3dContext,
+	           shared_ptr<Game>            game,
+	  		   int                         width,
+			   int                         height,
+			   int                         screenWidth,
+			   int                         screenHeight) :
 
 	m_rendering2D(false),
 	m_d3dContext(d3dContext),
+	m_game(game),
 	m_renderTexture(make_unique<RenderTexture>(d3dDevice, 
 		                                       width, 
 		                                       height)),
-	m_spriteBatch(make_unique<SpriteBatch>(d3dContext)),
+	m_spriteBatch(make_unique<SpriteBatch>(d3dContext.Get())),
 	m_width(width),
 	m_height(height),
 	m_screenWidth(screenWidth),
 	m_screenHeight(screenHeight),
-	m_states(make_unique<CommonStates>(d3dDevice)),
+	m_states(make_unique<CommonStates>(d3dDevice.Get())),
 	m_customBeginFunction(nullptr)
-{
-}
-
-Camera::Camera(const Camera& other)
 {
 }
 
 Camera::~Camera()
 {
-	m_states.reset();
 	m_spriteBatch.reset();
 	m_renderTexture.reset();
+	m_customBeginFunction.reset();
+	m_states.reset();
 }
 
-void Camera::Present(SpriteBatch* spriteBatch)
+void Camera::Present(shared_ptr<SpriteBatch> spriteBatch)
 {
-	if (!spriteBatch)
+	if (spriteBatch == nullptr)
 		return;
 
 	float scale = GetPresentScale();
@@ -55,7 +61,7 @@ void Camera::Present(SpriteBatch* spriteBatch)
 	Vector2 position = Vector2(screenCenter.x - (targetWidth / 2.0f), 
 		                       screenCenter.y - (targetHeight / 2.0f));
 
-	spriteBatch->Draw(m_renderTexture->GetShaderResourceView(), 
+	spriteBatch->Draw(m_renderTexture->GetShaderResourceView().Get(), 
 		              position, 
 		              nullptr, 
 		              Colors::White, 
@@ -66,11 +72,18 @@ void Camera::Present(SpriteBatch* spriteBatch)
 		              0.0f);
 }
 
-void Camera::DrawSprite(Texture2D*  sprite,
-	                    Vector2     position, 
-	                    const RECT* sourceRectangle = nullptr, 
-	                    float       rotation        = 0.0f, 
-	                    Vector2     scale           = Vector2::One)
+void Camera::OnScreenResize(int screenWidth, 
+	                        int screenHeight)
+{
+	m_screenWidth  = screenWidth;
+	m_screenHeight = screenHeight;
+}
+
+void Camera::DrawSprite(shared_ptr<Texture2D> sprite,
+	                    Vector2               position, 
+	                    const RECT*           sourceRectangle = nullptr, 
+	                    float                 rotation        = 0.0f, 
+	                    Vector2               scale           = Vector2::One)
 {
 	Begin2D(m_customBeginFunction);
 
@@ -120,16 +133,16 @@ void Camera::DrawSprite(Texture2D*  sprite,
 		calculatedPosition.y + (sourceRectangle->bottom * calculatedScale.y) <= offsettedScreenRect.bottom)
 
 		m_spriteBatch->Draw(sprite->GetShaderResourceView(), 
-			                calculatedPosition, 
+			                calculatedPosition,
 			                sourceRectangle, 
 			                Colors::White, 
 			                rotation, 
 			                Vector2::Zero, 
 			                calculatedScale, 
 			                SpriteEffects::SpriteEffects_None,
-			                Clamp((calculatedPosition.y + (centerTranslation.y * 2.0f)) / (m_height * 2.0f), 
-								  0.0f, 
-								  1.0f));
+			                Utils::Clamp((calculatedPosition.y + (centerTranslation.y * 2.0f)) / (m_height * 2.0f), 
+								         0.0f, 
+								         1.0f));
 }
 
 void Camera::Begin(Vector4 clearColor)
@@ -144,34 +157,40 @@ void Camera::Begin(Vector4 clearColor)
 
 }
 
-void Camera::End(ID3D11RenderTargetView* const* renderTargetViews, 
-	             ID3D11DepthStencilView*        depthStencilView, 
-	             int                            numViews)
+void Camera::End(int                            numViews,
+	             ComPtr<ID3D11RenderTargetView> renderTargetViews,
+	             ComPtr<ID3D11DepthStencilView> depthStencilView)
 {
 	End2D();
 	m_d3dContext->OMSetRenderTargets(numViews,
-		                             renderTargetViews,
-		                             depthStencilView);
+		                             renderTargetViews.GetAddressOf(),
+		                             depthStencilView.Get());
 }
 
-void Camera::Begin2D(function<void _cdecl()> customFunction)
+void Camera::Begin2D(shared_ptr<CameraBeginFunction> customFunction)
 {
 	if (m_rendering2D)
+	{
 		if (m_customBeginFunction == nullptr && customFunction != nullptr ||
 			m_customBeginFunction != nullptr && customFunction == nullptr)
 			End2D();
 
+		if (m_customBeginFunction != nullptr && customFunction != nullptr)
+			if (m_customBeginFunction->GetID() != customFunction->GetID())
+				End2D();
+	}
+
 	if (!m_rendering2D)
 	{
+		m_customBeginFunction = customFunction;
 		m_spriteBatch->Begin(DirectX::SpriteSortMode_FrontToBack,
 			                 m_states->NonPremultiplied(),
 			                 m_states->PointClamp(), 
 			                 nullptr, 
 			                 nullptr, 
-			                 customFunction);
+			                 m_customBeginFunction == nullptr ? nullptr : m_customBeginFunction->GetFunction());
 
 		m_rendering2D = true;
-		m_customBeginFunction = customFunction;
 	}
 }
 
@@ -201,14 +220,4 @@ float Camera::GetPresentScale()
 	scale = (int)scale;
 
 	return scale;
-}
-
-float Camera::Clamp(float value, float min, float max)
-{
-	if (value <= min)
-		value = min;
-	if (value >= max)
-		value = max;
-
-	return value;
 }

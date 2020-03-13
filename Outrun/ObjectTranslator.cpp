@@ -3,12 +3,11 @@
 
 using namespace std;
 
-ObjectTranslator::ObjectTranslator(GameObject* parent) :
-    GameComponent(parent),
-    m_translation(0.0f)
+ObjectTranslator::ObjectTranslator(shared_ptr<GameObject> parent) :
+    GameComponent(parent)
 {
     shared_ptr<Transform> transform = m_parent->GetTransform();
-    transform->SetLine(m_parent->GetGame()->GetPseudo3DCamera()->GetLine(15.0f));
+    transform->SetPositionZ(m_parent->GetGame()->GetPseudo3DCamera()->GetCameraDepth());
 }
 
 ObjectTranslator::~ObjectTranslator()
@@ -17,20 +16,17 @@ ObjectTranslator::~ObjectTranslator()
 
 void ObjectTranslator::Update(float deltaTime)
 {
-    Player* player = m_parent->GetGame()->GetPlayer();
-    float   speed  = player->GetSpeed();
+    shared_ptr<Player>    player    = m_parent->GetGame()->GetPlayer();
+    float                 speed     = player->GetSpeed();
     
     shared_ptr<Transform> transform = m_parent->GetTransform();
 
-    m_translation += speed * deltaTime;
-    transform->SetLine(m_parent->GetGame()->GetPseudo3DCamera()->GetLine(15.0f - m_translation));
+    float                 translate = speed * deltaTime;
+
+    transform->SetPositionZ(transform->GetPositionZ() - translate);
 
     // the child kills his parent
     // what he doesn't know is that he will die too.
-    if (m_translation >= 20.0f)
+    if (transform->GetPositionZ() <= m_parent->GetGame()->GetObjectDisappearDepth())
         m_parent->Die();
-}
-
-void ObjectTranslator::Render(Pseudo3DCamera* camera)
-{
 }

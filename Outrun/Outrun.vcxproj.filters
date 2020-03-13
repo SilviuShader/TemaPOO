@@ -28,6 +28,7 @@
     <ClInclude Include="Transform.h" />
     <ClInclude Include="ObjectsGenerator.h" />
     <ClInclude Include="ObjectTranslator.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -47,6 +48,7 @@
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="ObjectsGenerator.cpp" />
     <ClCompile Include="ObjectTranslator.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

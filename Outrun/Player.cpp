@@ -4,62 +4,51 @@
 using namespace std;
 using namespace DirectX;
 
-Player::Player(GameObject* parent) :
+Player::Player(shared_ptr<GameObject> parent) :
 
     GameComponent(parent),
     m_spriteRenderer(nullptr),
     m_positionX(0.0f),
-    m_posXVelocity(0.0f),
-    m_speed(0.0f),
-    m_accumultedStripesTranslation(0.0f)
+    m_speed(0.0f)
+
 {
 }
 
 Player::~Player()
 {
+    m_spriteRenderer.reset();
 }
 
 void Player::Update(float deltaTime)
 {
     InputManager*              inputManager = InputManager::GetInstance();
-    Game*                      game         = m_parent->GetGame();
-    Pseudo3DCamera*            camera       = game->GetPseudo3DCamera();
+    shared_ptr<Game>           game         = m_parent->GetGame();
+    shared_ptr<Pseudo3DCamera> camera       = game->GetPseudo3DCamera();
     std::shared_ptr<Transform> transform    = m_parent->GetTransform();
 
-    transform->SetLine(camera->GetHeight() - 1);
+    transform->SetPositionZ(camera->GetZ(camera->GetHeight() - 1));
 
     if (inputManager->GetKey(InputManager::GameKey::Up))
         m_speed += SPEED_ACCELERATION_MULTIP * deltaTime;
     else
         m_speed -= SPEED_ACCELERATION_MULTIP * deltaTime;
 
-    if (m_speed >= 3.0f)
-        m_speed = 3.0f;
+    if (m_speed >= MAX_SPEED)
+        m_speed = MAX_SPEED;
+
     if (m_speed < 0.0f)
         m_speed = 0.0f;
 
-    bool steer = false;
       
     if (inputManager->GetKey(InputManager::GameKey::Left))
-    {
-        m_positionX -= deltaTime;
-    }
+        m_positionX -= deltaTime * STEER_ACCELERATION_MULTIP;
     if (inputManager->GetKey(InputManager::GameKey::Right))
-    {
-        m_positionX += deltaTime;
-    }
+        m_positionX += deltaTime * STEER_ACCELERATION_MULTIP;
 
-    m_positionX += m_posXVelocity * deltaTime * m_speed;
-    m_accumultedStripesTranslation += m_speed * deltaTime;
     m_parent->GetGame()->GetTerrain()->SetPlayerSpeed(m_speed);
 
-    transform->SetPositionX(m_positionX - game->GetTerrain()->GetAccumulatedTranslation(camera->GetHeight() - 1));
-}
+    transform->SetPositionX(m_positionX - game->GetTerrain()->GetAccumulatedTranslation());
 
-void Player::Render(Pseudo3DCamera* pseudo3DCamera)
-{
-    pseudo3DCamera->TranslateStripes(m_accumultedStripesTranslation);
-    m_accumultedStripesTranslation = 0.0f;
-
-    pseudo3DCamera->SetPositionX(m_positionX);
+    camera->TranslateStripes(m_speed * deltaTime);
+    camera->SetPositionX(m_positionX);
 }
