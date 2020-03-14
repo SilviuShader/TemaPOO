@@ -71,6 +71,15 @@
     <Image Include="Resources\CarBack.png">
       <Filter>Resources</Filter>
     </Image>
+    <Image Include="Resources\CarFront.png">
+      <Filter>Resources</Filter>
+    </Image>
+    <Image Include="Resources\Border.png">
+      <Filter>Resources</Filter>
+    </Image>
+    <Image Include="Resources\Tower.png">
+      <Filter>Resources</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest">

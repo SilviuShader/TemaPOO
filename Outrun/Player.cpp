@@ -9,7 +9,8 @@ Player::Player(shared_ptr<GameObject> parent) :
     GameComponent(parent),
     m_spriteRenderer(nullptr),
     m_positionX(0.0f),
-    m_speed(0.0f)
+    m_speed(0.0f),
+    m_steerSpeed(0.0f)
 
 {
 }
@@ -33,17 +34,42 @@ void Player::Update(float deltaTime)
     else
         m_speed -= SPEED_ACCELERATION_MULTIP * deltaTime;
 
+    if (inputManager->GetKey(InputManager::GameKey::Down))
+        m_speed -= BRAKE_MULTIP * deltaTime;
+
     if (m_speed >= MAX_SPEED)
         m_speed = MAX_SPEED;
 
     if (m_speed < 0.0f)
         m_speed = 0.0f;
 
+    bool steering = false;
       
     if (inputManager->GetKey(InputManager::GameKey::Left))
-        m_positionX -= deltaTime * STEER_ACCELERATION_MULTIP;
+    {
+        m_steerSpeed -= deltaTime * STEER_ACCELERATION_MULTIP;
+        steering = true;
+    }
     if (inputManager->GetKey(InputManager::GameKey::Right))
-        m_positionX += deltaTime * STEER_ACCELERATION_MULTIP;
+    {
+        m_steerSpeed += deltaTime * STEER_ACCELERATION_MULTIP;
+        steering = true;
+    }
+
+    if (m_steerSpeed >= MAX_STEER_SPEED)
+        m_steerSpeed = MAX_STEER_SPEED;
+    if (m_steerSpeed <= -MAX_STEER_SPEED)
+        m_steerSpeed = -MAX_STEER_SPEED;
+
+    if (!steering)
+    {
+        if (m_steerSpeed > 0.0f)
+            m_steerSpeed -= deltaTime * STEER_ACCELERATION_DECREASE;
+        else
+            m_steerSpeed += deltaTime * STEER_ACCELERATION_DECREASE;
+    }
+
+    m_positionX += m_steerSpeed * deltaTime * (m_speed / MAX_SPEED);
 
     m_parent->GetGame()->GetTerrain()->SetPlayerSpeed(m_speed);
 

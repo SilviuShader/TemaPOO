@@ -210,12 +210,15 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="directx.ico" />
+    <Image Include="Resources\Border.png" />
     <Image Include="Resources\Car.png" />
     <Image Include="Resources\CarBack.png" />
+    <Image Include="Resources\CarFront.png" />
     <Image Include="Resources\Cat.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="Resources\Palm.png" />
+    <Image Include="Resources\Tower.png" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest" />
