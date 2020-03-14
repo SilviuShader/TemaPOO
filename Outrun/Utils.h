@@ -9,4 +9,7 @@ public:
                        float);
 
     static float RandomFloat();
+    static float Lerp(float, 
+                      float, 
+                      float);
 };

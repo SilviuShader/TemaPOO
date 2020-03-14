@@ -65,14 +65,10 @@ void Game::Update(DX::StepTimer const& timer)
 
     for (shared_ptr<GameObject>& gameObj : m_gameObjects)
         gameObj->Update(elapsedTime);
+    RemoveDeadObjects();
 
-    m_gameObjects.remove_if([](const shared_ptr<GameObject>& gameObj) 
-        {
-            if (gameObj->Dead())
-                gameObj->ClearComponents();
-
-            return gameObj->Dead();
-        });
+    m_collisionManager->Update(m_gameObjects);
+    RemoveDeadObjects();
 }
 
 // Draws the scene.
@@ -375,6 +371,17 @@ void Game::OnDeviceLost()
     CreateResources();
 }
 
+void Game::RemoveDeadObjects()
+{
+    m_gameObjects.remove_if([](const shared_ptr<GameObject>& gameObj)
+        {
+            if (gameObj->Dead())
+                gameObj->ClearComponents();
+
+            return gameObj->Dead();
+        });
+}
+
 void Game::CreateGameResources()
 {
     m_contentManager                          = make_shared<ContentManager>(m_d3dDevice,
@@ -390,6 +397,8 @@ void Game::CreateGameResources()
                                                                             CAMERA_DEPTH);
 
     m_gameObjects                             = list<shared_ptr<GameObject> >();
+
+    m_collisionManager                        = make_unique<CollisionManager>();
     
     // Add the terrain
     shared_ptr<GameObject> terrainObj         = make_shared<GameObject>(shared_from_this());
@@ -420,6 +429,8 @@ void Game::ReleaseGameResources()
     m_carTexture.reset();
     m_player.reset();
     m_terrain.reset();
+
+    m_collisionManager.reset();
 
     for (auto& gameObject : m_gameObjects)
     {

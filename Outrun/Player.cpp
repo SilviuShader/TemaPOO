@@ -52,3 +52,8 @@ void Player::Update(float deltaTime)
     camera->TranslateStripes(m_speed * deltaTime);
     camera->SetPositionX(m_positionX);
 }
+
+void Player::OnCollisionUpdate(shared_ptr<GameObject> other)
+{
+    m_parent->Die();
+}

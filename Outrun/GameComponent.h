@@ -14,7 +14,11 @@ public:
     virtual void                        Update(float) = 0;
     virtual void                        Render()      = 0;
 
-    inline  std::shared_ptr<GameObject> GetParent() const { return m_parent; }
+    // this is not a function that is required for many objects
+    // that's why it doesn't need override most of the time.
+    virtual void                        OnCollisionUpdate(std::shared_ptr<GameObject>) {                  }
+
+    inline  std::shared_ptr<GameObject> GetParent() const                              { return m_parent; }
 
 protected:
 

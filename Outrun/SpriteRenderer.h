@@ -12,8 +12,11 @@ public:
                    std::shared_ptr<Texture2D>);
     ~SpriteRenderer();
 
-    inline void Update(float) override { };
-           void Render()      override;
+    inline void  Update(float) override { };
+           void  Render()      override;
+
+           float GetSpriteScaleFactor();
+           RECT  GetSpriteRect();
 
 private:
 

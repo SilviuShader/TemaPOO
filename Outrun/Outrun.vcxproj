@@ -159,6 +159,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="ContentManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameComponent.h" />
@@ -180,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="ContentManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameComponent.cpp" />
@@ -209,6 +211,7 @@
   <ItemGroup>
     <Image Include="directx.ico" />
     <Image Include="Resources\Car.png" />
+    <Image Include="Resources\CarBack.png" />
     <Image Include="Resources\Cat.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

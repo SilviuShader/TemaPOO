@@ -30,6 +30,12 @@ void GameObject::Render()
         gc->Render();
 }
 
+void GameObject::OnCollisionUpdate(shared_ptr<GameObject> other)
+{
+    for (shared_ptr<GameComponent>& gc : m_gameComponents)
+        gc->OnCollisionUpdate(other);
+}
+
 std::shared_ptr<Transform> GameObject::GetTransform()
 {
     // Every objects needs a transform,

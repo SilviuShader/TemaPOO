@@ -11,6 +11,7 @@ public:
 
            void                           Update(float);
            void                           Render();
+           void                           OnCollisionUpdate(std::shared_ptr<GameObject>);
 
            std::shared_ptr<Transform>     GetTransform();
 

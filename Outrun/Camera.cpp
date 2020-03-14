@@ -107,13 +107,11 @@ void Camera::DrawSprite(shared_ptr<Texture2D> sprite,
 
 	centerTranslation *= textureScale;
 
-	Vector2 calculatedPosition = (Vector2((int)position.x, (int)position.y) * zoom) -
+	Vector2 calculatedPosition = (Vector2((float)position.x, (float)position.y) * zoom) -
 		                         (centerTranslation * zoom);
 
-	calculatedPosition -= Vector2(((int)centerPosition.x * zoom.x) - (m_width / 2.0f),
-		                          ((int)centerPosition.y * zoom.y) - (m_height / 2.0f));
-
-	calculatedPosition = Vector2((int)calculatedPosition.x, (int)calculatedPosition.y);
+	calculatedPosition -= Vector2(((float)centerPosition.x * zoom.x) - (m_width / 2.0f),
+		                          ((float)centerPosition.y * zoom.y) - (m_height / 2.0f));
 
 	Vector2 calculatedScale = zoom * textureScale;
 

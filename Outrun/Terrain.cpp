@@ -62,9 +62,7 @@ void Terrain::Update(float deltaTime)
 			                   Utils::RandomFloat() * (1.0f / (camera->GetHeight() * camera->GetHeight())) * MAX_CURVE_SLOPE * (rand() % 2 ? -1.0f : 1.0f));
 	}
 
-	m_objectsGenerator->Update(game->GetGameObjects(),
-		                       this,
-		                       m_playerSpeed,
+	m_objectsGenerator->Update(GetParent()->GetGame(),
 		                       deltaTime);
 }
 

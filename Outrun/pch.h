@@ -84,6 +84,7 @@
 #include "Player.h"
 #include "Pseudo3DCamera.h"
 #include "GameObject.h"
+#include "CollisionManager.h"
 #include "Game.h"
 
 namespace DX

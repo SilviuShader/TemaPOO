@@ -73,6 +73,7 @@ private:
 
     void OnDeviceLost();
 
+    void RemoveDeadObjects();
     void CreateGameResources();
     void ReleaseGameResources();
 
@@ -103,6 +104,7 @@ private:
     std::shared_ptr<ContentManager>                  m_contentManager;
     std::shared_ptr<Pseudo3DCamera>                  m_pseudo3DCamera;
     std::list<std::shared_ptr<GameObject> >          m_gameObjects;
+    std::unique_ptr<CollisionManager>                m_collisionManager;
 
     std::shared_ptr<Terrain>                         m_terrain;
     std::shared_ptr<Player>                          m_player;

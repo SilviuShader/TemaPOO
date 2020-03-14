@@ -29,6 +29,7 @@
     <ClInclude Include="ObjectsGenerator.h" />
     <ClInclude Include="ObjectTranslator.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="CollisionManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -49,6 +50,7 @@
     <ClCompile Include="ObjectsGenerator.cpp" />
     <ClCompile Include="ObjectTranslator.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -64,6 +66,9 @@
       <Filter>Resources</Filter>
     </Image>
     <Image Include="Resources\Palm.png">
+      <Filter>Resources</Filter>
+    </Image>
+    <Image Include="Resources\CarBack.png">
       <Filter>Resources</Filter>
     </Image>
   </ItemGroup>
