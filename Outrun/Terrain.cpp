@@ -42,15 +42,15 @@ void Terrain::Update(float deltaTime)
 	shared_ptr<Pseudo3DCamera> camera       = game->GetPseudo3DCamera();
 	float                      cameraHeight = camera->GetHeight();
 
-	float prevBottomHeight = m_bottomSegment.x;
+	float prevBottomHeight                  = m_bottomSegment.x;
 
 	m_topSegment.x    += deltaTime * ROAD_MOVE_SPEED * m_playerSpeed * camera->GetHeight();
 	m_bottomSegment.x += deltaTime * ROAD_MOVE_SPEED * m_playerSpeed * camera->GetHeight();
 	
 	float bottomDifference = m_bottomSegment.x - prevBottomHeight;
 
-	float alpha = camera->GetWidth() / 2.0f;
-	m_accumulatedTranslation += GetRoadX(cameraHeight - 1) * alpha * (1.0f / abs(m_parent->GetGame()->GetRoadHeight())) * bottomDifference;
+	float alpha = (camera->GetWidth() / 2.0f) * (ROAD_MOVE_SPEED * 100.0f);
+	m_accumulatedTranslation += GetRoadX(cameraHeight - 1) * alpha * (1.0f / abs(m_parent->GetGame()->GetRoadWidth())) * bottomDifference;
 
 	float startY = cameraHeight * 1.0f;
 	float diff   = m_topSegment.x - startY;
@@ -58,7 +58,8 @@ void Terrain::Update(float deltaTime)
 	if (diff >= 0)
 	{
 		m_bottomSegment = m_topSegment;
-		m_topSegment = Vector2(cameraHeight - startY, RandomFloat() * (1.0f / (camera->GetHeight() * camera->GetHeight())) * MAX_CURVE_SLOPE * (rand() % 2 ? -1.0f : 1.0f));
+		m_topSegment = Vector2(cameraHeight - startY, 
+			                   Utils::RandomFloat() * (1.0f / (camera->GetHeight() * camera->GetHeight())) * MAX_CURVE_SLOPE * (rand() % 2 ? -1.0f : 1.0f));
 	}
 
 	m_objectsGenerator->Update(game->GetGameObjects(),
@@ -98,12 +99,6 @@ float Terrain::GetRoadX(int crtHeight)
 	return result;
 }
 
-float Terrain::RandomFloat()
-{
-	// took this from stackoverflow: https://stackoverflow.com/questions/686353/random-float-number-generation
-	return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-}
-
 void Terrain::CreateTexture()
 {
 	shared_ptr<Game>           game         = m_parent->GetGame();
@@ -122,7 +117,7 @@ void Terrain::CreateTexture()
 		float z = camera->GetZ(i);
 		float roadX = 0.0f;
 
-		if (z <= 15.0f)
+		if (z <= camera->GetCameraDepth())
 			roadX = GetRoadX(i);
 
 		r = roadX;
@@ -140,6 +135,9 @@ void Terrain::CreateTexture()
 	{
 		float& r = textureData[(i * 4)];
 		r /= m_maxRoadX;
+		// It worked perfectly fine without changing the range from [-1, 1] to [0, 1]
+		// but it may not work on all devices so... better be safe and make the values positive
+		r = (r + 1.0f) / 2.0f;
 	}
 
 	m_dataMap = make_shared<Texture2D>(m_d3dDevice, 1, cameraHeight, textureData);

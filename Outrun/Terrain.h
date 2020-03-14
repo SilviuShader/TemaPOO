@@ -16,23 +16,19 @@ public:
 
 	~Terrain();
 
-	       void                         Update(float)               override;
-		   void                         Render()                    override;
+	       void                       Update(float)               override;
+		   void                       Render()                    override;
 
-	inline void                         SetPlayerSpeed(float speed)       { m_playerSpeed = speed;                  }
+		   float                      GetRoadX(int);
 
-	inline float                        GetMaxRoadX()               const { return m_maxRoadX;                      }
-	inline float                        GetAccumulatedTranslation() const { return m_accumulatedTranslation; }
-	inline std::shared_ptr<Texture2D>   GetDataMap()                const { return m_dataMap;                       }
+	inline void                       SetPlayerSpeed(float speed)       { m_playerSpeed = speed;           }
 
-	inline DirectX::SimpleMath::Vector2 GetBottomSegment()          const { return m_bottomSegment;                 }
-	inline DirectX::SimpleMath::Vector2 GetTopSegment()             const { return m_topSegment;                    }
-
-	       float                        GetRoadX(int);
+	inline float                      GetMaxRoadX()               const { return m_maxRoadX;               }
+	inline float                      GetAccumulatedTranslation() const { return m_accumulatedTranslation; }
+	inline std::shared_ptr<Texture2D> GetDataMap()                const { return m_dataMap;                }
 
 private:
 
-	float RandomFloat();
 	void  CreateTexture();
 
 private:

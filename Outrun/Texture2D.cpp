@@ -68,10 +68,6 @@ Texture2D::Texture2D(ComPtr<ID3D11Device> d3dDevice,
     m_textureDesc = desc;
 }
 
-Texture2D::Texture2D(const Texture2D& other)
-{
-}
-
 Texture2D::~Texture2D()
 {
     m_shaderResourceView.Reset();

@@ -84,7 +84,7 @@ void Game::Render()
         return;
     }
 
-    Vector4 clearColor = { 0.3f, 0.5f, 0.7f, 1.0f };
+    Vector4 clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
     
     m_pseudo3DCamera->Begin(clearColor);
 

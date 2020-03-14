@@ -10,3 +10,9 @@ float Utils::Clamp(float value, float mn, float mx)
 
 	return value;
 }
+
+float Utils::RandomFloat()
+{
+	// took this from stackoverflow: https://stackoverflow.com/questions/686353/random-float-number-generation
+	return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+}

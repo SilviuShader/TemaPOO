@@ -12,7 +12,6 @@ public:
 		      int, 
 		      float*);
 
-	Texture2D(const Texture2D&);
 	~Texture2D();
 
 	inline ID3D11ShaderResourceView* GetShaderResourceView() { return m_shaderResourceView.Get(); }
