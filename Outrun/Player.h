@@ -10,6 +10,7 @@ private:
     const float STEER_ACCELERATION_DECREASE = 2.5f;
     const float SPEED_ACCELERATION_MULTIP   = 1.0f;
     const float BRAKE_MULTIP                = 2.5f;
+    const float ACCIDENT_BRAKE              = 1.0f;
 
 public:
 

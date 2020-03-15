@@ -113,6 +113,9 @@ void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game,
                 m_textures[textureIndex]);
             gameObject->AddComponent(spriteRenderer);
 
+            shared_ptr<Killer> killer = make_shared<Killer>(gameObject);
+            gameObject->AddComponent(killer);
+
             gameObjects.push_back(gameObject);
 
             m_accumulatedDistance -= ACCUMULATE_TO_SPAWN;
@@ -147,7 +150,11 @@ void ObjectsGenerator::CarSpawnUpdate(shared_ptr<Game> game,
                                                                                 m_textures[(goingForward ? "CarBack" : "CarFront")]);
         gameObject->AddComponent(spriteRenderer);
 
+        shared_ptr<Killer> killer = make_shared<Killer>(gameObject);
+        gameObject->AddComponent(killer);
+
         gameObjects.push_back(gameObject);
+
         m_accumulatedCarChance -= CAR_CHANCE;
     }
 }

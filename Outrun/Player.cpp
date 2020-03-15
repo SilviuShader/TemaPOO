@@ -81,5 +81,10 @@ void Player::Update(float deltaTime)
 
 void Player::OnCollisionUpdate(shared_ptr<GameObject> other)
 {
-    m_parent->Die();
+    bool killer = other->GetComponent<Killer>() != nullptr;
+
+    if (killer)
+        m_parent->Die();
+    else
+        m_speed -= ACCIDENT_BRAKE;
 }

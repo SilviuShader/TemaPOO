@@ -63,12 +63,41 @@ void Game::Update(DX::StepTimer const& timer)
 
     auto mouse = m_mouse->GetState();
 
-    for (shared_ptr<GameObject>& gameObj : m_gameObjects)
-        gameObj->Update(elapsedTime);
-    RemoveDeadObjects();
+    switch (m_gameState)
+    {
+    case Game::GameState::Playing:
 
-    m_collisionManager->Update(m_gameObjects);
-    RemoveDeadObjects();
+        for (shared_ptr<GameObject>& gameObj : m_gameObjects)
+            gameObj->Update(elapsedTime);
+        RemoveDeadObjects();
+
+        m_collisionManager->Update(m_gameObjects);
+        RemoveDeadObjects();
+
+        // Wait wasn't the player removed from the list at this point?
+        // Well, no, it's a smart pointer, the player is still there, event though it was removed from the list
+        // This isn't a leak of any sort because it is completely removed in the ReleaseGameResources method.
+        // also, the player is still needed for this step... same applies for terrain.
+        if (m_player->GetParent()->Dead())
+            m_gameState = Game::GameState::End;
+
+        break;
+    case Game::GameState::End:
+
+
+
+        break;
+    }
+    // update UI
+    for (int i = 0; i < (int)Game::GameState::Last; i++)
+        if (i == (int)m_gameState)
+            m_uiLayers[i]->SetActive(true);
+        else
+            m_uiLayers[i]->SetActive(false);
+
+    for (int i = 0; i < (int)Game::GameState::Last; i++)
+        m_uiLayers[i]->Update();
+        
 }
 
 // Draws the scene.
@@ -90,7 +119,16 @@ void Game::Render()
     m_pseudo3DCamera->End(1, 
                           m_renderTargetView,
                           m_depthStencilView);
+
+    m_uiCamera->Begin(Vector4::Zero);
+
+    for (int i = 0; i < (int)Game::GameState::Last; i++)
+        m_uiLayers[i]->Render(m_uiCamera);
     
+    m_uiCamera->End(1,
+                    m_renderTargetView,
+                    m_depthStencilView);
+
     Clear();
 
     m_spriteBatch->Begin(SpriteSortMode_Deferred, 
@@ -99,7 +137,8 @@ void Game::Render()
 
 
     m_pseudo3DCamera->Present(m_spriteBatch);
-    
+    m_uiCamera->Present(m_spriteBatch);
+
     m_spriteBatch->End();
     
     // Now that we finish rendering the texture,
@@ -166,15 +205,24 @@ void Game::OnResuming()
     // TODO: Game is being power-resumed (or returning from minimize).
 }
 
-void Game::OnWindowSizeChanged(int width, int height)
+void Game::OnWindowSizeChanged(int width, 
+                               int height)
 {
-    m_outputWidth = std::max(width, 1);
-    m_outputHeight = std::max(height, 1);
+    m_outputWidth = max(width, 
+                        1);
+
+    m_outputHeight = max(height, 
+                         1);
 
     CreateResources();
 
     if (m_pseudo3DCamera != nullptr)
-        m_pseudo3DCamera->OnScreenResize(m_outputWidth, m_outputHeight);
+        m_pseudo3DCamera->OnScreenResize(m_outputWidth, 
+                                         m_outputHeight);
+
+    if (m_uiCamera != nullptr)
+        m_uiCamera->OnScreenResize(m_outputWidth, 
+                                   m_outputHeight);
 }
 
 // Properties
@@ -384,6 +432,8 @@ void Game::RemoveDeadObjects()
 
 void Game::CreateGameResources()
 {
+    m_gameState                               = Game::GameState::Playing;
+
     m_contentManager                          = make_shared<ContentManager>(m_d3dDevice,
                                                                             "Resources/");
 
@@ -422,10 +472,34 @@ void Game::CreateGameResources()
     playerObj->AddComponent(spriteRenderer);
 
     m_gameObjects.push_back(playerObj);
+
+    CreateUI();
+}
+
+void Game::CreateUI()
+{
+    m_uiCamera = make_shared<UICamera>(m_d3dDevice, 
+                                       m_d3dContext, 
+                                       shared_from_this(), 
+                                       GAME_WIDTH, 
+                                       GAME_HEIGHT, 
+                                       m_outputWidth, 
+                                       m_outputHeight);
+
+    for (int i = 0; i < (int)Game::GameState::Last; i++)
+        m_uiLayers[i] = make_shared<UILayer>(Vector2::Zero, 
+                                             Vector2(GAME_WIDTH, 
+                                                     GAME_HEIGHT));
+                                                     
 }
 
 void Game::ReleaseGameResources()
 {
+    for (int i = 0; i < (int)Game::GameState::Last; i++)
+        m_uiLayers[i].reset();
+
+    m_uiCamera.reset();
+        
     m_carTexture.reset();
     m_player.reset();
     m_terrain.reset();

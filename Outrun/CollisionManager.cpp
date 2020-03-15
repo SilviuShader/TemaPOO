@@ -22,7 +22,7 @@ void CollisionManager::Update(list<shared_ptr<GameObject> >& gameObjects)
             if (gameObject.get() != other.get())
             {
                 shared_ptr<GameComponent> spriteRenderer1 = gameObject->GetComponent<SpriteRenderer>();
-                shared_ptr<GameComponent> otherRenderer   = gameObject->GetComponent<SpriteRenderer>();
+                shared_ptr<GameComponent> otherRenderer   = other->GetComponent<SpriteRenderer>();
 
                 if (spriteRenderer1 != nullptr && 
                     otherRenderer   != nullptr)
@@ -39,7 +39,7 @@ void CollisionManager::Update(list<shared_ptr<GameObject> >& gameObjects)
                         RECT otherRect = othRend->GetSpriteRect();
 
                         float width      = (float)rect.right      * gameObject->GetTransform()->GetScale() * sprRend->GetSpriteScaleFactor();
-                        float otherWidth = (float)otherRect.right * gameObject->GetTransform()->GetScale() * othRend->GetSpriteScaleFactor();
+                        float otherWidth = (float)otherRect.right * other->GetTransform()->GetScale()      * othRend->GetSpriteScaleFactor();
 
                         width      /= camera->GetWidth();
                         otherWidth /= camera->GetWidth();

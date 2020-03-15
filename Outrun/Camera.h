@@ -34,34 +34,33 @@ public:
 
 	~Camera();
 
-	void         Present(std::shared_ptr<DirectX::SpriteBatch>);
-	void         OnScreenResize(int, 
-		                        int);
+	void        Present(std::shared_ptr<DirectX::SpriteBatch>);
+	void        OnScreenResize(int, 
+                               int);
 
-	void         DrawSprite(std::shared_ptr<Texture2D>,
-		                    DirectX::SimpleMath::Vector2,
-		                    const RECT*,
-		                    float,
-		                    DirectX::SimpleMath::Vector2);
+	void        DrawSprite(std::shared_ptr<Texture2D>,
+		                   DirectX::SimpleMath::Vector2,
+		                   const RECT*,
+		                   float,
+		                   DirectX::SimpleMath::Vector2);
 
-	void         Begin(DirectX::SimpleMath::Vector4) ;
+	       void Begin(DirectX::SimpleMath::Vector4);
 
-	virtual void End(int,
-		             Microsoft::WRL::ComPtr<ID3D11RenderTargetView>,
-		             Microsoft::WRL::ComPtr<ID3D11DepthStencilView>);
+	       void End(int,
+                    Microsoft::WRL::ComPtr<ID3D11RenderTargetView>,
+                    Microsoft::WRL::ComPtr<ID3D11DepthStencilView>);
 
-	        void Begin2D(std::shared_ptr<CameraBeginFunction> = nullptr);
-	        void End2D();
+	       void Begin2D(std::shared_ptr<CameraBeginFunction> = nullptr);
+	       void End2D();
 
-	inline  int GetWidth()  { return m_width;  }
-	inline  int GetHeight() { return m_height; }
+	inline int  GetWidth()  { return m_width;  }
+	inline int  GetHeight() { return m_height; }
 
 private:
 
 	float GetPresentScale();
 
 protected:
-
 
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_d3dContext;
 	std::shared_ptr<Game>                       m_game;

@@ -30,6 +30,10 @@
     <ClInclude Include="ObjectTranslator.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="CollisionManager.h" />
+    <ClInclude Include="Killer.h" />
+    <ClInclude Include="UIElement.h" />
+    <ClInclude Include="UILayer.h" />
+    <ClInclude Include="UICamera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -51,6 +55,10 @@
     <ClCompile Include="ObjectTranslator.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="Killer.cpp" />
+    <ClCompile Include="UIElement.cpp" />
+    <ClCompile Include="UILayer.cpp" />
+    <ClCompile Include="UICamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
