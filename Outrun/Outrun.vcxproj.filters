@@ -34,6 +34,7 @@
     <ClInclude Include="UIElement.h" />
     <ClInclude Include="UILayer.h" />
     <ClInclude Include="UICamera.h" />
+    <ClInclude Include="UIButton.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -59,6 +60,7 @@
     <ClCompile Include="UIElement.cpp" />
     <ClCompile Include="UILayer.cpp" />
     <ClCompile Include="UICamera.cpp" />
+    <ClCompile Include="UIButton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

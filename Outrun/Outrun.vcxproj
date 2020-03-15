@@ -178,6 +178,7 @@
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="UIButton.h" />
     <ClInclude Include="UICamera.h" />
     <ClInclude Include="UIElement.h" />
     <ClInclude Include="UILayer.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UICamera.cpp" />
     <ClCompile Include="UIElement.cpp" />
     <ClCompile Include="UILayer.cpp" />

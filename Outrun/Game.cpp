@@ -32,7 +32,7 @@ void Game::Initialize(HWND window, int width, int height)
     m_outputHeight = max(height, 1);
 
     m_keyboard = make_shared<Keyboard>();
-    m_mouse = make_unique<Mouse>();
+    m_mouse    = make_shared<Mouse>();
 
     m_mouse->SetWindow(window);
 
@@ -96,7 +96,7 @@ void Game::Update(DX::StepTimer const& timer)
             m_uiLayers[i]->SetActive(false);
 
     for (int i = 0; i < (int)Game::GameState::Last; i++)
-        m_uiLayers[i]->Update();
+        m_uiLayers[i]->Update(m_uiCamera);
         
 }
 
@@ -296,7 +296,8 @@ void Game::CreateDevice()
     DX::ThrowIfFailed(device.As(&m_d3dDevice));
     DX::ThrowIfFailed(context.As(&m_d3dContext));
 
-    InputManager::CreateInstance(m_keyboard);
+    InputManager::CreateInstance(m_keyboard, 
+                                 m_mouse);
 
     m_spriteBatch = make_shared<SpriteBatch>(m_d3dContext.Get());
     m_states = make_unique<CommonStates>(m_d3dDevice.Get());
@@ -490,7 +491,14 @@ void Game::CreateUI()
         m_uiLayers[i] = make_shared<UILayer>(Vector2::Zero, 
                                              Vector2(GAME_WIDTH, 
                                                      GAME_HEIGHT));
-                                                     
+
+    shared_ptr<UIButton> endReplayButton = make_shared<UIButton>(Vector2::Zero, 
+                                                                 Vector2(m_carTexture->GetWidth(),
+                                                                         m_carTexture->GetHeight()),
+                                                                 m_carTexture, 
+                                                                 m_carTexture);
+
+    m_uiLayers[(int)Game::GameState::End]->AddChild(endReplayButton);
 }
 
 void Game::ReleaseGameResources()

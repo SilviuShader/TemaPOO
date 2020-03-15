@@ -78,6 +78,7 @@
 #include "UICamera.h"
 #include "UIElement.h"
 #include "UILayer.h"
+#include "UIButton.h"
 #include "GameComponent.h"
 #include "ObjectTranslator.h"
 #include "Killer.h"

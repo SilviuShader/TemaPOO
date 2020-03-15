@@ -56,7 +56,7 @@ public:
 	inline int  GetWidth()  { return m_width;  }
 	inline int  GetHeight() { return m_height; }
 
-private:
+protected:
 
 	float GetPresentScale();
 
@@ -68,6 +68,9 @@ protected:
 	int                                         m_width;
 	int                                         m_height;
 
+	int                                         m_screenWidth;
+	int                                         m_screenHeight;
+
 private:
 
 	bool                                   m_rendering2D;
@@ -76,7 +79,4 @@ private:
 
 	std::unique_ptr<RenderTexture>         m_renderTexture;
 	std::unique_ptr<DirectX::SpriteBatch>  m_spriteBatch;
-
-	int                                    m_screenWidth;
-	int                                    m_screenHeight;
 };

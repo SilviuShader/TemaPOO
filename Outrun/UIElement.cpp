@@ -32,26 +32,26 @@ void UIElement::AddChild(shared_ptr<UIElement> child)
     m_children.push_back(child);
 }
 
-void UIElement::Update()
+void UIElement::Update(shared_ptr<UICamera> uiCamera)
 {
     if (!m_active)
         return;
 
-    ElementUpdate();
+    ElementUpdate(uiCamera);
 
     for (auto& child : m_children)
-        child->Update();
+        child->Update(uiCamera);
 }
 
-void UIElement::Render(shared_ptr<UICamera> camera)
+void UIElement::Render(shared_ptr<UICamera> uiCamera)
 {
     if (!m_active)
         return;
 
-    ElementRender(camera);
+    ElementRender(uiCamera);
 
     for (auto& child : m_children)
-        child->Render(camera);
+        child->Render(uiCamera);
 }
 
 Vector2 UIElement::GetAbsolutePosition()

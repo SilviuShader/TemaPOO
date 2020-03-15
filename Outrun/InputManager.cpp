@@ -4,24 +4,31 @@
 using namespace std;
 
 using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 InputManager* InputManager::g_inputManager = NULL;
 
-InputManager::InputManager(shared_ptr<Keyboard> keyboard) :
-    m_keyboard(keyboard)
+InputManager::InputManager(shared_ptr<Keyboard> keyboard,
+                           shared_ptr<Mouse>    mouse) :
+    m_keyboard(keyboard),
+    m_mouse(mouse)
 {
 }
 
 InputManager::~InputManager()
 {
+    m_mouse.reset();
+    m_keyboard.reset();
 }
 
-void InputManager::CreateInstance(shared_ptr<Keyboard> keyboard)
+void InputManager::CreateInstance(shared_ptr<Keyboard> keyboard, 
+                                  shared_ptr<Mouse>    mouse)
 {
     if (g_inputManager)
         Reset();
 
-    g_inputManager = new InputManager(keyboard);
+    g_inputManager = new InputManager(keyboard, 
+                                      mouse);
 }
 
 void InputManager::Reset()
@@ -37,6 +44,7 @@ bool InputManager::GetKey(InputManager::GameKey key)
 {
     Keyboard::State keyboardState = m_keyboard->GetState();
     bool result = false;
+
     switch (key)
     {
     case InputManager::GameKey::Up:
@@ -54,4 +62,12 @@ bool InputManager::GetKey(InputManager::GameKey key)
     }
 
     return result;
+}
+
+Vector2 InputManager::GetMousePosition()
+{
+    Mouse::State mouseState = m_mouse->GetState();
+    
+    return Vector2(mouseState.x, 
+                   mouseState.y);
 }

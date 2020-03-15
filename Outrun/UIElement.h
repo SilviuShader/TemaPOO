@@ -8,7 +8,7 @@ public:
     ~UIElement();
 
            void AddChild(std::shared_ptr<UIElement>);
-           void Update();
+           void Update(std::shared_ptr<UICamera>);
            void Render(std::shared_ptr<UICamera>);
 
     inline void SetActive(bool val)                                                { m_active = val;                        }
@@ -17,7 +17,7 @@ public:
 
 protected:
 
-    virtual void                 ElementUpdate()                        { }
+    virtual void                 ElementUpdate(std::shared_ptr<UICamera>) { }
     virtual void                 ElementRender(std::shared_ptr<UICamera>) { }
     DirectX::SimpleMath::Vector2 GetAbsolutePosition();
 
