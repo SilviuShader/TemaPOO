@@ -57,11 +57,22 @@ void Game::Update(DX::StepTimer const& timer)
 {
     float elapsedTime = float(timer.GetElapsedSeconds());
 
-    auto kb = m_keyboard->GetState();
-    if (kb.Escape)
-        ExitGame();
-
-    auto mouse = m_mouse->GetState();
+    InputManager::GetInstance()->Update();
+    if (InputManager::GetInstance()->GetKey(InputManager::GameKey::Esc))
+    {
+        switch (m_gameState)
+        {
+        case Game::GameState::Playing:
+            m_gameState = Game::GameState::Pause;
+            break;
+        case Game::GameState::End:
+            ExitGame();
+            break;
+        case Game::GameState::Pause:
+            m_gameState = Game::GameState::Playing;
+            break;
+        }
+    }
 
     switch (m_gameState)
     {
@@ -228,8 +239,8 @@ void Game::OnWindowSizeChanged(int width,
 // Properties
 void Game::GetDefaultSize(int& width, int& height) const
 {
-    width  = 900;
-    height = 900;
+    width  = 640;
+    height = 480;
 }
 
 // These are the resources that depend on the device.
@@ -479,6 +490,8 @@ void Game::CreateGameResources()
 
 void Game::CreateUI()
 {
+    const float MARGIN = 10.0f;
+
     m_uiCamera = make_shared<UICamera>(m_d3dDevice, 
                                        m_d3dContext, 
                                        shared_from_this(), 
@@ -492,13 +505,50 @@ void Game::CreateUI()
                                              Vector2(GAME_WIDTH, 
                                                      GAME_HEIGHT));
 
-    shared_ptr<UIButton> endReplayButton = make_shared<UIButton>(Vector2::Zero, 
-                                                                 Vector2(m_carTexture->GetWidth(),
-                                                                         m_carTexture->GetHeight()),
-                                                                 m_carTexture, 
-                                                                 m_carTexture);
+    shared_ptr<Texture2D> replayTexture        = m_contentManager->Load<Texture2D>("UI/Replay.png");
+    shared_ptr<Texture2D> replayPressedTexture = m_contentManager->Load<Texture2D>("UI/ReplayPressed.png");
+
+    shared_ptr<Texture2D> quitTexture          = m_contentManager->Load<Texture2D>("UI/Quit.png");
+    shared_ptr<Texture2D> quitPressedTexture   = m_contentManager->Load<Texture2D>("UI/QuitPressed.png");
+
+    shared_ptr<Texture2D> scoreBarTexture      = m_contentManager->Load<Texture2D>("UI/ScoreBar.png");
+
+    shared_ptr<GameFont> vcr32FontBlack        = m_contentManager->Load<GameFont>("Fonts/VCR32.spritefont");
+    // make the vcr32FontBlack the color black.
+    vcr32FontBlack->SetColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+
+    shared_ptr<UIButton> endReplayButton = make_shared<UIButton>(Vector2((-replayTexture->GetWidth() / 2.0f) - MARGIN, 
+                                                                         replayTexture->GetHeight() + 3.0f * MARGIN), 
+                                                                 Vector2(replayTexture->GetWidth(),
+                                                                         replayTexture->GetHeight()),
+                                                                 replayTexture,
+                                                                 replayPressedTexture,
+                                                                 bind(&Game::OnReplayButtonReleased, this));
 
     m_uiLayers[(int)Game::GameState::End]->AddChild(endReplayButton);
+
+    shared_ptr<UIButton> endQuitButton = make_shared<UIButton>(Vector2((quitTexture->GetWidth() / 2.0f) + MARGIN,
+                                                                       quitTexture->GetHeight() + 3.0f * MARGIN),
+                                                               Vector2(quitTexture->GetWidth(),
+                                                               quitTexture->GetHeight()),
+                                                               quitTexture,
+                                                               quitPressedTexture,
+                                                               ExitGame);
+
+    m_uiLayers[(int)Game::GameState::End]->AddChild(endQuitButton);
+
+    shared_ptr<UIImage> endHighScoreImage = make_shared<UIImage>(scoreBarTexture,
+                                                                 Vector2(0.0f,
+                                                                         (-GAME_HEIGHT / 2.0f) + (scoreBarTexture->GetHeight() / 2.0f)),
+                                                                 Vector2(scoreBarTexture->GetWidth(), 
+                                                                         scoreBarTexture->GetHeight()));
+
+    m_uiLayers[(int)Game::GameState::End]->AddChild(endHighScoreImage);
+    shared_ptr<UIText> endBestScoreText = make_shared<UIText>(vcr32FontBlack,
+                                                              Vector2(0.0f,
+                                                                      -MARGIN / 4.0f));
+    endBestScoreText->SetText("BEST SCORE");
+    endHighScoreImage->AddChild(dynamic_pointer_cast<UIElement>(endBestScoreText));
 }
 
 void Game::ReleaseGameResources()
@@ -527,4 +577,11 @@ void Game::ReleaseGameResources()
     m_carTexture.reset();
     m_pseudo3DCamera.reset();
     m_contentManager.reset();
+}
+
+void Game::OnReplayButtonReleased()
+{
+    ReleaseGameResources();
+    CreateGameResources();
+    m_gameState = Game::GameState::Playing;
 }

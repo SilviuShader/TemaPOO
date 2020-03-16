@@ -22,19 +22,19 @@ Player::~Player()
 
 void Player::Update(float deltaTime)
 {
-    InputManager*              inputManager = InputManager::GetInstance();
+    shared_ptr<InputManager>   inputManager = InputManager::GetInstance();
     shared_ptr<Game>           game         = m_parent->GetGame();
     shared_ptr<Pseudo3DCamera> camera       = game->GetPseudo3DCamera();
-    std::shared_ptr<Transform> transform    = m_parent->GetTransform();
+    shared_ptr<Transform>      transform    = m_parent->GetTransform();
 
     transform->SetPositionZ(camera->GetZ(camera->GetHeight() - 1));
 
-    if (inputManager->GetKey(InputManager::GameKey::Up))
+    if (inputManager->GetKeyDown(InputManager::GameKey::Up))
         m_speed += SPEED_ACCELERATION_MULTIP * deltaTime;
     else
         m_speed -= SPEED_ACCELERATION_MULTIP * deltaTime;
 
-    if (inputManager->GetKey(InputManager::GameKey::Down))
+    if (inputManager->GetKeyDown(InputManager::GameKey::Down))
         m_speed -= BRAKE_MULTIP * deltaTime;
 
     if (m_speed >= MAX_SPEED)
@@ -45,12 +45,12 @@ void Player::Update(float deltaTime)
 
     bool steering = false;
       
-    if (inputManager->GetKey(InputManager::GameKey::Left))
+    if (inputManager->GetKeyDown(InputManager::GameKey::Left))
     {
         m_steerSpeed -= deltaTime * STEER_ACCELERATION_MULTIP;
         steering = true;
     }
-    if (inputManager->GetKey(InputManager::GameKey::Right))
+    if (inputManager->GetKeyDown(InputManager::GameKey::Right))
     {
         m_steerSpeed += deltaTime * STEER_ACCELERATION_MULTIP;
         steering = true;

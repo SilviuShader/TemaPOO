@@ -71,12 +71,13 @@ protected:
 	int                                         m_screenWidth;
 	int                                         m_screenHeight;
 
+	std::shared_ptr<CameraBeginFunction>        m_customBeginFunction;
+	std::unique_ptr<DirectX::SpriteBatch>       m_spriteBatch;
+
 private:
 
 	bool                                   m_rendering2D;
 	std::unique_ptr<DirectX::CommonStates> m_states;
-	std::shared_ptr<CameraBeginFunction>   m_customBeginFunction;
-
+	
 	std::unique_ptr<RenderTexture>         m_renderTexture;
-	std::unique_ptr<DirectX::SpriteBatch>  m_spriteBatch;
 };

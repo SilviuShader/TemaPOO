@@ -8,7 +8,6 @@ public:
              DirectX::SimpleMath::Vector2,
              std::shared_ptr<Texture2D>,
              std::shared_ptr<Texture2D>   = nullptr,
-             std::function<void _cdecl()> = nullptr,
              std::function<void _cdecl()> = nullptr);
 
     ~UIButton();
@@ -22,6 +21,7 @@ private:
 
     std::shared_ptr<Texture2D>   m_activeTexture;
     std::shared_ptr<Texture2D>   m_pressedTexture;
-    std::function<void _cdecl()> m_onPressedFunction;
     std::function<void _cdecl()> m_onReleasedFunction;
+    bool                         m_selected;
+    bool                         m_pressed;
 };

@@ -8,6 +8,12 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{27f94a3b-74bf-4d17-a758-c01acb91b018}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources\UI">
+      <UniqueIdentifier>{3c355154-6269-4bc3-9a3e-c7173d3684bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Fonts">
+      <UniqueIdentifier>{f9db18db-84d9-4fab-841c-2d3937366226}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -35,6 +41,9 @@
     <ClInclude Include="UILayer.h" />
     <ClInclude Include="UICamera.h" />
     <ClInclude Include="UIButton.h" />
+    <ClInclude Include="UIText.h" />
+    <ClInclude Include="UIImage.h" />
+    <ClInclude Include="GameFont.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -61,6 +70,9 @@
     <ClCompile Include="UILayer.cpp" />
     <ClCompile Include="UICamera.cpp" />
     <ClCompile Include="UIButton.cpp" />
+    <ClCompile Include="UIText.cpp" />
+    <ClCompile Include="UIImage.cpp" />
+    <ClCompile Include="GameFont.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -90,6 +102,21 @@
     <Image Include="Resources\Tower.png">
       <Filter>Resources</Filter>
     </Image>
+    <Image Include="Resources\UI\Replay.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
+    <Image Include="Resources\UI\ReplayPressed.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
+    <Image Include="Resources\UI\Quit.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
+    <Image Include="Resources\UI\QuitPressed.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
+    <Image Include="Resources\UI\ScoreBar.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest">
@@ -98,5 +125,10 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TerrainPixelShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Fonts\VCR32.spritefont">
+      <Filter>Resources\Fonts</Filter>
+    </None>
   </ItemGroup>
 </Project>

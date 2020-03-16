@@ -14,6 +14,10 @@ public:
     
     ~UICamera();
 
+    void DrawString(std::shared_ptr<GameFont>,
+                    std::string,
+                    DirectX::SimpleMath::Vector2);
+
     DirectX::SimpleMath::Vector2 GetCameraPosition(DirectX::SimpleMath::Vector2);
     DirectX::SimpleMath::Vector2 GetWorldPosition(DirectX::SimpleMath::Vector2);
 };

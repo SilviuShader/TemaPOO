@@ -22,8 +22,8 @@ private:
 
 private:
 
-    const int   GAME_WIDTH             = 300;
-    const int   GAME_HEIGHT            = 300;
+    const int   GAME_WIDTH             = 320;
+    const int   GAME_HEIGHT            = 240;
 
     // 3D Space properties
     const float CAMERA_DEPTH           = 15.0f;
@@ -32,7 +32,9 @@ private:
     const int   SEGMENT_LENGTH         = 1;
 
     const float OBJECT_DISAPPEAR_DEPTH = 0.5f;
-    const float ROAD_HEIGHT            = -0.5f;
+    // no matter how cool it looks when this value is -0.5
+    // the car is too big in that case.
+    const float ROAD_HEIGHT            = -1.0f;
 
 public:
 
@@ -87,6 +89,9 @@ private:
     void CreateGameResources();
     void CreateUI();
     void ReleaseGameResources();
+
+    // callbacks
+    void OnReplayButtonReleased();
 
 private:
 

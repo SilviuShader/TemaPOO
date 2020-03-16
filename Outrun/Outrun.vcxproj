@@ -163,6 +163,7 @@
     <ClInclude Include="ContentManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameComponent.h" />
+    <ClInclude Include="GameFont.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Killer.h" />
@@ -181,7 +182,9 @@
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UICamera.h" />
     <ClInclude Include="UIElement.h" />
+    <ClInclude Include="UIImage.h" />
     <ClInclude Include="UILayer.h" />
+    <ClInclude Include="UIText.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
@@ -190,6 +193,7 @@
     <ClCompile Include="ContentManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameComponent.cpp" />
+    <ClCompile Include="GameFont.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Killer.cpp" />
@@ -212,7 +216,9 @@
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UICamera.cpp" />
     <ClCompile Include="UIElement.cpp" />
+    <ClCompile Include="UIImage.cpp" />
     <ClCompile Include="UILayer.cpp" />
+    <ClCompile Include="UIText.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +235,11 @@
     </Image>
     <Image Include="Resources\Palm.png" />
     <Image Include="Resources\Tower.png" />
+    <Image Include="Resources\UI\Quit.png" />
+    <Image Include="Resources\UI\QuitPressed.png" />
+    <Image Include="Resources\UI\Replay.png" />
+    <Image Include="Resources\UI\ReplayPressed.png" />
+    <Image Include="Resources\UI\ScoreBar.png" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest" />
@@ -246,6 +257,9 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <DeploymentContent>true</DeploymentContent>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Fonts\VCR32.spritefont" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

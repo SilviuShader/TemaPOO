@@ -14,7 +14,17 @@ public:
         Up,
         Left,
         Down,
-        Right
+        Right,
+        Esc,
+        Last
+    };
+
+    enum class MouseButton
+    {
+        Left,
+        Middle,
+        Right,
+        Last
     };
 
 public:
@@ -23,24 +33,40 @@ public:
                  std::shared_ptr<DirectX::Mouse>);
     ~InputManager();
 
-           static void          CreateInstance(std::shared_ptr<DirectX::Keyboard>, 
-                                               std::shared_ptr<DirectX::Mouse>);
-           static void          Reset();
-    inline static InputManager* GetInstance() { return g_inputManager; }
+           static void                          CreateInstance(std::shared_ptr<DirectX::Keyboard>,
+                                                               std::shared_ptr<DirectX::Mouse>);
+           static void                          Reset();
+    inline static std::shared_ptr<InputManager> GetInstance() { return g_inputManager; }
 
 public:
 
-    // I will explicitly name the enum
-    // for "extra" safety... like in C#
-    bool                         GetKey(InputManager::GameKey);
-    DirectX::SimpleMath::Vector2 GetMousePosition();
+           void                         Update();
+
+           bool                         GetKeyDown(InputManager::GameKey);
+           bool                         GetMouseButtonDown(InputManager::MouseButton);
+           
+    inline bool                         GetKey(InputManager::GameKey key)                        const { return m_getKeys               [(int)key   ];               }
+    inline bool                         GetMouseButton(InputManager::MouseButton button)         const { return m_getMouseButtons       [(int)button];               }
+    inline bool                         GetMouseButtonReleased(InputManager::MouseButton button) const { return m_getMouseButtonsRelease[(int)button];               }
+    inline bool                         MouseMoved()                                             const { return m_mouseMoved;                                        }
+    inline DirectX::SimpleMath::Vector2 GetMousePosition()                                       const { return DirectX::SimpleMath::Vector2(m_mouse->GetState().x, 
+                                                                                                                                             m_mouse->GetState().y); }
 
 private:
 
-    static InputManager* g_inputManager;
+    static std::shared_ptr<InputManager> g_inputManager;
 
 private:
 
     std::shared_ptr<DirectX::Keyboard> m_keyboard;
     std::shared_ptr<DirectX::Mouse>    m_mouse;
+
+    bool                               m_keyboardStates        [(int)InputManager::GameKey    ::Last];
+    bool                               m_getKeys               [(int)InputManager::GameKey    ::Last];
+
+    bool                               m_mouseStates           [(int)InputManager::MouseButton::Last];
+    bool                               m_getMouseButtons       [(int)InputManager::MouseButton::Last];
+    bool                               m_getMouseButtonsRelease[(int)InputManager::MouseButton::Last];
+    DirectX::SimpleMath::Vector2       m_lastMousePosition;
+    bool                               m_mouseMoved;
 };

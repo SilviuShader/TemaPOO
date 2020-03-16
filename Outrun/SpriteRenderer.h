@@ -4,7 +4,7 @@ class SpriteRenderer : public GameComponent
 {
 private:
 
-    const float BASE_TEXTURES_RESOLUTION = 300;
+    const float BASE_TEXTURES_RESOLUTION = 240;
 
 public:
     

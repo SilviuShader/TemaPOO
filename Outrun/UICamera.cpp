@@ -3,6 +3,7 @@
 using namespace std;
 using namespace Microsoft::WRL;
 
+using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
 UICamera::UICamera(ComPtr<ID3D11Device>        d3dDevice, 
@@ -24,6 +25,43 @@ UICamera::UICamera(ComPtr<ID3D11Device>        d3dDevice,
 
 UICamera::~UICamera()
 {
+}
+
+void UICamera::DrawString(shared_ptr<GameFont> font, 
+                          string               message, 
+                          Vector2              position)
+{
+    if (font == nullptr)
+        return;
+
+
+    Vector2 zoom              = Vector2::One;
+    Vector2 centerPosition    = Vector2::Zero;
+    Vector2 messageSize       = font->GetSpriteFont()->MeasureString(message.c_str());
+    
+    Vector2 centerTranslation = Vector2(messageSize.x / 2.0f,
+                                        messageSize.y / 2.0f);
+
+    Vector2 calculatedPosition = (Vector2((int)position.x, (int)position.y) * zoom) -
+                                 (centerTranslation * zoom);
+
+    calculatedPosition        -= Vector2(((float)centerPosition.x * zoom.x) - (m_width / 2.0f),
+                                         ((float)centerPosition.y * zoom.y) - (m_height / 2.0f));
+
+    calculatedPosition         = Vector2((int)calculatedPosition.x,
+                                         (int)calculatedPosition.y);
+
+    Begin2D(m_customBeginFunction);
+
+    font->GetSpriteFont()->DrawString(m_spriteBatch.get(), 
+                                      message.c_str(), 
+                                      calculatedPosition, 
+                                      font->GetColor(), 
+                                      0.0f, 
+                                      Vector2::Zero, 
+                                      zoom, 
+                                      SpriteEffects_None, 
+                                      1.0f);
 }
 
 Vector2 UICamera::GetCameraPosition(Vector2 screenPosition)
