@@ -81,6 +81,8 @@ void RenderTexture::Initialize(ComPtr<ID3D11Device> device,
 	textureDesc.CPUAccessFlags   = 0;
 	textureDesc.MiscFlags        = 0;
 
+	m_textureDesc = textureDesc;
+
 	result = device->CreateTexture2D(&textureDesc, 
 		                             NULL, 
 		                             m_renderTargetTexture.ReleaseAndGetAddressOf());

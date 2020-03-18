@@ -44,6 +44,8 @@
     <ClInclude Include="UIText.h" />
     <ClInclude Include="UIImage.h" />
     <ClInclude Include="GameFont.h" />
+    <ClInclude Include="FileManager.h" />
+    <ClInclude Include="BloomCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -73,6 +75,8 @@
     <ClCompile Include="UIText.cpp" />
     <ClCompile Include="UIImage.cpp" />
     <ClCompile Include="GameFont.cpp" />
+    <ClCompile Include="FileManager.cpp" />
+    <ClCompile Include="BloomCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -117,6 +121,24 @@
     <Image Include="Resources\UI\ScoreBar.png">
       <Filter>Resources\UI</Filter>
     </Image>
+    <Image Include="Resources\UI\Resume.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
+    <Image Include="Resources\UI\ResumePressed.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
+    <Image Include="Resources\UI\Speedometer.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
+    <Image Include="Resources\UI\SpeedPointer.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
+    <Image Include="Resources\UI\Pause.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
+    <Image Include="Resources\UI\PausePressed.png">
+      <Filter>Resources\UI</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest">
@@ -125,10 +147,20 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TerrainPixelShader.hlsl" />
+    <FxCompile Include="BloomCombine.hlsl" />
+    <FxCompile Include="BloomExtract.hlsl" />
+    <FxCompile Include="GaussianBlur.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Fonts\VCR32.spritefont">
       <Filter>Resources\Fonts</Filter>
     </None>
+    <None Include="Resources\Fonts\VCR16.spritefont">
+      <Filter>Resources\Fonts</Filter>
+    </None>
+    <None Include="Resources\Fonts\VCR17.spritefont">
+      <Filter>Resources\Fonts</Filter>
+    </None>
+    <None Include="Bloom.hlsli" />
   </ItemGroup>
 </Project>

@@ -41,8 +41,8 @@ void CollisionManager::Update(list<shared_ptr<GameObject> >& gameObjects)
                         float width      = (float)rect.right      * gameObject->GetTransform()->GetScale() * sprRend->GetSpriteScaleFactor();
                         float otherWidth = (float)otherRect.right * other->GetTransform()->GetScale()      * othRend->GetSpriteScaleFactor();
 
-                        width      /= camera->GetWidth();
-                        otherWidth /= camera->GetWidth();
+                        width      /= (camera->GetWidth() / 2.0f);
+                        otherWidth /= (camera->GetWidth() / 2.0f);
 
                         float x      = gameObject->GetTransform()->GetPositionX();
                         float otherX = other->GetTransform()->GetPositionX();

@@ -88,6 +88,9 @@ private:
     void RemoveDeadObjects();
     void CreateGameResources();
     void CreateUI();
+    void CreateScoreUI(std::shared_ptr<UILayer>, 
+                       float);
+    void UpdateBestScoreLabels();
     void ReleaseGameResources();
 
     // callbacks
@@ -121,6 +124,7 @@ private:
 
     std::shared_ptr<ContentManager>                  m_contentManager;
     std::shared_ptr<Pseudo3DCamera>                  m_pseudo3DCamera;
+    std::shared_ptr<BloomCamera>                     m_bloomCamera;
     std::list<std::shared_ptr<GameObject> >          m_gameObjects;
     std::unique_ptr<CollisionManager>                m_collisionManager;
 
@@ -132,4 +136,8 @@ private:
     // UI
     std::shared_ptr<UICamera>                        m_uiCamera;
     std::shared_ptr<UILayer>                         m_uiLayers[(int)Game::GameState::Last];
+    std::shared_ptr<UIImage>                         m_speedPointerImage;
+    std::shared_ptr<UIText>                          m_distanceText;
+    std::vector<std::shared_ptr<UIText> >            m_scoreLabels;
+    std::vector<std::shared_ptr<UIText> >            m_bestScoreLabels;
 };

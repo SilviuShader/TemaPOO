@@ -71,10 +71,12 @@
 
 #include "Utils.h"
 #include "InputManager.h"
+#include "FileManager.h"
 #include "RenderTexture.h"
 #include "Texture2D.h"
 #include "ContentManager.h"
 #include "Camera.h"
+#include "BloomCamera.h"
 #include "GameFont.h"
 #include "UICamera.h"
 #include "UIElement.h"

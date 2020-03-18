@@ -34,11 +34,11 @@ public:
 
 	~Camera();
 
-	void        Present(std::shared_ptr<DirectX::SpriteBatch>);
-	void        OnScreenResize(int, 
+	       void Present(std::shared_ptr<DirectX::SpriteBatch>);
+	       void OnScreenResize(int, 
                                int);
 
-	void        DrawSprite(std::shared_ptr<Texture2D>,
+ 	       void DrawSprite(std::shared_ptr<Texture2D>,
 		                   DirectX::SimpleMath::Vector2,
 		                   const RECT*,
 		                   float,
@@ -53,8 +53,10 @@ public:
 	       void Begin2D(std::shared_ptr<CameraBeginFunction> = nullptr);
 	       void End2D();
 
-	inline int  GetWidth()  { return m_width;  }
-	inline int  GetHeight() { return m_height; }
+	inline int                        GetWidth()   const { return m_width;                                                             }
+	inline int                        GetHeight()  const { return m_height;                                                            }
+	inline std::shared_ptr<Texture2D> GetTexture() const { return std::make_shared<Texture2D>(m_renderTexture->GetShaderResourceView(), 
+		                                                                                      (CD3D11_TEXTURE2D_DESC)m_renderTexture->GetTextureDesc());      }
 
 protected:
 
@@ -63,6 +65,7 @@ protected:
 protected:
 
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_d3dContext;
+	std::unique_ptr<DirectX::CommonStates>      m_states;
 	std::shared_ptr<Game>                       m_game;
 
 	int                                         m_width;
@@ -77,7 +80,6 @@ protected:
 private:
 
 	bool                                   m_rendering2D;
-	std::unique_ptr<DirectX::CommonStates> m_states;
 	
 	std::unique_ptr<RenderTexture>         m_renderTexture;
 };

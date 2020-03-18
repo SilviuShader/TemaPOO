@@ -7,7 +7,8 @@ using namespace DirectX::SimpleMath;
 UIImage::UIImage(shared_ptr<Texture2D> texture, 
                  Vector2               position,
                  Vector2               size) :
-    m_texture(texture)
+    m_texture(texture),
+    m_rotation(0.0f)
 {
     SetRelativePosition(position);
     SetSize(size);
@@ -25,7 +26,7 @@ void UIImage::ElementRender(shared_ptr<UICamera> uiCamera)
     uiCamera->DrawSprite(m_texture,
                          absolutePosition,
                          nullptr,
-                         0.0f,
+                         m_rotation,
                          Vector2(m_size.x / (float)m_texture->GetWidth(),
                                  m_size.y / (float)m_texture->GetHeight()));
 }

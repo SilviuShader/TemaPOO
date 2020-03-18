@@ -79,7 +79,7 @@ void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game,
 
     if (m_accumulatedZone >= ACCUMULATE_TO_CHANGE_ZONE)
     {
-        m_zone = ObjectsGenerator::Zone::Beach;
+        m_zone = ObjectsGenerator::Zone::City;
         m_accumulatedZone -= ACCUMULATE_TO_CHANGE_ZONE;
     }
 
@@ -107,7 +107,9 @@ void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game,
             shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject);
             gameObject->AddComponent(objTranslator);
 
-            gameObject->GetTransform()->SetPositionX((rand() % 2 ? 1.0f : -1.0f) * (game->GetRoadWidth() / 2.0f + 0.75f + Utils::RandomFloat() * MAX_OBJECT_DISPLACEMENT));
+            float displacement = Utils::RandomFloat() * MAX_OBJECT_DISPLACEMENT;
+
+            gameObject->GetTransform()->SetPositionX((rand() % 2 ? 1.0f : -1.0f) * (game->GetRoadWidth() / 2.0f + 2.0f + displacement));
 
             shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject,
                 m_textures[textureIndex]);

@@ -5,7 +5,7 @@ class Player : public GameComponent
 private:
 
     const float MAX_SPEED                   = 5.0f;
-    const float MAX_STEER_SPEED             = 1.0f;
+    const float MAX_STEER_SPEED             = 1.25f;
     const float STEER_ACCELERATION_MULTIP   = 5.0f;
     const float STEER_ACCELERATION_DECREASE = 2.5f;
     const float SPEED_ACCELERATION_MULTIP   = 1.0f;
@@ -22,7 +22,9 @@ public:
            void OnCollisionUpdate(std::shared_ptr<GameObject>) override;
 
     inline float GetPositionX()                                const    { return m_positionX; }
+    inline float GetMaxSpeed()                                 const    { return MAX_SPEED;   }
     inline float GetSpeed()                                    const    { return m_speed;     }
+    inline float GetDistance()                                 const    { return m_distance;  }
 
 private:
 
@@ -30,4 +32,5 @@ private:
     float                           m_positionX;
     float                           m_speed;
     float                           m_steerSpeed;
+    float                           m_distance;
 };

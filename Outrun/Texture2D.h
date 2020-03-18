@@ -12,6 +12,9 @@ public:
 		      int, 
 		      float*);
 
+	Texture2D(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>,
+		      CD3D11_TEXTURE2D_DESC);
+
 	~Texture2D();
 
 	inline ID3D11ShaderResourceView* GetShaderResourceView() { return m_shaderResourceView.Get(); }

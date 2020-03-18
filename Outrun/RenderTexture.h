@@ -23,6 +23,7 @@ public:
 	inline Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShaderResourceView() const { return m_shaderResourceView; }
 	inline int                                              GetTextureWidth()       const { return m_textureWidth;       }
 	inline int                                              GetTextureHeight()      const { return m_textureHeight;      }
+	inline D3D11_TEXTURE2D_DESC                             GetTextureDesc()        const { return m_textureDesc;        }
 
 private:
 
@@ -43,4 +44,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>   m_depthStencilView;
 
 	D3D11_VIEWPORT                                   m_viewport;
+	D3D11_TEXTURE2D_DESC                             m_textureDesc;
 };

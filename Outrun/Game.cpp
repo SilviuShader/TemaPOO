@@ -85,17 +85,30 @@ void Game::Update(DX::StepTimer const& timer)
         m_collisionManager->Update(m_gameObjects);
         RemoveDeadObjects();
 
+        m_speedPointerImage->SetRotation(Utils::Lerp(m_player->GetSpeed() / m_player->GetMaxSpeed(), 
+                                                     -1.75f, 
+                                                     1.1f));
+
+        m_distanceText->SetText(to_string((int)m_player->GetDistance()));
+        for (int i = 0; i < m_scoreLabels.size(); i++)
+            m_scoreLabels[i]->SetText(to_string((int)m_player->GetDistance()));
+
         // Wait wasn't the player removed from the list at this point?
         // Well, no, it's a smart pointer, the player is still there, event though it was removed from the list
         // This isn't a leak of any sort because it is completely removed in the ReleaseGameResources method.
         // also, the player is still needed for this step... same applies for terrain.
         if (m_player->GetParent()->Dead())
+        {
+            int bestScore = FileManager::GetInstance()->ReadScore();
+            bestScore = max(bestScore, (int)m_player->GetDistance());
+            FileManager::GetInstance()->WriteScore(bestScore);
+
             m_gameState = Game::GameState::End;
 
+            UpdateBestScoreLabels();
+        }
         break;
     case Game::GameState::End:
-
-
 
         break;
     }
@@ -130,15 +143,19 @@ void Game::Render()
     m_pseudo3DCamera->End(1, 
                           m_renderTargetView,
                           m_depthStencilView);
-
+    
     m_uiCamera->Begin(Vector4::Zero);
 
     for (int i = 0; i < (int)Game::GameState::Last; i++)
         m_uiLayers[i]->Render(m_uiCamera);
-    
+
     m_uiCamera->End(1,
                     m_renderTargetView,
                     m_depthStencilView);
+
+    m_bloomCamera->Bloom(m_pseudo3DCamera->GetTexture(), 
+                         m_renderTargetView, 
+                         m_depthStencilView);
 
     Clear();
 
@@ -147,7 +164,7 @@ void Game::Render()
                          m_states->PointClamp());
 
 
-    m_pseudo3DCamera->Present(m_spriteBatch);
+    m_bloomCamera->Present(m_spriteBatch);
     m_uiCamera->Present(m_spriteBatch);
 
     m_spriteBatch->End();
@@ -230,6 +247,10 @@ void Game::OnWindowSizeChanged(int width,
     if (m_pseudo3DCamera != nullptr)
         m_pseudo3DCamera->OnScreenResize(m_outputWidth, 
                                          m_outputHeight);
+
+    if (m_bloomCamera != nullptr)
+        m_bloomCamera->OnScreenResize(m_outputWidth,
+                                      m_outputHeight);
 
     if (m_uiCamera != nullptr)
         m_uiCamera->OnScreenResize(m_outputWidth, 
@@ -458,6 +479,14 @@ void Game::CreateGameResources()
                                                                             m_outputHeight,
                                                                             CAMERA_DEPTH);
 
+    m_bloomCamera                             = make_shared<BloomCamera>(m_d3dDevice,
+                                                                         m_d3dContext,
+                                                                         shared_from_this(),
+                                                                         GAME_WIDTH,
+                                                                         GAME_HEIGHT,
+                                                                         m_outputWidth,
+                                                                         m_outputHeight);
+
     m_gameObjects                             = list<shared_ptr<GameObject> >();
 
     m_collisionManager                        = make_unique<CollisionManager>();
@@ -492,6 +521,9 @@ void Game::CreateUI()
 {
     const float MARGIN = 10.0f;
 
+    m_scoreLabels.clear();
+    m_bestScoreLabels.clear();
+
     m_uiCamera = make_shared<UICamera>(m_d3dDevice, 
                                        m_d3dContext, 
                                        shared_from_this(), 
@@ -511,14 +543,22 @@ void Game::CreateUI()
     shared_ptr<Texture2D> quitTexture          = m_contentManager->Load<Texture2D>("UI/Quit.png");
     shared_ptr<Texture2D> quitPressedTexture   = m_contentManager->Load<Texture2D>("UI/QuitPressed.png");
 
-    shared_ptr<Texture2D> scoreBarTexture      = m_contentManager->Load<Texture2D>("UI/ScoreBar.png");
+    shared_ptr<Texture2D> resumeTexture        = m_contentManager->Load<Texture2D>("UI/Resume.png");
+    shared_ptr<Texture2D> resumePressedTexture = m_contentManager->Load<Texture2D>("UI/ResumePressed.png");
 
-    shared_ptr<GameFont> vcr32FontBlack        = m_contentManager->Load<GameFont>("Fonts/VCR32.spritefont");
-    // make the vcr32FontBlack the color black.
-    vcr32FontBlack->SetColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+    shared_ptr<Texture2D> speedometerTexture   = m_contentManager->Load<Texture2D>("UI/Speedometer.png");
+    shared_ptr<Texture2D> speedPointerTexture  = m_contentManager->Load<Texture2D>("UI/SpeedPointer.png");
+
+    shared_ptr<Texture2D> pauseTexture         = m_contentManager->Load<Texture2D>("UI/Pause.png");
+    shared_ptr<Texture2D> pausePressedTexture  = m_contentManager->Load<Texture2D>("UI/PausePressed.png");
+
+    shared_ptr<GameFont> vcr17FontRed          = m_contentManager->Load<GameFont>("Fonts/VCR17.spritefont");
+    vcr17FontRed->SetColor(Vector4(1, 0, 0.447, 1.0f));
+
+    // create the ending screen
 
     shared_ptr<UIButton> endReplayButton = make_shared<UIButton>(Vector2((-replayTexture->GetWidth() / 2.0f) - MARGIN, 
-                                                                         replayTexture->GetHeight() + 3.0f * MARGIN), 
+                                                                         replayTexture->GetHeight() + 2.0f * MARGIN), 
                                                                  Vector2(replayTexture->GetWidth(),
                                                                          replayTexture->GetHeight()),
                                                                  replayTexture,
@@ -528,7 +568,7 @@ void Game::CreateUI()
     m_uiLayers[(int)Game::GameState::End]->AddChild(endReplayButton);
 
     shared_ptr<UIButton> endQuitButton = make_shared<UIButton>(Vector2((quitTexture->GetWidth() / 2.0f) + MARGIN,
-                                                                       quitTexture->GetHeight() + 3.0f * MARGIN),
+                                                                       quitTexture->GetHeight() + 2.0f * MARGIN),
                                                                Vector2(quitTexture->GetWidth(),
                                                                quitTexture->GetHeight()),
                                                                quitTexture,
@@ -537,18 +577,154 @@ void Game::CreateUI()
 
     m_uiLayers[(int)Game::GameState::End]->AddChild(endQuitButton);
 
-    shared_ptr<UIImage> endHighScoreImage = make_shared<UIImage>(scoreBarTexture,
-                                                                 Vector2(0.0f,
-                                                                         (-GAME_HEIGHT / 2.0f) + (scoreBarTexture->GetHeight() / 2.0f)),
-                                                                 Vector2(scoreBarTexture->GetWidth(), 
-                                                                         scoreBarTexture->GetHeight()));
+    CreateScoreUI(m_uiLayers[(int)Game::GameState::End], 
+                  MARGIN);
 
-    m_uiLayers[(int)Game::GameState::End]->AddChild(endHighScoreImage);
+    // create the pause screen
+    shared_ptr<UIButton> pauseReplayButton = make_shared<UIButton>(Vector2((-replayTexture->GetWidth()) - MARGIN,
+                                                                           replayTexture->GetHeight() + 2.0f * MARGIN),
+                                                                   Vector2(replayTexture->GetWidth(),
+                                                                           replayTexture->GetHeight()),
+                                                                   replayTexture,
+                                                                   replayPressedTexture,
+                                                                   bind(&Game::OnReplayButtonReleased, 
+                                                                        this));
+
+    m_uiLayers[(int)Game::GameState::Pause]->AddChild(pauseReplayButton);
+
+    shared_ptr<UIButton> pauseResumeButton = make_shared<UIButton>(Vector2(0.0f,
+                                                                           replayTexture->GetHeight() + 2.0f * MARGIN),
+                                                                   Vector2(resumeTexture->GetWidth(),
+                                                                           resumeTexture->GetHeight()),
+                                                                   resumeTexture,
+                                                                   resumePressedTexture, 
+                                                                   [&]() 
+        {
+            m_gameState = GameState::Playing;
+        });
+
+    m_uiLayers[(int)Game::GameState::Pause]->AddChild(pauseResumeButton);
+
+    shared_ptr<UIButton> pauseQuitButton = make_shared<UIButton>(Vector2((quitTexture->GetWidth()) + MARGIN,
+                                                                         quitTexture->GetHeight() + 2.0f * MARGIN),
+                                                                 Vector2(quitTexture->GetWidth(),
+                                                                         quitTexture->GetHeight()),
+                                                                 quitTexture,
+                                                                 quitPressedTexture,
+                                                                 ExitGame);
+
+    m_uiLayers[(int)Game::GameState::Pause]->AddChild(pauseQuitButton);
+
+    CreateScoreUI(m_uiLayers[(int)Game::GameState::Pause],
+                  MARGIN);
+
+    // create the game screen
+
+    shared_ptr<UIImage> speedometerImage = make_shared<UIImage>(speedometerTexture, 
+                                                                Vector2(GAME_WIDTH / 2.0f - speedometerTexture->GetWidth() / 2.0f,
+                                                                        GAME_HEIGHT / 2.0f - speedometerTexture->GetHeight() / 2.0f + MARGIN),
+                                                                Vector2(speedometerTexture->GetWidth(),
+                                                                        speedometerTexture->GetHeight()));
+
+    m_uiLayers[(int)Game::GameState::Playing]->AddChild(speedometerImage);
+
+    shared_ptr<UIImage> speedPointerImage = make_shared<UIImage>(speedPointerTexture,
+                                                                 Vector2(GAME_WIDTH / 2.0f - speedPointerTexture->GetWidth() / 2.0f,
+                                                                         GAME_HEIGHT / 2.0f - speedPointerTexture->GetHeight() / 2.0f + MARGIN),
+                                                                 Vector2(speedPointerTexture->GetWidth(),
+                                                                         speedPointerTexture->GetHeight()));
+
+    m_uiLayers[(int)Game::GameState::Playing]->AddChild(speedPointerImage);
+    m_speedPointerImage = speedPointerImage;
+
+    shared_ptr<UIButton> pauseButton = make_shared<UIButton>(Vector2((-GAME_WIDTH / 2.0f) + MARGIN + (pauseTexture->GetWidth() / 2.0f),
+                                                                     (-GAME_HEIGHT / 2.0f) + MARGIN + (pauseTexture->GetHeight() / 2.0f)),
+                                                             Vector2(pauseTexture->GetWidth(),
+                                                                     pauseTexture->GetHeight()),
+                                                             pauseTexture,
+                                                             pausePressedTexture,
+                                                             [&]() 
+        {
+            m_gameState = Game::GameState::Pause;
+        });
+
+    m_uiLayers[(int)Game::GameState::Playing]->AddChild(pauseButton);
+
+    m_distanceText = make_shared<UIText>(vcr17FontRed,
+                                         Vector2(0.0f, -GAME_HEIGHT / 2.0f + 2.0f * MARGIN));
+    m_distanceText->SetText("0");
+
+    m_uiLayers[(int)Game::GameState::Playing]->AddChild(m_distanceText);
+}
+
+void Game::CreateScoreUI(shared_ptr<UILayer> layer, 
+                         float               MARGIN)
+{
+    float currentUIHeight = 0.0f;
+    shared_ptr<Texture2D> scoreBarTexture = m_contentManager->Load<Texture2D>("UI/ScoreBar.png");
+
+    shared_ptr<GameFont> vcr32FontBlack = m_contentManager->Load<GameFont>("Fonts/VCR32.spritefont");
+    // make the vcr32FontBlack the color black.
+    vcr32FontBlack->SetColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+    shared_ptr<GameFont> vcr32FontRed = m_contentManager->Load<GameFont>("Fonts/VCR32.spritefont");
+    vcr32FontRed->SetColor(Vector4(1, 0, 0.447, 1.0f));
+
+    shared_ptr<UIImage> endHighScoreImage = make_shared<UIImage>(scoreBarTexture,
+        Vector2(0.0f,
+        (-GAME_HEIGHT / 2.0f) + currentUIHeight + (scoreBarTexture->GetHeight() / 2.0f)),
+        Vector2(scoreBarTexture->GetWidth(),
+            scoreBarTexture->GetHeight()));
+
+    layer->AddChild(endHighScoreImage);
     shared_ptr<UIText> endBestScoreText = make_shared<UIText>(vcr32FontBlack,
-                                                              Vector2(0.0f,
-                                                                      -MARGIN / 4.0f));
+        Vector2(0.0f,
+            -MARGIN / 4.0f));
     endBestScoreText->SetText("BEST SCORE");
     endHighScoreImage->AddChild(dynamic_pointer_cast<UIElement>(endBestScoreText));
+
+    currentUIHeight += scoreBarTexture->GetHeight();
+
+    shared_ptr<UIText> endBestScore = make_shared<UIText>(vcr32FontRed,
+        Vector2(0.0f,
+        (-GAME_HEIGHT / 2.0f) + currentUIHeight + (scoreBarTexture->GetHeight() / 2.0f)));
+    endBestScore->SetText("0");
+    layer->AddChild(endBestScore);
+
+    currentUIHeight += scoreBarTexture->GetHeight();
+
+    shared_ptr<UIImage> endScoreImage = make_shared<UIImage>(scoreBarTexture,
+        Vector2(0.0f,
+        (-GAME_HEIGHT / 2.0f) + currentUIHeight + (scoreBarTexture->GetHeight() / 2.0f)),
+        Vector2(scoreBarTexture->GetWidth(),
+            scoreBarTexture->GetHeight()));
+
+    layer->AddChild(endScoreImage);
+
+    shared_ptr<UIText> endScoreText = make_shared<UIText>(vcr32FontBlack,
+        Vector2(0.0f,
+            0.0f));
+    endScoreText->SetText("SCORE");
+    endScoreImage->AddChild(dynamic_pointer_cast<UIElement>(endScoreText));
+
+    currentUIHeight += scoreBarTexture->GetHeight();
+
+    shared_ptr<UIText> endScore = make_shared<UIText>(vcr32FontRed,
+        Vector2(0.0f,
+        (-GAME_HEIGHT / 2.0f) + currentUIHeight + (scoreBarTexture->GetHeight() / 2.0f)));
+    endScore->SetText("0");
+
+    m_scoreLabels.push_back(endScore);
+    m_bestScoreLabels.push_back(endBestScore);
+    UpdateBestScoreLabels();
+
+    layer->AddChild(endScore);
+}
+
+void Game::UpdateBestScoreLabels()
+{
+    int bestScore = FileManager::GetInstance()->ReadScore();
+    for (int i = 0; i < m_bestScoreLabels.size(); i++)
+        m_bestScoreLabels[i]->SetText(to_string(bestScore));
 }
 
 void Game::ReleaseGameResources()
@@ -575,6 +751,7 @@ void Game::ReleaseGameResources()
     m_gameObjects.clear();
 
     m_carTexture.reset();
+    m_bloomCamera.reset();
     m_pseudo3DCamera.reset();
     m_contentManager.reset();
 }

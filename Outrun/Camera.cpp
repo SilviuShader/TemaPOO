@@ -104,7 +104,7 @@ void Camera::DrawSprite(shared_ptr<Texture2D> sprite,
 
 	Vector2 centerTranslation = Vector2(sourceRectangle->right  / 2.0f,
 		                                sourceRectangle->bottom / 2.0f);
-
+	centerTranslation = Vector2::Zero;
 	centerTranslation *= textureScale;
 
 	Vector2 calculatedPosition = (Vector2((int)position.x, (int)position.y) * zoom) -
@@ -136,10 +136,11 @@ void Camera::DrawSprite(shared_ptr<Texture2D> sprite,
 			                sourceRectangle, 
 			                Colors::White, 
 			                rotation, 
-			                Vector2::Zero, 
+			                Vector2((int)(sourceRectangle->right / 2.0f) + (sourceRectangle->right == 1 ? 0.5f : 0.0f), 
+			                        (int)(sourceRectangle->bottom / 2.0f)), 
 			                calculatedScale, 
 			                SpriteEffects::SpriteEffects_None,
-			                Utils::Clamp((calculatedPosition.y + (centerTranslation.y * 2.0f)) / (m_height * 2.0f), 
+			                Utils::Clamp((calculatedPosition.y + (sourceRectangle->bottom * calculatedScale.y / 2.0f) ) / (m_height * 2.0f), 
 								         0.0f, 
 								         1.0f));
 }

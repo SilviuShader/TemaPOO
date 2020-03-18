@@ -10,9 +10,14 @@ public:
 
     ~UIImage();
 
+    inline void SetRotation(float rotation) { m_rotation = rotation; }
+
+protected:
+
     void ElementRender(std::shared_ptr<UICamera>) override;
 
 private:
 
     std::shared_ptr<Texture2D> m_texture;
+    float                      m_rotation;
 };

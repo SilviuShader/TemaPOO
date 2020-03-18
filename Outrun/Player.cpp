@@ -10,7 +10,8 @@ Player::Player(shared_ptr<GameObject> parent) :
     m_spriteRenderer(nullptr),
     m_positionX(0.0f),
     m_speed(0.0f),
-    m_steerSpeed(0.0f)
+    m_steerSpeed(0.0f),
+    m_distance(0.0f)
 
 {
 }
@@ -71,7 +72,10 @@ void Player::Update(float deltaTime)
 
     m_positionX += m_steerSpeed * deltaTime * (m_speed / MAX_SPEED);
 
-    m_parent->GetGame()->GetTerrain()->SetPlayerSpeed(m_speed);
+    game->GetTerrain()->SetPlayerSpeed(m_speed);
+
+    if (abs(-game->GetTerrain()->GetAccumulatedTranslation() + m_positionX) <= game->GetRoadWidth())
+        m_distance += m_speed * deltaTime;
 
     transform->SetPositionX(m_positionX - game->GetTerrain()->GetAccumulatedTranslation());
 
