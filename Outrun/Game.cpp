@@ -63,13 +63,13 @@ void Game::Update(DX::StepTimer const& timer)
         switch (m_gameState)
         {
         case Game::GameState::Playing:
-            m_gameState = Game::GameState::Pause;
+            ChangeGameState(Game::GameState::Pause);
             break;
         case Game::GameState::End:
             ExitGame();
             break;
         case Game::GameState::Pause:
-            m_gameState = Game::GameState::Playing;
+            ChangeGameState(Game::GameState::Playing);
             break;
         }
     }
@@ -103,7 +103,7 @@ void Game::Update(DX::StepTimer const& timer)
             bestScore = max(bestScore, (int)m_player->GetDistance());
             FileManager::GetInstance()->WriteScore(bestScore);
 
-            m_gameState = Game::GameState::End;
+            ChangeGameState(Game::GameState::End);
 
             UpdateBestScoreLabels();
         }
@@ -129,9 +129,9 @@ void Game::Render()
 {
     // Don't try to render anything before the first Update.
     if (m_timer.GetFrameCount() == 0)
-    {
         return;
-    }
+
+    ID3D11ShaderResourceView* const null[] = { nullptr, nullptr };
 
     Vector4 clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
     
@@ -153,25 +153,58 @@ void Game::Render()
                     m_renderTargetView,
                     m_depthStencilView);
 
+    BloomCamera::BloomPresets currentBloomPreset = m_bloomCamera->GetBloomPreset();
+
+    m_bloomCamera->SetBloomPreset(BloomCamera::BloomPresets::Blurry);
     m_bloomCamera->Bloom(m_pseudo3DCamera->GetTexture(), 
                          m_renderTargetView, 
                          m_depthStencilView);
 
+    m_bloomCamera->SetBloomPreset(currentBloomPreset);
+
+    m_d3dContext->PSSetShaderResources(0, 2, null);
+
     Clear();
+
+    m_spriteBatch->Begin(SpriteSortMode_Deferred,
+        nullptr,
+        m_states->PointClamp());
+
+    float gameAspectRatio = (float)GAME_WIDTH / (float)GAME_HEIGHT;
+    float windowAspectRatio = (float)m_outputWidth / (float)m_outputHeight;
+    float scale = 1.0f;
+    if (gameAspectRatio > windowAspectRatio)
+        scale = (float)m_outputHeight / (float)GAME_HEIGHT;
+    else
+        scale = (float)m_outputWidth / (float)GAME_WIDTH;
+
+    m_spriteBatch->Draw(m_bloomCamera->GetTexture()->GetShaderResourceView().Get(), 
+                        Vector2::Zero, 
+                        nullptr, 
+                        Vector4::One, 
+                        0.0f, 
+                        Vector2::Zero, 
+                        Vector2::One * scale, 
+                        SpriteEffects_None, 
+                        0.0f);
+
+    m_spriteBatch->End();
+
+    m_bloomCamera->Bloom(m_pseudo3DCamera->GetTexture(),
+                         m_renderTargetView,
+                         m_depthStencilView);
+
+    SetRenderTarget();
 
     m_spriteBatch->Begin(SpriteSortMode_Deferred, 
                          nullptr, 
                          m_states->PointClamp());
-
 
     m_bloomCamera->Present(m_spriteBatch);
     m_uiCamera->Present(m_spriteBatch);
 
     m_spriteBatch->End();
     
-    // Now that we finish rendering the texture,
-    // we must let the computer render to it again
-    ID3D11ShaderResourceView* const null[] = { nullptr, nullptr };
     m_d3dContext->PSSetShaderResources(0, 2, null);
 
     Present();
@@ -184,9 +217,12 @@ void Game::Clear()
     m_d3dContext->ClearRenderTargetView(m_renderTargetView.Get(), Colors::Black);
     m_d3dContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    m_d3dContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
+    SetRenderTarget();
+}
 
-    // Set the viewport.
+void Game::SetRenderTarget()
+{
+    m_d3dContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
     CD3D11_VIEWPORT viewport(0.0f, 0.0f, static_cast<float>(m_outputWidth), static_cast<float>(m_outputHeight));
     m_d3dContext->RSSetViewports(1, &viewport);
 }
@@ -452,6 +488,19 @@ void Game::OnDeviceLost()
     CreateResources();
 }
 
+void Game::ChangeGameState(Game::GameState gameState)
+{
+    m_gameState = gameState;
+
+    if (m_bloomCamera != nullptr)
+    {
+        if (m_gameState == Game::GameState::Playing)
+            m_bloomCamera->SetBloomPreset(BloomCamera::BloomPresets::Default);
+        else
+            m_bloomCamera->SetBloomPreset(BloomCamera::BloomPresets::Blurry);
+    }
+}
+
 void Game::RemoveDeadObjects()
 {
     m_gameObjects.remove_if([](const shared_ptr<GameObject>& gameObj)
@@ -600,7 +649,7 @@ void Game::CreateUI()
                                                                    resumePressedTexture, 
                                                                    [&]() 
         {
-            m_gameState = GameState::Playing;
+            ChangeGameState(GameState::Playing);
         });
 
     m_uiLayers[(int)Game::GameState::Pause]->AddChild(pauseResumeButton);
@@ -645,7 +694,7 @@ void Game::CreateUI()
                                                              pausePressedTexture,
                                                              [&]() 
         {
-            m_gameState = Game::GameState::Pause;
+            ChangeGameState(Game::GameState::Pause);
         });
 
     m_uiLayers[(int)Game::GameState::Playing]->AddChild(pauseButton);
@@ -760,5 +809,5 @@ void Game::OnReplayButtonReleased()
 {
     ReleaseGameResources();
     CreateGameResources();
-    m_gameState = Game::GameState::Playing;
+    ChangeGameState(Game::GameState::Playing);
 }

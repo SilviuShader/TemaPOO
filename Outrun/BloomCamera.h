@@ -1,7 +1,73 @@
 #pragma once
 
+// Implements the post-processing effect: Bloom
+// most of the code is from: https://github.com/microsoft/DirectXTK/wiki/Writing-custom-shaders
+// with slight adjustmens.
+// The shaders used by this class are copied from that tutorial too.
+
 class BloomCamera : public Camera
 {
+public:
+
+    enum class BloomPresets
+    {
+        Default = 0,
+        Soft,
+        Desaturated,
+        Saturated,
+        Blurry,
+        Subtle,
+        None
+    };
+
+private:
+
+    class VS_BLOOM_PARAMETERS
+    {
+    public:
+
+        VS_BLOOM_PARAMETERS(float, 
+                            float, 
+                            float, 
+                            float, 
+                            float, 
+                            float);
+
+        inline float GetBlurAmount() const { return m_blurAmount; }
+
+    private:
+
+        float   m_bloomThreshold;
+        float   m_blurAmount;
+        float   m_bloomIntensity;
+        float   m_baseIntensity;
+        float   m_bloomSaturation;
+        float   m_baseSaturation;
+        uint8_t m_na[8];
+    };
+
+    struct VS_BLUR_PARAMETERS
+    {
+    private:
+
+        static const size_t SAMPLE_COUNT = 15;
+
+    public:
+
+        void SetBlurEffectParameters(float, 
+                                     float,
+                                     const BloomCamera::VS_BLOOM_PARAMETERS&);
+
+    private:
+
+        float ComputeGaussian(float, 
+                              float);
+    private:
+
+        DirectX::XMFLOAT4 m_sampleOffsets[SAMPLE_COUNT];
+        DirectX::XMFLOAT4 m_sampleWeights[SAMPLE_COUNT];
+    };
+
 private:
 
     const int BLOOM_BEGIN_PIPELINE_ID = 2;
@@ -18,9 +84,21 @@ public:
 
     ~BloomCamera();
 
-    void Bloom(std::shared_ptr<Texture2D>,
-               Microsoft::WRL::ComPtr<ID3D11RenderTargetView>,
-               Microsoft::WRL::ComPtr<ID3D11DepthStencilView>);
+           void                      SetBloomPreset(BloomCamera::BloomPresets);
+
+           void                      Bloom(std::shared_ptr<Texture2D>,
+                                           Microsoft::WRL::ComPtr<ID3D11RenderTargetView>,
+                                           Microsoft::WRL::ComPtr<ID3D11DepthStencilView>);
+
+    inline BloomCamera::BloomPresets GetBloomPreset() const { return m_bloomPreset; }
+
+private:
+
+    void SetBloomParameters();
+
+private:
+
+    static const BloomCamera::VS_BLOOM_PARAMETERS g_bloomPresets[];
 
 private:
 
@@ -35,4 +113,6 @@ private:
     std::shared_ptr<RenderTexture>            m_renderTexture1;
     std::shared_ptr<RenderTexture>            m_renderTexture2;
     RECT                                      m_bloomRect;
+
+    BloomCamera::BloomPresets                 m_bloomPreset;
 };

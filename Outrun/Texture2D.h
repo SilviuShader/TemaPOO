@@ -17,10 +17,10 @@ public:
 
 	~Texture2D();
 
-	inline ID3D11ShaderResourceView* GetShaderResourceView() { return m_shaderResourceView.Get(); }
+	inline Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShaderResourceView() const { return m_shaderResourceView; }
 
-	inline int                       GetWidth()              { return m_textureDesc.Width;        }
-	inline int                       GetHeight()             { return m_textureDesc.Height;       }
+	inline int                                              GetWidth()              const { return m_textureDesc.Width;  }
+	inline int                                              GetHeight()             const { return m_textureDesc.Height; }
 
 private:
 

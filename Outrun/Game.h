@@ -78,12 +78,15 @@ private:
     void Render();
 
     void Clear();
+    void SetRenderTarget();
     void Present();
 
     void CreateDevice();
     void CreateResources();
 
     void OnDeviceLost();
+
+    void ChangeGameState(Game::GameState);
 
     void RemoveDeadObjects();
     void CreateGameResources();

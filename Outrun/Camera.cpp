@@ -131,7 +131,7 @@ void Camera::DrawSprite(shared_ptr<Texture2D> sprite,
 		calculatedPosition.y                                                 >= offsettedScreenRect.top   &&
 		calculatedPosition.y + (sourceRectangle->bottom * calculatedScale.y) <= offsettedScreenRect.bottom)
 
-		m_spriteBatch->Draw(sprite->GetShaderResourceView(), 
+		m_spriteBatch->Draw(sprite->GetShaderResourceView().Get(), 
 			                calculatedPosition,
 			                sourceRectangle, 
 			                Colors::White, 
