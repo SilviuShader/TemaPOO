@@ -237,6 +237,8 @@
     <Image Include="Resources\Cat.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="Resources\MotorBack.png" />
+    <Image Include="Resources\Mountains.png" />
     <Image Include="Resources\Palm.png" />
     <Image Include="Resources\Tower.png" />
     <Image Include="Resources\UI\Pause.png" />

@@ -60,9 +60,8 @@ Texture2D::Texture2D(ComPtr<ID3D11Device> d3dDevice,
     ComPtr<ID3D11Texture2D>          resource;
     ComPtr<ID3D11ShaderResourceView> shaderResourceView;
 
-    ThrowIfFailed(d3dDevice->CreateTexture2D(&desc, &data, resource.GetAddressOf()));
-    
-    ThrowIfFailed(d3dDevice->CreateShaderResourceView(resource.Get(), &resourceDesc, shaderResourceView.GetAddressOf()));
+    ThrowIfFailed(d3dDevice->CreateTexture2D(&desc, &data, resource.GetAddressOf()), typeid(*this).name());
+    ThrowIfFailed(d3dDevice->CreateShaderResourceView(resource.Get(), &resourceDesc, shaderResourceView.GetAddressOf()), typeid(*this).name());
 
     m_shaderResourceView = shaderResourceView;
     m_textureDesc        = desc;

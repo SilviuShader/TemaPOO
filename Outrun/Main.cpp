@@ -261,6 +261,7 @@ LRESULT CALLBACK WndProc(HWND   hWnd,
         break;
 
     case WM_DESTROY:
+        FileManager::GetInstance()->WriteLog();
         PostQuitMessage(0);
         break;
 
@@ -365,5 +366,6 @@ LRESULT CALLBACK WndProc(HWND   hWnd,
 // Exit helper
 void ExitGame()
 {
+    FileManager::GetInstance()->WriteLog();
     PostQuitMessage(0);
 }

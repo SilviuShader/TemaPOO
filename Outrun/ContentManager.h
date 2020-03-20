@@ -24,6 +24,8 @@ inline std::shared_ptr<T> ContentManager::Load(std::string filename)
     std::shared_ptr<T> result = NULL;
     std::string fullPath = m_path + filename;
 
+    FileManager::GetInstance()->PushToLog("Loading: \"" + fullPath + "\"");
+
     if (typeid(T).hash_code() == typeid(Texture2D).hash_code() || 
         typeid(T).hash_code() == typeid(GameFont).hash_code())
         result = std::make_shared<T>(m_d3dDevice, fullPath);

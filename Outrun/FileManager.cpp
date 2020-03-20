@@ -4,7 +4,8 @@ using namespace std;
 
 shared_ptr<FileManager> FileManager::g_fileManager = nullptr;
 
-FileManager::FileManager()
+FileManager::FileManager() :
+    m_gameLog("")
 {
 }
 
@@ -38,8 +39,22 @@ int FileManager::ReadScore()
 void FileManager::WriteScore(int score)
 {
     ofstream fout("data.poo", ios::binary);
-
     fout.write((const char*)&score, sizeof(int));
-
     fout.close();
+}
+
+void FileManager::WriteLog()
+{
+    ofstream fout("log.txt");
+    fout << m_gameLog;
+    fout.close();
+}
+
+void FileManager::PushToLog(string str)
+{
+    time_t t = time(nullptr);
+    char dateStr[100] = { NULL };
+
+    if (strftime(dateStr, sizeof(dateStr), "[%Y-%b-%d %H:%M:%S] ", localtime(&t)))
+        m_gameLog = m_gameLog.append(string(dateStr) + str + "\n");
 }

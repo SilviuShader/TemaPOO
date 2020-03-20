@@ -6,6 +6,8 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
+using namespace DX;
+
 const BloomCamera::VS_BLOOM_PARAMETERS BloomCamera::g_bloomPresets[] =
 {
     //Thresh  Blur Bloom  Base  BloomSat BaseSat
@@ -102,18 +104,20 @@ BloomCamera::BloomCamera(ComPtr<ID3D11Device>        d3dDevice,
     static_assert(!(sizeof(BloomCamera::VS_BLUR_PARAMETERS) % 16),
         "VS_BLUR_PARAMETERS needs to be 16 bytes aligned");
 
+    FileManager::GetInstance()->PushToLog("Creating BloomCamera");
+
     m_bloomPreset = BloomCamera::BloomPresets::Default;
 
-    auto blob = DX::ReadData(L"BloomExtract.cso");
-    DX::ThrowIfFailed(d3dDevice->CreatePixelShader(blob.data(), blob.size(),
+    auto blob = ReadData(L"BloomExtract.cso");
+    ThrowIfFailed(d3dDevice->CreatePixelShader(blob.data(), blob.size(),
         nullptr, m_bloomExtractPS.ReleaseAndGetAddressOf()));
 
-    blob = DX::ReadData(L"BloomCombine.cso");
-    DX::ThrowIfFailed(d3dDevice->CreatePixelShader(blob.data(), blob.size(),
+    blob = ReadData(L"BloomCombine.cso");
+    ThrowIfFailed(d3dDevice->CreatePixelShader(blob.data(), blob.size(),
         nullptr, m_bloomCombinePS.ReleaseAndGetAddressOf()));
 
-    blob = DX::ReadData(L"GaussianBlur.cso");
-    DX::ThrowIfFailed(d3dDevice->CreatePixelShader(blob.data(), blob.size(),
+    blob = ReadData(L"GaussianBlur.cso");
+    ThrowIfFailed(d3dDevice->CreatePixelShader(blob.data(), blob.size(),
         nullptr, m_gaussianBlurPS.ReleaseAndGetAddressOf()));
 
     {
@@ -122,16 +126,16 @@ BloomCamera::BloomCamera(ComPtr<ID3D11Device>        d3dDevice,
         D3D11_SUBRESOURCE_DATA initData;
         initData.pSysMem = &g_bloomPresets[(int)m_bloomPreset];
         initData.SysMemPitch = sizeof(VS_BLOOM_PARAMETERS);
-        DX::ThrowIfFailed(d3dDevice->CreateBuffer(&cbDesc, &initData,
+        ThrowIfFailed(d3dDevice->CreateBuffer(&cbDesc, &initData,
             m_bloomParams.ReleaseAndGetAddressOf()));
     }
 
     {
         CD3D11_BUFFER_DESC cbDesc(sizeof(VS_BLUR_PARAMETERS),
             D3D11_BIND_CONSTANT_BUFFER);
-        DX::ThrowIfFailed(d3dDevice->CreateBuffer(&cbDesc, nullptr,
+        ThrowIfFailed(d3dDevice->CreateBuffer(&cbDesc, nullptr,
             m_blurParamsWidth.ReleaseAndGetAddressOf()));
-        DX::ThrowIfFailed(d3dDevice->CreateBuffer(&cbDesc, nullptr,
+        ThrowIfFailed(d3dDevice->CreateBuffer(&cbDesc, nullptr,
             m_blurParamsHeight.ReleaseAndGetAddressOf()));
     }
 

@@ -9,8 +9,11 @@ ObjectsGenerator::ObjectsGenerator(shared_ptr<ContentManager> contentManager) :
     m_borderAccumulatedDistance(0.0f),
     m_accumulatedDistance(0.0f),
     m_accumulatedZone(0.0f),
-    m_accumulatedCarChance(0.0f)
+    m_accumulatedCarChance(0.0f),
+    m_accumulatedMotorChance(0.0f)
 {
+    m_prevZone = m_zone;
+
     shared_ptr<Texture2D> border = contentManager->Load<Texture2D>("Border.png");
     m_textures["Border"] = border;
 
@@ -20,11 +23,17 @@ ObjectsGenerator::ObjectsGenerator(shared_ptr<ContentManager> contentManager) :
     shared_ptr<Texture2D> tower = contentManager->Load<Texture2D>("Tower.png");
     m_textures["Tower"] = tower;
 
+    shared_ptr<Texture2D> mountains = contentManager->Load<Texture2D>("Mountains.png");
+    m_textures["Mountains"] = mountains;
+
     shared_ptr<Texture2D> car = contentManager->Load<Texture2D>("CarBack.png");
     m_textures["CarBack"] = car;
 
     car = contentManager->Load<Texture2D>("CarFront.png");
     m_textures["CarFront"] = car;
+
+    shared_ptr<Texture2D> motor = contentManager->Load<Texture2D>("MotorBack.png");
+    m_textures["MotorBack"] = motor;
 }
 
 ObjectsGenerator::~ObjectsGenerator()
@@ -40,6 +49,7 @@ void ObjectsGenerator::Update(shared_ptr<Game> game,
     BorderSpawnUpdate(game, deltaTime);
     ZoneSpawnUpdate(game, deltaTime);
     CarSpawnUpdate(game, deltaTime);
+    MotorSpawnUpdate(game, deltaTime);
 }
 
 void ObjectsGenerator::BorderSpawnUpdate(shared_ptr<Game> game, float deltaTime)
@@ -79,7 +89,11 @@ void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game,
 
     if (m_accumulatedZone >= ACCUMULATE_TO_CHANGE_ZONE)
     {
-        m_zone = ObjectsGenerator::Zone::City;
+        m_prevZone = m_zone;
+        m_zone = (ObjectsGenerator::Zone)(rand() % ((int)ObjectsGenerator::Zone::Last));
+        if (m_zone == m_prevZone)
+            m_zone = (ObjectsGenerator::Zone)(((int)m_zone + 1) % (int)ObjectsGenerator::Zone::Last);
+
         m_accumulatedZone -= ACCUMULATE_TO_CHANGE_ZONE;
     }
 
@@ -87,7 +101,12 @@ void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game,
     {
         string textureIndex = "";
 
-        switch (m_zone)
+        Zone crtZone = m_zone;
+        float prevChance = (m_accumulatedZone / ACCUMULATE_TO_CHANGE_ZONE);
+        if (Utils::RandomFloat() > prevChance)
+            crtZone = m_prevZone;
+
+        switch (crtZone)
         {
         case ObjectsGenerator::Zone::Beach:
             textureIndex = "Palm";
@@ -98,6 +117,7 @@ void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game,
             break;
 
         case ObjectsGenerator::Zone::Mountains:
+            textureIndex = "Mountains";
             break;
         }
 
@@ -109,7 +129,7 @@ void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game,
 
             float displacement = Utils::RandomFloat() * MAX_OBJECT_DISPLACEMENT;
 
-            gameObject->GetTransform()->SetPositionX((rand() % 2 ? 1.0f : -1.0f) * (game->GetRoadWidth() / 2.0f + 2.0f + displacement));
+            gameObject->GetTransform()->SetPositionX((rand() % 2 ? 1.0f : -1.0f) * (game->GetRoadWidth() / 2.0f + 3.0f + displacement));
 
             shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject,
                 m_textures[textureIndex]);
@@ -158,5 +178,37 @@ void ObjectsGenerator::CarSpawnUpdate(shared_ptr<Game> game,
         gameObjects.push_back(gameObject);
 
         m_accumulatedCarChance -= CAR_CHANCE;
+    }
+}
+
+void ObjectsGenerator::MotorSpawnUpdate(shared_ptr<Game> game, 
+                                        float            deltaTime)
+{
+    list<shared_ptr<GameObject> >& gameObjects = game->GetGameObjects();
+
+    m_accumulatedMotorChance += deltaTime * Utils::RandomFloat();
+    if (m_accumulatedMotorChance >= MOTOR_CHANCE)
+    {
+        shared_ptr<GameObject> gameObject = make_shared<GameObject>(game);
+
+        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject);
+        objTranslator->SetObjectSpeed(Utils::Lerp(Utils::RandomFloat(),
+                                                  MIN_CAR_SPEED,
+                                                  MAX_CAR_SPEED) * -1.0f);
+
+        gameObject->AddComponent(objTranslator);
+
+        gameObject->GetTransform()->SetPositionX(0.0f);
+
+        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject,
+            m_textures["MotorBack"]);
+        gameObject->AddComponent(spriteRenderer);
+
+        shared_ptr<Killer> killer = make_shared<Killer>(gameObject);
+        gameObject->AddComponent(killer);
+
+        gameObjects.push_back(gameObject);
+
+        m_accumulatedMotorChance -= MOTOR_CHANCE;
     }
 }

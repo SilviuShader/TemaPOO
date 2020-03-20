@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <system_error>
 
 #include <winsdkver.h>
 #define _WIN32_WINNT 0x0601
@@ -99,12 +100,14 @@
 
 namespace DX
 {
-    inline void ThrowIfFailed(HRESULT hr)
+    inline void ThrowIfFailed(HRESULT hr, std::string obj = "")
     {
         if (FAILED(hr))
         {
-            // Set a breakpoint on this line to catch DirectX API errors
-            throw std::exception();
+            std::string msg = "";
+            if (obj != "")
+                msg = obj + ": ";
+            throw std::exception((msg + std::string(std::system_category().message(hr).c_str())).c_str());
         }
     }
 }

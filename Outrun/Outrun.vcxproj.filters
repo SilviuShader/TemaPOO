@@ -139,6 +139,12 @@
     <Image Include="Resources\UI\PausePressed.png">
       <Filter>Resources\UI</Filter>
     </Image>
+    <Image Include="Resources\MotorBack.png">
+      <Filter>Resources</Filter>
+    </Image>
+    <Image Include="Resources\Mountains.png">
+      <Filter>Resources</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest">

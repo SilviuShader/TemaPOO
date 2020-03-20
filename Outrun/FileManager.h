@@ -9,10 +9,19 @@ public:
 
     static std::shared_ptr<FileManager> GetInstance();
 
-    int                                 ReadScore();
-    void                                WriteScore(int);
+public:
+
+    int  ReadScore();
+    void WriteScore(int);
+    void WriteLog();
+
+    void PushToLog(std::string);
 
 private:
 
     static std::shared_ptr<FileManager> g_fileManager;
+
+private:
+
+    std::string                         m_gameLog;
 };

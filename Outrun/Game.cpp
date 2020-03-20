@@ -57,70 +57,80 @@ void Game::Update(DX::StepTimer const& timer)
 {
     float elapsedTime = float(timer.GetElapsedSeconds());
 
-    InputManager::GetInstance()->Update();
-    if (InputManager::GetInstance()->GetKey(InputManager::GameKey::Esc))
+    try
     {
+
+        InputManager::GetInstance()->Update();
+        if (InputManager::GetInstance()->GetKey(InputManager::GameKey::Esc))
+        {
+            switch (m_gameState)
+            {
+            case Game::GameState::Playing:
+                ChangeGameState(Game::GameState::Pause);
+                break;
+            case Game::GameState::End:
+                ExitGame();
+                break;
+            case Game::GameState::Pause:
+                ChangeGameState(Game::GameState::Playing);
+                break;
+            }
+        }
+
         switch (m_gameState)
         {
         case Game::GameState::Playing:
-            ChangeGameState(Game::GameState::Pause);
+
+            for (shared_ptr<GameObject>& gameObj : m_gameObjects)
+                gameObj->Update(elapsedTime);
+            RemoveDeadObjects();
+
+            m_collisionManager->Update(m_gameObjects);
+            RemoveDeadObjects();
+
+            m_speedPointerImage->SetRotation(Utils::Lerp(m_player->GetSpeed() / m_player->GetMaxSpeed(),
+                -1.75f,
+                1.1f));
+
+            m_distanceText->SetText(to_string((int)m_player->GetDistance()));
+            for (int i = 0; i < m_scoreLabels.size(); i++)
+                m_scoreLabels[i]->SetText(to_string((int)m_player->GetDistance()));
+
+            // Wait wasn't the player removed from the list at this point?
+            // Well, no, it's a smart pointer, the player is still there, event though it was removed from the list
+            // This isn't a leak of any sort because it is completely removed in the ReleaseGameResources method.
+            // also, the player is still needed for this step... same applies for terrain.
+            if (m_player->GetParent()->Dead())
+            {
+                int bestScore = FileManager::GetInstance()->ReadScore();
+                bestScore = max(bestScore, (int)m_player->GetDistance());
+                FileManager::GetInstance()->WriteScore(bestScore);
+
+                ChangeGameState(Game::GameState::End);
+
+                UpdateBestScoreLabels();
+            }
             break;
         case Game::GameState::End:
-            ExitGame();
-            break;
-        case Game::GameState::Pause:
-            ChangeGameState(Game::GameState::Playing);
+
             break;
         }
-    }
+        // update UI
+        for (int i = 0; i < (int)Game::GameState::Last; i++)
+            if (i == (int)m_gameState)
+                m_uiLayers[i]->SetActive(true);
+            else
+                m_uiLayers[i]->SetActive(false);
 
-    switch (m_gameState)
+        for (int i = 0; i < (int)Game::GameState::Last; i++)
+            m_uiLayers[i]->Update(m_uiCamera);
+    }
+    catch (exception e)
     {
-    case Game::GameState::Playing:
-
-        for (shared_ptr<GameObject>& gameObj : m_gameObjects)
-            gameObj->Update(elapsedTime);
-        RemoveDeadObjects();
-
-        m_collisionManager->Update(m_gameObjects);
-        RemoveDeadObjects();
-
-        m_speedPointerImage->SetRotation(Utils::Lerp(m_player->GetSpeed() / m_player->GetMaxSpeed(), 
-                                                     -1.75f, 
-                                                     1.1f));
-
-        m_distanceText->SetText(to_string((int)m_player->GetDistance()));
-        for (int i = 0; i < m_scoreLabels.size(); i++)
-            m_scoreLabels[i]->SetText(to_string((int)m_player->GetDistance()));
-
-        // Wait wasn't the player removed from the list at this point?
-        // Well, no, it's a smart pointer, the player is still there, event though it was removed from the list
-        // This isn't a leak of any sort because it is completely removed in the ReleaseGameResources method.
-        // also, the player is still needed for this step... same applies for terrain.
-        if (m_player->GetParent()->Dead())
-        {
-            int bestScore = FileManager::GetInstance()->ReadScore();
-            bestScore = max(bestScore, (int)m_player->GetDistance());
-            FileManager::GetInstance()->WriteScore(bestScore);
-
-            ChangeGameState(Game::GameState::End);
-
-            UpdateBestScoreLabels();
-        }
-        break;
-    case Game::GameState::End:
-
-        break;
+        FileManager::GetInstance()->PushToLog("Error while updating frame: " + to_string(timer.GetFrameCount()));
+        FileManager::GetInstance()->PushToLog(e.what());
+        ExitGame();
     }
-    // update UI
-    for (int i = 0; i < (int)Game::GameState::Last; i++)
-        if (i == (int)m_gameState)
-            m_uiLayers[i]->SetActive(true);
-        else
-            m_uiLayers[i]->SetActive(false);
-
-    for (int i = 0; i < (int)Game::GameState::Last; i++)
-        m_uiLayers[i]->Update(m_uiCamera);
         
 }
 
@@ -131,83 +141,96 @@ void Game::Render()
     if (m_timer.GetFrameCount() == 0)
         return;
 
-    ID3D11ShaderResourceView* const null[] = { nullptr, nullptr };
+    try
+    {
+        ID3D11ShaderResourceView* const null[] = { nullptr, nullptr };
+        Vector4 clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-    Vector4 clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-    
-    m_pseudo3DCamera->Begin(clearColor);
+        m_pseudo3DCamera->Begin(clearColor);
 
-    for (shared_ptr<GameObject>& gameObj : m_gameObjects)
-        gameObj->Render();
+        for (shared_ptr<GameObject>& gameObj : m_gameObjects)
+            gameObj->Render();
 
-    m_pseudo3DCamera->End(1, 
-                          m_renderTargetView,
-                          m_depthStencilView);
-    
-    m_uiCamera->Begin(Vector4::Zero);
+        m_pseudo3DCamera->End(1,
+            m_renderTargetView,
+            m_depthStencilView);
 
-    for (int i = 0; i < (int)Game::GameState::Last; i++)
-        m_uiLayers[i]->Render(m_uiCamera);
+        m_uiCamera->Begin(Vector4::Zero);
 
-    m_uiCamera->End(1,
-                    m_renderTargetView,
-                    m_depthStencilView);
+        for (int i = 0; i < (int)Game::GameState::Last; i++)
+            m_uiLayers[i]->Render(m_uiCamera);
 
-    BloomCamera::BloomPresets currentBloomPreset = m_bloomCamera->GetBloomPreset();
+        m_uiCamera->End(1,
+            m_renderTargetView,
+            m_depthStencilView);
 
-    m_bloomCamera->SetBloomPreset(BloomCamera::BloomPresets::Blurry);
-    m_bloomCamera->Bloom(m_pseudo3DCamera->GetTexture(), 
-                         m_renderTargetView, 
-                         m_depthStencilView);
+        BloomCamera::BloomPresets currentBloomPreset = m_bloomCamera->GetBloomPreset();
 
-    m_bloomCamera->SetBloomPreset(currentBloomPreset);
+        m_bloomCamera->SetBloomPreset(BloomCamera::BloomPresets::Blurry);
+        m_bloomCamera->Bloom(m_pseudo3DCamera->GetTexture(),
+            m_renderTargetView,
+            m_depthStencilView);
 
-    m_d3dContext->PSSetShaderResources(0, 2, null);
+        m_bloomCamera->SetBloomPreset(currentBloomPreset);
 
-    Clear();
+        m_d3dContext->PSSetShaderResources(0, 2, null);
 
-    m_spriteBatch->Begin(SpriteSortMode_Deferred,
-        nullptr,
-        m_states->PointClamp());
+        Clear();
 
-    float gameAspectRatio = (float)GAME_WIDTH / (float)GAME_HEIGHT;
-    float windowAspectRatio = (float)m_outputWidth / (float)m_outputHeight;
-    float scale = 1.0f;
-    if (gameAspectRatio > windowAspectRatio)
-        scale = (float)m_outputHeight / (float)GAME_HEIGHT;
-    else
-        scale = (float)m_outputWidth / (float)GAME_WIDTH;
+        m_spriteBatch->Begin(SpriteSortMode_Deferred,
+            nullptr,
+            m_states->LinearClamp());
 
-    m_spriteBatch->Draw(m_bloomCamera->GetTexture()->GetShaderResourceView().Get(), 
-                        Vector2::Zero, 
-                        nullptr, 
-                        Vector4::One, 
-                        0.0f, 
-                        Vector2::Zero, 
-                        Vector2::One * scale, 
-                        SpriteEffects_None, 
-                        0.0f);
+        float gameAspectRatio = (float)GAME_WIDTH / (float)GAME_HEIGHT;
+        float windowAspectRatio = (float)m_outputWidth / (float)m_outputHeight;
+        float scale = 1.0f;
+        if (gameAspectRatio > windowAspectRatio)
+            scale = (float)m_outputHeight / (float)GAME_HEIGHT;
+        else
+            scale = (float)m_outputWidth / (float)GAME_WIDTH;
 
-    m_spriteBatch->End();
+        float blurredWidth = (float)GAME_WIDTH * scale;
+        float blurredHeight = (float)GAME_HEIGHT * scale;
 
-    m_bloomCamera->Bloom(m_pseudo3DCamera->GetTexture(),
-                         m_renderTargetView,
-                         m_depthStencilView);
+        m_spriteBatch->Draw(m_bloomCamera->GetTexture()->GetShaderResourceView().Get(),
+            Vector2(blurredWidth / 2.0f,
+                blurredHeight / 2.0f),
+            nullptr,
+            Vector4::One,
+            0.0f,
+            Vector2(GAME_WIDTH / 2.0f,
+                GAME_HEIGHT / 2.0f),
+            Vector2::One * scale,
+            SpriteEffects_None,
+            0.0f);
 
-    SetRenderTarget();
+        m_spriteBatch->End();
 
-    m_spriteBatch->Begin(SpriteSortMode_Deferred, 
-                         nullptr, 
-                         m_states->PointClamp());
+        m_bloomCamera->Bloom(m_pseudo3DCamera->GetTexture(),
+            m_renderTargetView,
+            m_depthStencilView);
 
-    m_bloomCamera->Present(m_spriteBatch);
-    m_uiCamera->Present(m_spriteBatch);
+        SetRenderTarget();
 
-    m_spriteBatch->End();
-    
-    m_d3dContext->PSSetShaderResources(0, 2, null);
+        m_spriteBatch->Begin(SpriteSortMode_Deferred,
+            nullptr,
+            m_states->PointClamp());
 
-    Present();
+        m_bloomCamera->Present(m_spriteBatch);
+        m_uiCamera->Present(m_spriteBatch);
+
+        m_spriteBatch->End();
+
+        m_d3dContext->PSSetShaderResources(0, 2, null);
+
+        Present();
+    }
+    catch(exception e)
+    {
+        FileManager::GetInstance()->PushToLog("Error while rendering frame: " + to_string(m_timer.GetFrameCount()));
+        FileManager::GetInstance()->PushToLog(e.what());
+        ExitGame();
+    }
 }
 
 // Helper method to clear the back buffers.
@@ -237,13 +260,9 @@ void Game::Present()
 
     // If the device was reset we must completely reinitialize the renderer.
     if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
-    {
         OnDeviceLost();
-    }
     else
-    {
         DX::ThrowIfFailed(hr);
-    }
 }
 
 // Message handlers
@@ -303,66 +322,75 @@ void Game::GetDefaultSize(int& width, int& height) const
 // These are the resources that depend on the device.
 void Game::CreateDevice()
 {
-    UINT creationFlags = 0;
+    FileManager::GetInstance()->PushToLog("Creating Device");
+    try
+    {
+        UINT creationFlags = 0;
 
 #ifdef _DEBUG
-    creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
+        creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-    static const D3D_FEATURE_LEVEL featureLevels [] =
-    {
-        // TODO: Modify for supported Direct3D feature levels
-        D3D_FEATURE_LEVEL_11_1,
-        D3D_FEATURE_LEVEL_11_0,
-        D3D_FEATURE_LEVEL_10_1,
-        D3D_FEATURE_LEVEL_10_0,
-        D3D_FEATURE_LEVEL_9_3,
-        D3D_FEATURE_LEVEL_9_2,
-        D3D_FEATURE_LEVEL_9_1,
-    };
+        static const D3D_FEATURE_LEVEL featureLevels[] =
+        {
+            // TODO: Modify for supported Direct3D feature levels
+            D3D_FEATURE_LEVEL_11_1,
+            D3D_FEATURE_LEVEL_11_0,
+            D3D_FEATURE_LEVEL_10_1,
+            D3D_FEATURE_LEVEL_10_0,
+            D3D_FEATURE_LEVEL_9_3,
+            D3D_FEATURE_LEVEL_9_2,
+            D3D_FEATURE_LEVEL_9_1,
+        };
 
-    // Create the DX11 API device object, and get a corresponding context.
-    ComPtr<ID3D11Device> device;
-    ComPtr<ID3D11DeviceContext> context;
-    DX::ThrowIfFailed(D3D11CreateDevice(
-        nullptr,                            // specify nullptr to use the default adapter
-        D3D_DRIVER_TYPE_HARDWARE,
-        nullptr,
-        creationFlags,
-        featureLevels,
-        _countof(featureLevels),
-        D3D11_SDK_VERSION,
-        device.ReleaseAndGetAddressOf(),    // returns the Direct3D device created
-        &m_featureLevel,                    // returns feature level of device created
-        context.ReleaseAndGetAddressOf()    // returns the device immediate context
-        ));
+        // Create the DX11 API device object, and get a corresponding context.
+        ComPtr<ID3D11Device> device;
+        ComPtr<ID3D11DeviceContext> context;
+        DX::ThrowIfFailed(D3D11CreateDevice(
+            nullptr,                            // specify nullptr to use the default adapter
+            D3D_DRIVER_TYPE_HARDWARE,
+            nullptr,
+            creationFlags,
+            featureLevels,
+            _countof(featureLevels),
+            D3D11_SDK_VERSION,
+            device.ReleaseAndGetAddressOf(),    // returns the Direct3D device created
+            &m_featureLevel,                    // returns feature level of device created
+            context.ReleaseAndGetAddressOf()    // returns the device immediate context
+            ));
 
 #ifndef NDEBUG
-    ComPtr<ID3D11Debug> d3dDebug;
-    if (SUCCEEDED(device.As(&d3dDebug)))
-    {
-        ComPtr<ID3D11InfoQueue> d3dInfoQueue;
-        if (SUCCEEDED(d3dDebug.As(&d3dInfoQueue)))
+        ComPtr<ID3D11Debug> d3dDebug;
+        if (SUCCEEDED(device.As(&d3dDebug)))
         {
-#ifdef _DEBUG
-            d3dInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
-            d3dInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
-#endif
-            D3D11_MESSAGE_ID hide [] =
+            ComPtr<ID3D11InfoQueue> d3dInfoQueue;
+            if (SUCCEEDED(d3dDebug.As(&d3dInfoQueue)))
             {
-                D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS,
-                // TODO: Add more message IDs here as needed.
-            };
-            D3D11_INFO_QUEUE_FILTER filter = {};
-            filter.DenyList.NumIDs = _countof(hide);
-            filter.DenyList.pIDList = hide;
-            d3dInfoQueue->AddStorageFilterEntries(&filter);
+#ifdef _DEBUG
+                d3dInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
+                d3dInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
+#endif
+                D3D11_MESSAGE_ID hide[] =
+                {
+                    D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS,
+                    // TODO: Add more message IDs here as needed.
+                };
+                D3D11_INFO_QUEUE_FILTER filter = {};
+                filter.DenyList.NumIDs = _countof(hide);
+                filter.DenyList.pIDList = hide;
+                d3dInfoQueue->AddStorageFilterEntries(&filter);
+            }
         }
-    }
 #endif
 
-    DX::ThrowIfFailed(device.As(&m_d3dDevice));
-    DX::ThrowIfFailed(context.As(&m_d3dContext));
+        DX::ThrowIfFailed(device.As(&m_d3dDevice));
+        DX::ThrowIfFailed(context.As(&m_d3dContext));
+    }
+    catch (exception e)
+    {
+        FileManager::GetInstance()->PushToLog(e.what());
+        ExitGame();
+    }
 
     InputManager::CreateInstance(m_keyboard, 
                                  m_mouse);
@@ -376,97 +404,102 @@ void Game::CreateDevice()
 // Allocate all memory resources that change on a window SizeChanged event.
 void Game::CreateResources()
 {
-    // Clear the previous window size specific context.
-    ID3D11RenderTargetView* nullViews [] = { nullptr };
-    m_d3dContext->OMSetRenderTargets(_countof(nullViews), nullViews, nullptr);
-    m_renderTargetView.Reset();
-    m_depthStencilView.Reset();
-    m_d3dContext->Flush();
-
-    UINT backBufferWidth = static_cast<UINT>(m_outputWidth);
-    UINT backBufferHeight = static_cast<UINT>(m_outputHeight);
-    DXGI_FORMAT backBufferFormat = DXGI_FORMAT_B8G8R8A8_UNORM;
-    DXGI_FORMAT depthBufferFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    UINT backBufferCount = 2;
-
-    // If the swap chain already exists, resize it, otherwise create one.
-    if (m_swapChain)
+    FileManager::GetInstance()->PushToLog("Creating window size dependent resources");
+    try
     {
-        HRESULT hr = m_swapChain->ResizeBuffers(backBufferCount, backBufferWidth, backBufferHeight, backBufferFormat, 0);
+        // Clear the previous window size specific context.
+        ID3D11RenderTargetView* nullViews[] = { nullptr };
+        m_d3dContext->OMSetRenderTargets(_countof(nullViews), nullViews, nullptr);
+        m_renderTargetView.Reset();
+        m_depthStencilView.Reset();
+        m_d3dContext->Flush();
 
-        if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+        UINT backBufferWidth = static_cast<UINT>(m_outputWidth);
+        UINT backBufferHeight = static_cast<UINT>(m_outputHeight);
+        DXGI_FORMAT backBufferFormat = DXGI_FORMAT_B8G8R8A8_UNORM;
+        DXGI_FORMAT depthBufferFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        UINT backBufferCount = 2;
+
+        // If the swap chain already exists, resize it, otherwise create one.
+        if (m_swapChain)
         {
-            // If the device was removed for any reason, a new device and swap chain will need to be created.
-            OnDeviceLost();
+            HRESULT hr = m_swapChain->ResizeBuffers(backBufferCount, backBufferWidth, backBufferHeight, backBufferFormat, 0);
 
-            // Everything is set up now. Do not continue execution of this method. OnDeviceLost will reenter this method 
-            // and correctly set up the new device.
-            return;
+            if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+            {
+                // If the device was removed for any reason, a new device and swap chain will need to be created.
+                OnDeviceLost();
+
+                // Everything is set up now. Do not continue execution of this method. OnDeviceLost will reenter this method 
+                // and correctly set up the new device.
+                return;
+            }
+            else
+                DX::ThrowIfFailed(hr);
         }
         else
         {
-            DX::ThrowIfFailed(hr);
+            // First, retrieve the underlying DXGI Device from the D3D Device.
+            ComPtr<IDXGIDevice1> dxgiDevice;
+            DX::ThrowIfFailed(m_d3dDevice.As(&dxgiDevice));
+
+            // Identify the physical adapter (GPU or card) this device is running on.
+            ComPtr<IDXGIAdapter> dxgiAdapter;
+            DX::ThrowIfFailed(dxgiDevice->GetAdapter(dxgiAdapter.GetAddressOf()));
+
+            // And obtain the factory object that created it.
+            ComPtr<IDXGIFactory2> dxgiFactory;
+            DX::ThrowIfFailed(dxgiAdapter->GetParent(IID_PPV_ARGS(dxgiFactory.GetAddressOf())));
+
+            // Create a descriptor for the swap chain.
+            DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+            swapChainDesc.Width = backBufferWidth;
+            swapChainDesc.Height = backBufferHeight;
+            swapChainDesc.Format = backBufferFormat;
+            swapChainDesc.SampleDesc.Count = 1;
+            swapChainDesc.SampleDesc.Quality = 0;
+            swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+            swapChainDesc.BufferCount = backBufferCount;
+
+            DXGI_SWAP_CHAIN_FULLSCREEN_DESC fsSwapChainDesc = {};
+            fsSwapChainDesc.Windowed = TRUE;
+
+            // Create a SwapChain from a Win32 window.
+            DX::ThrowIfFailed(dxgiFactory->CreateSwapChainForHwnd(
+                m_d3dDevice.Get(),
+                m_window,
+                &swapChainDesc,
+                &fsSwapChainDesc,
+                nullptr,
+                m_swapChain.ReleaseAndGetAddressOf()
+                ));
+
+            // This template does not support exclusive fullscreen mode and prevents DXGI from responding to the ALT+ENTER shortcut.
+            DX::ThrowIfFailed(dxgiFactory->MakeWindowAssociation(m_window, DXGI_MWA_NO_ALT_ENTER));
         }
+
+        // Obtain the backbuffer for this window which will be the final 3D rendertarget.
+        ComPtr<ID3D11Texture2D> backBuffer;
+        DX::ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf())));
+
+        // Create a view interface on the rendertarget to use on bind.
+        DX::ThrowIfFailed(m_d3dDevice->CreateRenderTargetView(backBuffer.Get(), nullptr, m_renderTargetView.ReleaseAndGetAddressOf()));
+
+        // Allocate a 2-D surface as the depth/stencil buffer and
+        // create a DepthStencil view on this surface to use on bind.
+        CD3D11_TEXTURE2D_DESC depthStencilDesc(depthBufferFormat, backBufferWidth, backBufferHeight, 1, 1, D3D11_BIND_DEPTH_STENCIL);
+
+        ComPtr<ID3D11Texture2D> depthStencil;
+        DX::ThrowIfFailed(m_d3dDevice->CreateTexture2D(&depthStencilDesc, nullptr, depthStencil.GetAddressOf()));
+
+        CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
+        DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(depthStencil.Get(), &depthStencilViewDesc, m_depthStencilView.ReleaseAndGetAddressOf()));
     }
-    else
+    catch (exception e)
     {
-        // First, retrieve the underlying DXGI Device from the D3D Device.
-        ComPtr<IDXGIDevice1> dxgiDevice;
-        DX::ThrowIfFailed(m_d3dDevice.As(&dxgiDevice));
-
-        // Identify the physical adapter (GPU or card) this device is running on.
-        ComPtr<IDXGIAdapter> dxgiAdapter;
-        DX::ThrowIfFailed(dxgiDevice->GetAdapter(dxgiAdapter.GetAddressOf()));
-
-        // And obtain the factory object that created it.
-        ComPtr<IDXGIFactory2> dxgiFactory;
-        DX::ThrowIfFailed(dxgiAdapter->GetParent(IID_PPV_ARGS(dxgiFactory.GetAddressOf())));
-
-        // Create a descriptor for the swap chain.
-        DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-        swapChainDesc.Width = backBufferWidth;
-        swapChainDesc.Height = backBufferHeight;
-        swapChainDesc.Format = backBufferFormat;
-        swapChainDesc.SampleDesc.Count = 1;
-        swapChainDesc.SampleDesc.Quality = 0;
-        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDesc.BufferCount = backBufferCount;
-
-        DXGI_SWAP_CHAIN_FULLSCREEN_DESC fsSwapChainDesc = {};
-        fsSwapChainDesc.Windowed = TRUE;
-
-        // Create a SwapChain from a Win32 window.
-        DX::ThrowIfFailed(dxgiFactory->CreateSwapChainForHwnd(
-            m_d3dDevice.Get(),
-            m_window,
-            &swapChainDesc,
-            &fsSwapChainDesc,
-            nullptr,
-            m_swapChain.ReleaseAndGetAddressOf()
-            ));
-
-        // This template does not support exclusive fullscreen mode and prevents DXGI from responding to the ALT+ENTER shortcut.
-        DX::ThrowIfFailed(dxgiFactory->MakeWindowAssociation(m_window, DXGI_MWA_NO_ALT_ENTER));
+        FileManager::GetInstance()->PushToLog(e.what());
+        ExitGame();
     }
-
-    // Obtain the backbuffer for this window which will be the final 3D rendertarget.
-    ComPtr<ID3D11Texture2D> backBuffer;
-    DX::ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf())));
-
-    // Create a view interface on the rendertarget to use on bind.
-    DX::ThrowIfFailed(m_d3dDevice->CreateRenderTargetView(backBuffer.Get(), nullptr, m_renderTargetView.ReleaseAndGetAddressOf()));
-
-    // Allocate a 2-D surface as the depth/stencil buffer and
-    // create a DepthStencil view on this surface to use on bind.
-    CD3D11_TEXTURE2D_DESC depthStencilDesc(depthBufferFormat, backBufferWidth, backBufferHeight, 1, 1, D3D11_BIND_DEPTH_STENCIL);
-
-    ComPtr<ID3D11Texture2D> depthStencil;
-    DX::ThrowIfFailed(m_d3dDevice->CreateTexture2D(&depthStencilDesc, nullptr, depthStencil.GetAddressOf()));
-
-    CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
-    DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(depthStencil.Get(), &depthStencilViewDesc, m_depthStencilView.ReleaseAndGetAddressOf()));
-
-    // TODO: Initialize windows-size dependent objects here.
 }
 
 void Game::OnDeviceLost()
@@ -514,196 +547,214 @@ void Game::RemoveDeadObjects()
 
 void Game::CreateGameResources()
 {
-    m_gameState                               = Game::GameState::Playing;
+    FileManager::GetInstance()->PushToLog("Creating Game resources");
+    try
+    {
+        m_gameState = Game::GameState::Playing;
 
-    m_contentManager                          = make_shared<ContentManager>(m_d3dDevice,
-                                                                            "Resources/");
+        m_contentManager = make_shared<ContentManager>(m_d3dDevice,
+            "Resources/");
 
-    m_pseudo3DCamera                          = make_shared<Pseudo3DCamera>(m_d3dDevice,
-                                                                            m_d3dContext,
-                                                                            shared_from_this(),
-                                                                            GAME_WIDTH,
-                                                                            GAME_HEIGHT,
-                                                                            m_outputWidth,
-                                                                            m_outputHeight,
-                                                                            CAMERA_DEPTH);
+        m_pseudo3DCamera = make_shared<Pseudo3DCamera>(m_d3dDevice,
+            m_d3dContext,
+            shared_from_this(),
+            GAME_WIDTH,
+            GAME_HEIGHT,
+            m_outputWidth,
+            m_outputHeight,
+            CAMERA_DEPTH);
 
-    m_bloomCamera                             = make_shared<BloomCamera>(m_d3dDevice,
-                                                                         m_d3dContext,
-                                                                         shared_from_this(),
-                                                                         GAME_WIDTH,
-                                                                         GAME_HEIGHT,
-                                                                         m_outputWidth,
-                                                                         m_outputHeight);
+        m_bloomCamera = make_shared<BloomCamera>(m_d3dDevice,
+            m_d3dContext,
+            shared_from_this(),
+            GAME_WIDTH,
+            GAME_HEIGHT,
+            m_outputWidth,
+            m_outputHeight);
 
-    m_gameObjects                             = list<shared_ptr<GameObject> >();
+        m_gameObjects = list<shared_ptr<GameObject> >();
 
-    m_collisionManager                        = make_unique<CollisionManager>();
-    
-    // Add the terrain
-    shared_ptr<GameObject> terrainObj         = make_shared<GameObject>(shared_from_this());
+        m_collisionManager = make_unique<CollisionManager>();
 
-    m_terrain                                 = make_shared<Terrain>(terrainObj,
-                                                                     m_contentManager,
-                                                                     m_d3dDevice);
+        // Add the terrain
+        shared_ptr<GameObject> terrainObj = make_shared<GameObject>(shared_from_this());
 
-    terrainObj->AddComponent(m_terrain);
-    m_gameObjects.push_back(terrainObj);
+        m_terrain = make_shared<Terrain>(terrainObj,
+            m_contentManager,
+            m_d3dDevice);
 
-    // Add the player
-    shared_ptr<GameObject> playerObj          = make_shared<GameObject>(shared_from_this());
-    m_player                                  = make_shared<Player>(playerObj);
-    playerObj->AddComponent(m_player);
+        terrainObj->AddComponent(m_terrain);
+        m_gameObjects.push_back(terrainObj);
 
-    m_carTexture                              = m_contentManager->Load<Texture2D>("Car.png");
+        // Add the player
+        shared_ptr<GameObject> playerObj = make_shared<GameObject>(shared_from_this());
+        m_player = make_shared<Player>(playerObj);
+        playerObj->AddComponent(m_player);
 
-    shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(playerObj,  
-                                                                            m_carTexture);
-    playerObj->AddComponent(spriteRenderer);
+        m_carTexture = m_contentManager->Load<Texture2D>("Car.png");
 
-    m_gameObjects.push_back(playerObj);
+        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(playerObj,
+            m_carTexture);
+        playerObj->AddComponent(spriteRenderer);
+
+        m_gameObjects.push_back(playerObj);
+    }
+    catch (exception e)
+    {
+        FileManager::GetInstance()->PushToLog(e.what());
+        ExitGame();
+    }
 
     CreateUI();
 }
 
 void Game::CreateUI()
 {
-    const float MARGIN = 10.0f;
+    FileManager::GetInstance()->PushToLog("Creating UI");
+    try
+    { 
+        const float MARGIN = 10.0f;
 
-    m_scoreLabels.clear();
-    m_bestScoreLabels.clear();
+        m_scoreLabels.clear();
+        m_bestScoreLabels.clear();
 
-    m_uiCamera = make_shared<UICamera>(m_d3dDevice, 
-                                       m_d3dContext, 
-                                       shared_from_this(), 
-                                       GAME_WIDTH, 
-                                       GAME_HEIGHT, 
-                                       m_outputWidth, 
-                                       m_outputHeight);
+        m_uiCamera = make_shared<UICamera>(m_d3dDevice, 
+                                           m_d3dContext, 
+                                           shared_from_this(), 
+                                           GAME_WIDTH, 
+                                           GAME_HEIGHT, 
+                                           m_outputWidth, 
+                                           m_outputHeight);
 
-    for (int i = 0; i < (int)Game::GameState::Last; i++)
-        m_uiLayers[i] = make_shared<UILayer>(Vector2::Zero, 
-                                             Vector2(GAME_WIDTH, 
-                                                     GAME_HEIGHT));
+        for (int i = 0; i < (int)Game::GameState::Last; i++)
+            m_uiLayers[i] = make_shared<UILayer>(Vector2::Zero, 
+                                                 Vector2(GAME_WIDTH, 
+                                                         GAME_HEIGHT));
 
-    shared_ptr<Texture2D> replayTexture        = m_contentManager->Load<Texture2D>("UI/Replay.png");
-    shared_ptr<Texture2D> replayPressedTexture = m_contentManager->Load<Texture2D>("UI/ReplayPressed.png");
+        shared_ptr<Texture2D> replayTexture        = m_contentManager->Load<Texture2D>("UI/Replay.png");
+        shared_ptr<Texture2D> replayPressedTexture = m_contentManager->Load<Texture2D>("UI/ReplayPressed.png");
 
-    shared_ptr<Texture2D> quitTexture          = m_contentManager->Load<Texture2D>("UI/Quit.png");
-    shared_ptr<Texture2D> quitPressedTexture   = m_contentManager->Load<Texture2D>("UI/QuitPressed.png");
+        shared_ptr<Texture2D> quitTexture          = m_contentManager->Load<Texture2D>("UI/Quit.png");
+        shared_ptr<Texture2D> quitPressedTexture   = m_contentManager->Load<Texture2D>("UI/QuitPressed.png");
 
-    shared_ptr<Texture2D> resumeTexture        = m_contentManager->Load<Texture2D>("UI/Resume.png");
-    shared_ptr<Texture2D> resumePressedTexture = m_contentManager->Load<Texture2D>("UI/ResumePressed.png");
+        shared_ptr<Texture2D> resumeTexture        = m_contentManager->Load<Texture2D>("UI/Resume.png");
+        shared_ptr<Texture2D> resumePressedTexture = m_contentManager->Load<Texture2D>("UI/ResumePressed.png");
 
-    shared_ptr<Texture2D> speedometerTexture   = m_contentManager->Load<Texture2D>("UI/Speedometer.png");
-    shared_ptr<Texture2D> speedPointerTexture  = m_contentManager->Load<Texture2D>("UI/SpeedPointer.png");
+        shared_ptr<Texture2D> speedometerTexture   = m_contentManager->Load<Texture2D>("UI/Speedometer.png");
+        shared_ptr<Texture2D> speedPointerTexture  = m_contentManager->Load<Texture2D>("UI/SpeedPointer.png");
 
-    shared_ptr<Texture2D> pauseTexture         = m_contentManager->Load<Texture2D>("UI/Pause.png");
-    shared_ptr<Texture2D> pausePressedTexture  = m_contentManager->Load<Texture2D>("UI/PausePressed.png");
+        shared_ptr<Texture2D> pauseTexture         = m_contentManager->Load<Texture2D>("UI/Pause.png");
+        shared_ptr<Texture2D> pausePressedTexture  = m_contentManager->Load<Texture2D>("UI/PausePressed.png");
 
-    shared_ptr<GameFont> vcr17FontRed          = m_contentManager->Load<GameFont>("Fonts/VCR17.spritefont");
-    vcr17FontRed->SetColor(Vector4(1, 0, 0.447, 1.0f));
+        shared_ptr<GameFont> vcr17FontRed          = m_contentManager->Load<GameFont>("Fonts/VCR17.spritefont");
+        vcr17FontRed->SetColor(Vector4(1, 0, 0.447, 1.0f));
 
-    // create the ending screen
+        // create the ending screen
 
-    shared_ptr<UIButton> endReplayButton = make_shared<UIButton>(Vector2((-replayTexture->GetWidth() / 2.0f) - MARGIN, 
-                                                                         replayTexture->GetHeight() + 2.0f * MARGIN), 
-                                                                 Vector2(replayTexture->GetWidth(),
-                                                                         replayTexture->GetHeight()),
-                                                                 replayTexture,
-                                                                 replayPressedTexture,
-                                                                 bind(&Game::OnReplayButtonReleased, this));
+        shared_ptr<UIButton> endReplayButton = make_shared<UIButton>(Vector2((-replayTexture->GetWidth() / 2.0f) - MARGIN, 
+                                                                             replayTexture->GetHeight() + 2.0f * MARGIN), 
+                                                                     Vector2(replayTexture->GetWidth(),
+                                                                             replayTexture->GetHeight()),
+                                                                     replayTexture,
+                                                                     replayPressedTexture,
+                                                                     bind(&Game::OnReplayButtonReleased, this));
 
-    m_uiLayers[(int)Game::GameState::End]->AddChild(endReplayButton);
+        m_uiLayers[(int)Game::GameState::End]->AddChild(endReplayButton);
 
-    shared_ptr<UIButton> endQuitButton = make_shared<UIButton>(Vector2((quitTexture->GetWidth() / 2.0f) + MARGIN,
-                                                                       quitTexture->GetHeight() + 2.0f * MARGIN),
-                                                               Vector2(quitTexture->GetWidth(),
-                                                               quitTexture->GetHeight()),
-                                                               quitTexture,
-                                                               quitPressedTexture,
-                                                               ExitGame);
+        shared_ptr<UIButton> endQuitButton = make_shared<UIButton>(Vector2((quitTexture->GetWidth() / 2.0f) + MARGIN,
+                                                                           quitTexture->GetHeight() + 2.0f * MARGIN),
+                                                                   Vector2(quitTexture->GetWidth(),
+                                                                   quitTexture->GetHeight()),
+                                                                   quitTexture,
+                                                                   quitPressedTexture,
+                                                                   ExitGame);
 
-    m_uiLayers[(int)Game::GameState::End]->AddChild(endQuitButton);
+        m_uiLayers[(int)Game::GameState::End]->AddChild(endQuitButton);
 
-    CreateScoreUI(m_uiLayers[(int)Game::GameState::End], 
-                  MARGIN);
+        CreateScoreUI(m_uiLayers[(int)Game::GameState::End], 
+                      MARGIN);
 
-    // create the pause screen
-    shared_ptr<UIButton> pauseReplayButton = make_shared<UIButton>(Vector2((-replayTexture->GetWidth()) - MARGIN,
-                                                                           replayTexture->GetHeight() + 2.0f * MARGIN),
-                                                                   Vector2(replayTexture->GetWidth(),
-                                                                           replayTexture->GetHeight()),
-                                                                   replayTexture,
-                                                                   replayPressedTexture,
-                                                                   bind(&Game::OnReplayButtonReleased, 
-                                                                        this));
+        // create the pause screen
+        shared_ptr<UIButton> pauseReplayButton = make_shared<UIButton>(Vector2((-replayTexture->GetWidth()) - MARGIN,
+                                                                               replayTexture->GetHeight() + 2.0f * MARGIN),
+                                                                       Vector2(replayTexture->GetWidth(),
+                                                                               replayTexture->GetHeight()),
+                                                                       replayTexture,
+                                                                       replayPressedTexture,
+                                                                       bind(&Game::OnReplayButtonReleased, 
+                                                                            this));
 
-    m_uiLayers[(int)Game::GameState::Pause]->AddChild(pauseReplayButton);
+        m_uiLayers[(int)Game::GameState::Pause]->AddChild(pauseReplayButton);
 
-    shared_ptr<UIButton> pauseResumeButton = make_shared<UIButton>(Vector2(0.0f,
-                                                                           replayTexture->GetHeight() + 2.0f * MARGIN),
-                                                                   Vector2(resumeTexture->GetWidth(),
-                                                                           resumeTexture->GetHeight()),
-                                                                   resumeTexture,
-                                                                   resumePressedTexture, 
-                                                                   [&]() 
-        {
-            ChangeGameState(GameState::Playing);
-        });
+        shared_ptr<UIButton> pauseResumeButton = make_shared<UIButton>(Vector2(0.0f,
+                                                                               replayTexture->GetHeight() + 2.0f * MARGIN),
+                                                                       Vector2(resumeTexture->GetWidth(),
+                                                                               resumeTexture->GetHeight()),
+                                                                       resumeTexture,
+                                                                       resumePressedTexture, 
+                                                                       [&]() 
+            {
+                ChangeGameState(GameState::Playing);
+            });
 
-    m_uiLayers[(int)Game::GameState::Pause]->AddChild(pauseResumeButton);
+        m_uiLayers[(int)Game::GameState::Pause]->AddChild(pauseResumeButton);
 
-    shared_ptr<UIButton> pauseQuitButton = make_shared<UIButton>(Vector2((quitTexture->GetWidth()) + MARGIN,
-                                                                         quitTexture->GetHeight() + 2.0f * MARGIN),
-                                                                 Vector2(quitTexture->GetWidth(),
-                                                                         quitTexture->GetHeight()),
-                                                                 quitTexture,
-                                                                 quitPressedTexture,
-                                                                 ExitGame);
+        shared_ptr<UIButton> pauseQuitButton = make_shared<UIButton>(Vector2((quitTexture->GetWidth()) + MARGIN,
+                                                                             quitTexture->GetHeight() + 2.0f * MARGIN),
+                                                                     Vector2(quitTexture->GetWidth(),
+                                                                             quitTexture->GetHeight()),
+                                                                     quitTexture,
+                                                                     quitPressedTexture,
+                                                                     ExitGame);
 
-    m_uiLayers[(int)Game::GameState::Pause]->AddChild(pauseQuitButton);
+        m_uiLayers[(int)Game::GameState::Pause]->AddChild(pauseQuitButton);
 
-    CreateScoreUI(m_uiLayers[(int)Game::GameState::Pause],
-                  MARGIN);
+        CreateScoreUI(m_uiLayers[(int)Game::GameState::Pause],
+                      MARGIN);
 
-    // create the game screen
+        // create the game screen
 
-    shared_ptr<UIImage> speedometerImage = make_shared<UIImage>(speedometerTexture, 
-                                                                Vector2(GAME_WIDTH / 2.0f - speedometerTexture->GetWidth() / 2.0f,
-                                                                        GAME_HEIGHT / 2.0f - speedometerTexture->GetHeight() / 2.0f + MARGIN),
-                                                                Vector2(speedometerTexture->GetWidth(),
-                                                                        speedometerTexture->GetHeight()));
+        shared_ptr<UIImage> speedometerImage = make_shared<UIImage>(speedometerTexture, 
+                                                                    Vector2(GAME_WIDTH / 2.0f - speedometerTexture->GetWidth() / 2.0f,
+                                                                            GAME_HEIGHT / 2.0f - speedometerTexture->GetHeight() / 2.0f + MARGIN),
+                                                                    Vector2(speedometerTexture->GetWidth(),
+                                                                            speedometerTexture->GetHeight()));
 
-    m_uiLayers[(int)Game::GameState::Playing]->AddChild(speedometerImage);
+        m_uiLayers[(int)Game::GameState::Playing]->AddChild(speedometerImage);
 
-    shared_ptr<UIImage> speedPointerImage = make_shared<UIImage>(speedPointerTexture,
-                                                                 Vector2(GAME_WIDTH / 2.0f - speedPointerTexture->GetWidth() / 2.0f,
-                                                                         GAME_HEIGHT / 2.0f - speedPointerTexture->GetHeight() / 2.0f + MARGIN),
-                                                                 Vector2(speedPointerTexture->GetWidth(),
-                                                                         speedPointerTexture->GetHeight()));
+        shared_ptr<UIImage> speedPointerImage = make_shared<UIImage>(speedPointerTexture,
+                                                                     Vector2(GAME_WIDTH / 2.0f - speedPointerTexture->GetWidth() / 2.0f,
+                                                                             GAME_HEIGHT / 2.0f - speedPointerTexture->GetHeight() / 2.0f + MARGIN),
+                                                                     Vector2(speedPointerTexture->GetWidth(),
+                                                                             speedPointerTexture->GetHeight()));
 
-    m_uiLayers[(int)Game::GameState::Playing]->AddChild(speedPointerImage);
-    m_speedPointerImage = speedPointerImage;
+        m_uiLayers[(int)Game::GameState::Playing]->AddChild(speedPointerImage);
+        m_speedPointerImage = speedPointerImage;
 
-    shared_ptr<UIButton> pauseButton = make_shared<UIButton>(Vector2((-GAME_WIDTH / 2.0f) + MARGIN + (pauseTexture->GetWidth() / 2.0f),
-                                                                     (-GAME_HEIGHT / 2.0f) + MARGIN + (pauseTexture->GetHeight() / 2.0f)),
-                                                             Vector2(pauseTexture->GetWidth(),
-                                                                     pauseTexture->GetHeight()),
-                                                             pauseTexture,
-                                                             pausePressedTexture,
-                                                             [&]() 
-        {
-            ChangeGameState(Game::GameState::Pause);
-        });
+        shared_ptr<UIButton> pauseButton = make_shared<UIButton>(Vector2((-GAME_WIDTH / 2.0f) + MARGIN + (pauseTexture->GetWidth() / 2.0f),
+                                                                         (-GAME_HEIGHT / 2.0f) + MARGIN + (pauseTexture->GetHeight() / 2.0f)),
+                                                                 Vector2(pauseTexture->GetWidth(),
+                                                                         pauseTexture->GetHeight()),
+                                                                 pauseTexture,
+                                                                 pausePressedTexture,
+                                                                 [&]() 
+            {
+                ChangeGameState(Game::GameState::Pause);
+            });
 
-    m_uiLayers[(int)Game::GameState::Playing]->AddChild(pauseButton);
+        m_uiLayers[(int)Game::GameState::Playing]->AddChild(pauseButton);
 
-    m_distanceText = make_shared<UIText>(vcr17FontRed,
-                                         Vector2(0.0f, -GAME_HEIGHT / 2.0f + 2.0f * MARGIN));
-    m_distanceText->SetText("0");
+        m_distanceText = make_shared<UIText>(vcr17FontRed,
+                                             Vector2(0.0f, -GAME_HEIGHT / 2.0f + 2.0f * MARGIN));
+        m_distanceText->SetText("0");
 
-    m_uiLayers[(int)Game::GameState::Playing]->AddChild(m_distanceText);
+        m_uiLayers[(int)Game::GameState::Playing]->AddChild(m_distanceText);
+    }
+    catch(exception e)
+    {
+        FileManager::GetInstance()->PushToLog(e.what());
+        ExitGame();
+    }
 }
 
 void Game::CreateScoreUI(shared_ptr<UILayer> layer, 

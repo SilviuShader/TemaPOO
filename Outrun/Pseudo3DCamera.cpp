@@ -72,6 +72,8 @@ Pseudo3DCamera::Pseudo3DCamera(ComPtr<ID3D11Device>        device,
 	
 	static_assert(!(sizeof(TerrainShaderParameters) % 16), 
 		          "TerrainShaderParameters needs to be 16 bytes aligned");
+
+	FileManager::GetInstance()->PushToLog("Creating Pseudo3DCamera");
 	
 	auto blob = ReadData(L"TerrainPixelShader.cso");
 	ThrowIfFailed(m_d3dDevice->CreatePixelShader(blob.data(), 
