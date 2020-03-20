@@ -53,8 +53,6 @@ void FileManager::WriteLog()
 void FileManager::PushToLog(string str)
 {
     time_t t = time(nullptr);
-    char dateStr[100] = { NULL };
-
-    if (strftime(dateStr, sizeof(dateStr), "[%Y-%b-%d %H:%M:%S] ", localtime(&t)))
+    if (char dateStr[100] = { NULL }; strftime(dateStr, sizeof(dateStr), "[%Y-%b-%d %H:%M:%S] ", localtime(&t)))
         m_gameLog = m_gameLog.append(string(dateStr) + str + "\n");
 }

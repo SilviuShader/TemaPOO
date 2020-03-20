@@ -26,9 +26,12 @@ inline std::shared_ptr<T> ContentManager::Load(std::string filename)
 
     FileManager::GetInstance()->PushToLog("Loading: \"" + fullPath + "\"");
 
-    if (typeid(T).hash_code() == typeid(Texture2D).hash_code() || 
-        typeid(T).hash_code() == typeid(GameFont).hash_code())
+    if constexpr (std::is_same<T, Texture2D>())
         result = std::make_shared<T>(m_d3dDevice, fullPath);
+    else if constexpr (std::is_same<T, GameFont>())
+        result = std::make_shared<T>(m_d3dDevice, fullPath);
+    else
+        throw std::exception((std::string("The type \"") + (std::string)typeid(T).name() + std::string("\" cannot be loaded by ContentManager")).c_str());
     
     return result;
 }

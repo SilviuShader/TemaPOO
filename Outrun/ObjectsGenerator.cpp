@@ -38,8 +38,9 @@ ObjectsGenerator::ObjectsGenerator(shared_ptr<ContentManager> contentManager) :
 
 ObjectsGenerator::~ObjectsGenerator()
 {
-    for (auto& texture : m_textures)
-        texture.second.reset();
+    for (const auto& [k, v] : m_textures)
+        m_textures[k].reset();
+
     m_textures.clear();
 }
 
@@ -101,12 +102,9 @@ void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game,
     {
         string textureIndex = "";
 
-        Zone crtZone = m_zone;
         float prevChance = (m_accumulatedZone / ACCUMULATE_TO_CHANGE_ZONE);
-        if (Utils::RandomFloat() > prevChance)
-            crtZone = m_prevZone;
-
-        switch (crtZone)
+        
+        switch (Zone crtZone = ((Utils::RandomFloat() > prevChance) ? m_prevZone : m_zone); crtZone)
         {
         case ObjectsGenerator::Zone::Beach:
             textureIndex = "Palm";

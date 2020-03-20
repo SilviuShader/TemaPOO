@@ -181,10 +181,10 @@ void Game::Render()
             nullptr,
             m_states->LinearClamp());
 
-        float gameAspectRatio = (float)GAME_WIDTH / (float)GAME_HEIGHT;
-        float windowAspectRatio = (float)m_outputWidth / (float)m_outputHeight;
         float scale = 1.0f;
-        if (gameAspectRatio > windowAspectRatio)
+        
+        if (auto [gameAspectRatio, windowAspectRatio] = make_pair((float)GAME_WIDTH / (float)GAME_HEIGHT, (float)m_outputWidth / (float)m_outputHeight); 
+            gameAspectRatio > windowAspectRatio)
             scale = (float)m_outputHeight / (float)GAME_HEIGHT;
         else
             scale = (float)m_outputWidth / (float)GAME_WIDTH;
@@ -256,10 +256,8 @@ void Game::Present()
     // The first argument instructs DXGI to block until VSync, putting the application
     // to sleep until the next VSync. This ensures we don't waste any cycles rendering
     // frames that will never be displayed to the screen.
-    HRESULT hr = m_swapChain->Present(1, 0);
-
     // If the device was reset we must completely reinitialize the renderer.
-    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+    if (HRESULT hr = m_swapChain->Present(1, 0); hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
         OnDeviceLost();
     else
         DX::ThrowIfFailed(hr);
@@ -423,9 +421,7 @@ void Game::CreateResources()
         // If the swap chain already exists, resize it, otherwise create one.
         if (m_swapChain)
         {
-            HRESULT hr = m_swapChain->ResizeBuffers(backBufferCount, backBufferWidth, backBufferHeight, backBufferFormat, 0);
-
-            if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+            if (HRESULT hr = m_swapChain->ResizeBuffers(backBufferCount, backBufferWidth, backBufferHeight, backBufferFormat, 0); hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
             {
                 // If the device was removed for any reason, a new device and swap chain will need to be created.
                 OnDeviceLost();

@@ -53,9 +53,8 @@ void Terrain::Update(float deltaTime)
 	m_accumulatedTranslation += GetRoadX(cameraHeight - 1) * alpha * (1.0f / abs(m_parent->GetGame()->GetRoadWidth())) * bottomDifference;
 
 	float startY = cameraHeight * 1.0f;
-	float diff   = m_topSegment.x - startY;
-
-	if (diff >= 0)
+	
+	if (float diff = m_topSegment.x - startY; diff >= 0)
 	{
 		m_bottomSegment = m_topSegment;
 		m_topSegment = Vector2(cameraHeight - startY, 
@@ -112,10 +111,9 @@ void Terrain::CreateTexture()
 		float& b = textureData[(i * 4) + 2];
 		float& a = textureData[(i * 4) + 3];
 
-		float z = camera->GetZ(i);
 		float roadX = 0.0f;
 
-		if (z <= camera->GetCameraDepth())
+		if (float z = camera->GetZ(i); z <= camera->GetCameraDepth() && z > 0)
 			roadX = GetRoadX(i);
 
 		r = roadX;
