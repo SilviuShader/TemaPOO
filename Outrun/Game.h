@@ -135,6 +135,7 @@ private:
     std::shared_ptr<Player>                          m_player;
 
     std::shared_ptr<Texture2D>                       m_carTexture;
+    std::shared_ptr<Texture2D>                       m_sunTexture;
 
     // UI
     std::shared_ptr<UICamera>                        m_uiCamera;

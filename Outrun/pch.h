@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <locale>
 #include <codecvt>
 #include <string>

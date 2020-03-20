@@ -5,7 +5,7 @@ class Player : public GameComponent
 private:
 
     const float MAX_SPEED                   = 5.0f;
-    const float MAX_STEER_SPEED             = 1.25f;
+    const float MAX_STEER_SPEED             = 1.0f;
     const float STEER_ACCELERATION_MULTIP   = 5.0f;
     const float STEER_ACCELERATION_DECREASE = 2.5f;
     const float SPEED_ACCELERATION_MULTIP   = 1.0f;

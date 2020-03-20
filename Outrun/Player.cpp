@@ -3,6 +3,7 @@
 
 using namespace std;
 using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 Player::Player(shared_ptr<GameObject> parent) :
 
@@ -70,16 +71,21 @@ void Player::Update(float deltaTime)
             m_steerSpeed += deltaTime * STEER_ACCELERATION_DECREASE;
     }
 
-    m_positionX += m_steerSpeed * deltaTime * (m_speed / MAX_SPEED);
+    Vector2 speedVector = Vector2(m_steerSpeed, m_speed);
+    speedVector.Normalize();
 
-    game->GetTerrain()->SetPlayerSpeed(m_speed);
+    speedVector *= abs(m_speed);
+
+    m_positionX += speedVector.x * deltaTime;
+
+    game->GetTerrain()->SetPlayerSpeed(speedVector.y);
 
     if (abs(-game->GetTerrain()->GetAccumulatedTranslation() + m_positionX) <= game->GetRoadWidth())
-        m_distance += m_speed * deltaTime;
+        m_distance += speedVector.y * deltaTime;
 
     transform->SetPositionX(m_positionX - game->GetTerrain()->GetAccumulatedTranslation());
 
-    camera->TranslateStripes(m_speed * deltaTime);
+    camera->TranslateStripes(speedVector.y * deltaTime);
     camera->SetPositionX(m_positionX);
 }
 

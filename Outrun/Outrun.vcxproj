@@ -244,6 +244,7 @@
     <Image Include="Resources\MotorBack.png" />
     <Image Include="Resources\Mountains.png" />
     <Image Include="Resources\Palm.png" />
+    <Image Include="Resources\Sun.png" />
     <Image Include="Resources\Tower.png" />
     <Image Include="Resources\UI\Pause.png" />
     <Image Include="Resources\UI\PausePressed.png" />

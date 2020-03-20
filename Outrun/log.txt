@@ -1,31 +1,34 @@
-[2020-Mar-20 14:58:57] Creating Device
-[2020-Mar-20 14:58:58] Creating Game resources
-[2020-Mar-20 14:58:58] Creating Pseudo3DCamera
-[2020-Mar-20 14:58:58] Creating BloomCamera
-[2020-Mar-20 14:58:58] Loading: "Resources/Border.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/Palm.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/Tower.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/Mountains.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/CarBack.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/CarFront.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/MotorBack.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/Car.png"
-[2020-Mar-20 14:58:58] Creating UI
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/Replay.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/ReplayPressed.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/Quit.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/QuitPressed.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/Resume.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/ResumePressed.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/Speedometer.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/SpeedPointer.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/Pause.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/PausePressed.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/Fonts/VCR17.spritefont"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/ScoreBar.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/Fonts/VCR32.spritefont"
-[2020-Mar-20 14:58:58] Loading: "Resources/Fonts/VCR32.spritefont"
-[2020-Mar-20 14:58:58] Loading: "Resources/UI/ScoreBar.png"
-[2020-Mar-20 14:58:58] Loading: "Resources/Fonts/VCR32.spritefont"
-[2020-Mar-20 14:58:58] Loading: "Resources/Fonts/VCR32.spritefont"
-[2020-Mar-20 14:58:58] Creating window size dependent resources
+[2020-Mar-20 22:18:16] Creating Device
+[2020-Mar-20 22:18:16] Creating Game resources
+[2020-Mar-20 22:18:16] Creating Pseudo3DCamera
+[2020-Mar-20 22:18:16] Creating BloomCamera
+[2020-Mar-20 22:18:16] Loading: "Resources/Sun.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/Border.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/Palm.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/Tower.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/Mountains.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/CarBack.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/CarFront.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/MotorBack.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/Car.png"
+[2020-Mar-20 22:18:17] Creating UI
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/Replay.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/ReplayPressed.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/Quit.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/QuitPressed.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/Resume.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/ResumePressed.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/Speedometer.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/SpeedPointer.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/Pause.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/PausePressed.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/Fonts/VCR17.spritefont"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/ScoreBar.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/Fonts/VCR32.spritefont"
+[2020-Mar-20 22:18:17] Loading: "Resources/Fonts/VCR32.spritefont"
+[2020-Mar-20 22:18:17] Loading: "Resources/UI/ScoreBar.png"
+[2020-Mar-20 22:18:17] Loading: "Resources/Fonts/VCR32.spritefont"
+[2020-Mar-20 22:18:17] Loading: "Resources/Fonts/VCR32.spritefont"
+[2020-Mar-20 22:18:17] Creating window size dependent resources
+[2020-Mar-20 22:18:18] Creating window size dependent resources
+[2020-Mar-20 22:18:18] Creating window size dependent resources

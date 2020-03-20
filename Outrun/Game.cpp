@@ -146,8 +146,18 @@ void Game::Render()
         ID3D11ShaderResourceView* const null[] = { nullptr, nullptr };
         Vector4 clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
+
+
         m_pseudo3DCamera->Begin(clearColor);
 
+        /*
+        m_pseudo3DCamera->DrawSprite(m_sunTexture, 
+                                     Vector2::Zero, 
+                                     nullptr, 
+                                     0.0f, 
+                                     Vector2::One);
+        m_pseudo3DCamera->End2D();
+        */
         for (shared_ptr<GameObject>& gameObj : m_gameObjects)
             gameObj->Render();
 
@@ -313,8 +323,8 @@ void Game::OnWindowSizeChanged(int width,
 // Properties
 void Game::GetDefaultSize(int& width, int& height) const
 {
-    width  = 640;
-    height = 480;
+    width  = 320;
+    height = 240;
 }
 
 // These are the resources that depend on the device.
@@ -571,6 +581,8 @@ void Game::CreateGameResources()
         m_gameObjects = list<shared_ptr<GameObject> >();
 
         m_collisionManager = make_unique<CollisionManager>();
+
+        m_sunTexture = m_contentManager->Load<Texture2D>("Sun.png");
 
         // Add the terrain
         shared_ptr<GameObject> terrainObj = make_shared<GameObject>(shared_from_this());

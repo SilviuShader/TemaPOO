@@ -145,6 +145,9 @@
     <Image Include="Resources\Mountains.png">
       <Filter>Resources</Filter>
     </Image>
+    <Image Include="Resources\Sun.png">
+      <Filter>Resources</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest">
