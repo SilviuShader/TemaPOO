@@ -88,9 +88,9 @@ void Game::Update(DX::StepTimer const& timer)
             m_collisionManager->Update(m_gameObjects);
             RemoveDeadObjects();
 
-            m_speedPointerImage->SetRotation(Utils::Lerp(m_player->GetSpeed() / m_player->GetMaxSpeed(),
-                -1.75f,
-                1.1f));
+            (*m_speedPointerImage.get()) = Utils::Lerp(m_player->GetSpeed() / m_player->GetMaxSpeed(),
+                                                       -1.75f,
+                                                       1.1f);
 
             m_distanceText->SetText(to_string((int)m_player->GetDistance()));
             for (int i = 0; i < m_scoreLabels.size(); i++)
@@ -325,8 +325,8 @@ void Game::OnWindowSizeChanged(int width,
 // Properties
 void Game::GetDefaultSize(int& width, int& height) const
 {
-    width  = 320;
-    height = 240;
+    width  = 640;
+    height = 480;
 }
 
 // These are the resources that depend on the device.

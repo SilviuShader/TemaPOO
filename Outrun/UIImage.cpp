@@ -19,6 +19,12 @@ UIImage::~UIImage()
     m_texture.reset();
 }
 
+UIImage& UIImage::operator=(const float& rotation)
+{
+    SetRotation(rotation);
+    return *this;
+}
+
 void UIImage::ElementRender(shared_ptr<UICamera> uiCamera)
 {
     Vector2 absolutePosition = GetAbsolutePosition();

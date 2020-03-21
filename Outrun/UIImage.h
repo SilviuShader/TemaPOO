@@ -10,8 +10,9 @@ public:
 
     ~UIImage();
 
-    inline void SetRotation(float rotation) { m_rotation = rotation; }
-
+           UIImage& operator=(const float&);
+    inline void     SetRotation(float rotation) { m_rotation = rotation; }
+           
 protected:
 
     void ElementRender(std::shared_ptr<UICamera>) override;
