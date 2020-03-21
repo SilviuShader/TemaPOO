@@ -8,9 +8,7 @@ public:
     ~ObjectTranslator();
 
            void Update(float)                                  override;
-    inline void Render()                                       override  {                        };
-           void OnCollisionUpdate(std::shared_ptr<GameObject>) override;
-
+    inline void Render()                                       override  {                        }
     inline void SetObjectSpeed(float speed)                              { m_objectSpeed = speed; }
 
 private:

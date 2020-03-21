@@ -89,6 +89,7 @@
 #include "GameComponent.h"
 #include "ObjectTranslator.h"
 #include "Killer.h"
+#include "Life.h"
 #include "ObjectsGenerator.h"
 #include "Terrain.h"
 #include "SpriteRenderer.h"

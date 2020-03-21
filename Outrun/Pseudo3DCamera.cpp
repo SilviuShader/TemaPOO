@@ -41,6 +41,15 @@ Pseudo3DCamera::TerrainShaderParameters::TerrainShaderParameters(float maxRoadX,
 {
 }
 
+Pseudo3DCamera::TerrainShaderParameters& Pseudo3DCamera::TerrainShaderParameters::operator=(Vector3 vec)
+{
+	m_maxRoadX    = vec.x;
+	m_translation = vec.y;
+	m_positionX   = vec.z;
+
+	return *this;
+}
+
 Pseudo3DCamera::Pseudo3DCamera(ComPtr<ID3D11Device>        device,
 							   ComPtr<ID3D11DeviceContext> deviceContext, 
 	                           shared_ptr<Game>            game,
@@ -61,7 +70,7 @@ Pseudo3DCamera::Pseudo3DCamera(ComPtr<ID3D11Device>        device,
 	m_cameraDepth(cameraDepth),
 	m_positionX(0.0f),
 	m_stripesTranslation(0.0f),
-	m_terrainParameters(TerrainShaderParameters(0.0f, 0.0f, 0.0f))
+	m_terrainParameters(TerrainShaderParameters(1.0f, 0.0f, 0.0f))
 {
 	// To create the "custom shaders" pipeline I followed this tutorial:
 	// https://github.com/microsoft/DirectXTK/wiki/Writing-custom-shaders
@@ -144,9 +153,9 @@ int Pseudo3DCamera::GetLine(float z)
 
 void Pseudo3DCamera::DrawTerrain(Terrain* terrain)
 {
-	m_terrainParameters = TerrainShaderParameters(terrain->GetMaxRoadX(),
-		                                          m_stripesTranslation,
-		                                          terrain->GetAccumulatedTranslation() - m_positionX);
+	m_terrainParameters = Vector3(terrain->GetMaxRoadX(),
+		                          m_stripesTranslation,
+		                          terrain->GetAccumulatedTranslation() - m_positionX);
 
 	m_d3dContext->UpdateSubresource(m_terrainShaderParams.Get(), 0, nullptr, &m_terrainParameters, sizeof(TerrainShaderParameters), 0);
 

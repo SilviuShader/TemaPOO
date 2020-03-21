@@ -32,11 +32,3 @@ void ObjectTranslator::Update(float deltaTime)
         transform->GetPositionZ() >= (m_parent->GetGame()->GetPseudo3DCamera()->GetCameraDepth() * 2.0f))
         m_parent->Die();
 }
-
-void ObjectTranslator::OnCollisionUpdate(shared_ptr<GameObject> other)
-{
-    // This object hit something
-    // Or it was hit by something
-    // NOW IT MUST DIE.
-    m_parent->Die();
-}

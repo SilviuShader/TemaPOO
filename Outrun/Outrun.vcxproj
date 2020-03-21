@@ -173,6 +173,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Killer.h" />
+    <ClInclude Include="Life.h" />
     <ClInclude Include="ObjectsGenerator.h" />
     <ClInclude Include="ObjectTranslator.h" />
     <ClInclude Include="pch.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Killer.cpp" />
+    <ClCompile Include="Life.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="ObjectsGenerator.cpp" />
     <ClCompile Include="ObjectTranslator.cpp" />
@@ -241,6 +243,7 @@
     <Image Include="Resources\Cat.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="Resources\Life.png" />
     <Image Include="Resources\MotorBack.png" />
     <Image Include="Resources\Mountains.png" />
     <Image Include="Resources\Palm.png" />

@@ -46,6 +46,7 @@
     <ClInclude Include="GameFont.h" />
     <ClInclude Include="FileManager.h" />
     <ClInclude Include="BloomCamera.h" />
+    <ClInclude Include="Life.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -77,6 +78,7 @@
     <ClCompile Include="GameFont.cpp" />
     <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="BloomCamera.cpp" />
+    <ClCompile Include="Life.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -146,6 +148,9 @@
       <Filter>Resources</Filter>
     </Image>
     <Image Include="Resources\Sun.png">
+      <Filter>Resources</Filter>
+    </Image>
+    <Image Include="Resources\Life.png">
       <Filter>Resources</Filter>
     </Image>
   </ItemGroup>

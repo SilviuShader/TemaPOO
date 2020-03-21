@@ -12,7 +12,8 @@ Player::Player(shared_ptr<GameObject> parent) :
     m_positionX(0.0f),
     m_speed(0.0f),
     m_steerSpeed(0.0f),
-    m_distance(0.0f)
+    m_distance(0.0f),
+    m_livesCount(0)
 
 {
 }
@@ -91,8 +92,51 @@ void Player::Update(float deltaTime)
 
 void Player::OnCollisionUpdate(shared_ptr<GameObject> other)
 {
-    if (bool killer = other->GetComponent<Killer>() != nullptr; killer)
-        m_parent->Die();
+    if (other->GetComponent<Killer>() != nullptr)
+        (*this)--;
+    else if (other->GetComponent<Life>() != nullptr)
+        (*this)++;
     else
         m_speed -= ACCIDENT_BRAKE;
+
+    other->Die();
+}
+
+Player& Player::operator++()
+{
+    operator+=(1);
+
+    return *this;
+}
+
+Player& Player::operator--()
+{
+    m_livesCount--;
+
+    if (m_livesCount < 0)
+        m_parent->Die();
+
+    return *this;
+}
+
+Player& Player::operator++(int)
+{
+    operator++();
+    return *this;
+}
+
+Player& Player::operator--(int)
+{
+    operator--();
+    return *this;
+}
+
+Player& Player::operator+=(const int& rhs)
+{
+    m_livesCount += rhs;
+
+    if (m_livesCount >= MAX_LIVES_COUNT)
+        m_livesCount = MAX_LIVES_COUNT;
+
+    return *this;
 }

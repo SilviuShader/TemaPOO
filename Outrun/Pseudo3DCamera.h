@@ -39,9 +39,12 @@ private:
 	{
 	public:
 
-		TerrainShaderParameters(float, 
-			                    float,
-			                    float);
+		TerrainShaderParameters(float = 1, 
+			                    float = 0,
+			                    float = 0);
+
+		// did this just because I need operator overloading
+		TerrainShaderParameters& operator=(DirectX::SimpleMath::Vector3);
 
 	private:
 

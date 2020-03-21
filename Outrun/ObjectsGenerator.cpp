@@ -10,7 +10,8 @@ ObjectsGenerator::ObjectsGenerator(shared_ptr<ContentManager> contentManager) :
     m_accumulatedDistance(0.0f),
     m_accumulatedZone(0.0f),
     m_accumulatedCarChance(0.0f),
-    m_accumulatedMotorChance(0.0f)
+    m_accumulatedMotorChance(0.0f),
+    m_accumulatedLifeChance(0.0f)
 {
     m_prevZone = m_zone;
 
@@ -34,6 +35,9 @@ ObjectsGenerator::ObjectsGenerator(shared_ptr<ContentManager> contentManager) :
 
     shared_ptr<Texture2D> motor = contentManager->Load<Texture2D>("MotorBack.png");
     m_textures["MotorBack"] = motor;
+
+    shared_ptr<Texture2D> life = contentManager->Load<Texture2D>("Life.png");
+    m_textures["Life"] = life;
 }
 
 ObjectsGenerator::~ObjectsGenerator()
@@ -51,6 +55,7 @@ void ObjectsGenerator::Update(shared_ptr<Game> game,
     ZoneSpawnUpdate(game, deltaTime);
     CarSpawnUpdate(game, deltaTime);
     MotorSpawnUpdate(game, deltaTime);
+    LifeSpawnUpdate(game, deltaTime);
 }
 
 void ObjectsGenerator::BorderSpawnUpdate(shared_ptr<Game> game, float deltaTime)
@@ -208,5 +213,31 @@ void ObjectsGenerator::MotorSpawnUpdate(shared_ptr<Game> game,
         gameObjects.push_back(gameObject);
 
         m_accumulatedMotorChance -= MOTOR_CHANCE;
+    }
+}
+
+void ObjectsGenerator::LifeSpawnUpdate(shared_ptr<Game> game, 
+                                       float            deltaTime)
+{
+    list<shared_ptr<GameObject> >& gameObjects = game->GetGameObjects();
+
+    m_accumulatedLifeChance += deltaTime * Utils::RandomFloat();
+    if (m_accumulatedLifeChance >= LIFE_CHANCE)
+    {
+        shared_ptr<GameObject> gameObject = make_shared<GameObject>(game);
+        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject);
+        gameObject->AddComponent(objTranslator);
+        gameObject->GetTransform()->SetPositionX((rand() % 2 ? 1.0f : -1.0f) * ((game->GetRoadWidth() / 2.0f) * Utils::RandomFloat()));
+
+        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject,
+                                                                                m_textures["Life"]);
+        gameObject->AddComponent(spriteRenderer);
+
+        shared_ptr<Life> life = make_shared<Life>(gameObject);
+        gameObject->AddComponent(life);
+
+        gameObjects.push_back(gameObject);
+
+        m_accumulatedLifeChance -= LIFE_CHANCE;
     }
 }

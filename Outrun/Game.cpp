@@ -96,6 +96,8 @@ void Game::Update(DX::StepTimer const& timer)
             for (int i = 0; i < m_scoreLabels.size(); i++)
                 m_scoreLabels[i]->SetText(to_string((int)m_player->GetDistance()));
 
+            m_livesLabel->SetText(to_string(m_player->GetLivesCount()));
+
             // Wait wasn't the player removed from the list at this point?
             // Well, no, it's a smart pointer, the player is still there, event though it was removed from the list
             // This isn't a leak of any sort because it is completely removed in the ReleaseGameResources method.
@@ -648,11 +650,12 @@ void Game::CreateUI()
         shared_ptr<Texture2D> resumeTexture        = m_contentManager->Load<Texture2D>("UI/Resume.png");
         shared_ptr<Texture2D> resumePressedTexture = m_contentManager->Load<Texture2D>("UI/ResumePressed.png");
 
-        shared_ptr<Texture2D> speedometerTexture   = m_contentManager->Load<Texture2D>("UI/Speedometer.png");
-        shared_ptr<Texture2D> speedPointerTexture  = m_contentManager->Load<Texture2D>("UI/SpeedPointer.png");
-
         shared_ptr<Texture2D> pauseTexture         = m_contentManager->Load<Texture2D>("UI/Pause.png");
         shared_ptr<Texture2D> pausePressedTexture  = m_contentManager->Load<Texture2D>("UI/PausePressed.png");
+
+        shared_ptr<Texture2D> speedometerTexture   = m_contentManager->Load<Texture2D>("UI/Speedometer.png");
+        shared_ptr<Texture2D> speedPointerTexture  = m_contentManager->Load<Texture2D>("UI/SpeedPointer.png");
+        shared_ptr<Texture2D> life17Texture        = m_contentManager->Load<Texture2D>("UI/Life17.png");
 
         shared_ptr<GameFont> vcr17FontRed          = m_contentManager->Load<GameFont>("Fonts/VCR17.spritefont");
         vcr17FontRed->SetColor(Vector4(1, 0, 0.447, 1.0f));
@@ -757,6 +760,20 @@ void Game::CreateUI()
         m_distanceText->SetText("0");
 
         m_uiLayers[(int)Game::GameState::Playing]->AddChild(m_distanceText);
+
+        shared_ptr<UIImage> lifeImage = make_shared<UIImage>(life17Texture,
+                                                             Vector2((GAME_WIDTH / 2.0f) - MARGIN - (life17Texture->GetWidth() / 2.0f),
+                                                                     (-GAME_HEIGHT / 2.0f) + MARGIN + (life17Texture->GetHeight() / 2.0f)),
+                                                             Vector2(life17Texture->GetWidth(),
+                                                                     life17Texture->GetHeight()));
+
+        m_uiLayers[(int)Game::GameState::Playing]->AddChild(lifeImage);
+
+        m_livesLabel = make_shared<UIText>(vcr17FontRed,
+                                           Vector2(-2.0f * MARGIN, 0.0f));
+        m_livesLabel->SetText("0");
+
+        lifeImage->AddChild(m_livesLabel);
     }
     catch(exception e)
     {

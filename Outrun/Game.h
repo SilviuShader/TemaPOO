@@ -144,4 +144,5 @@ private:
     std::shared_ptr<UIText>                          m_distanceText;
     std::vector<std::shared_ptr<UIText> >            m_scoreLabels;
     std::vector<std::shared_ptr<UIText> >            m_bestScoreLabels;
+    std::shared_ptr<UIText>                          m_livesLabel;
 };
