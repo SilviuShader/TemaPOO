@@ -2,7 +2,8 @@
 
 // Implements the post-processing effect: Bloom
 // most of the code is from: https://github.com/microsoft/DirectXTK/wiki/Writing-custom-shaders
-// with slight adjustmens.
+// with slight adjustmens. 
+// (I added heap memory allocation and assignment operator to the VS_BLUR_PARAMETERS class)
 // The shaders used by this class are copied from that tutorial too.
 
 class BloomCamera : public Camera
@@ -51,12 +52,26 @@ private:
     private:
 
         static const size_t SAMPLE_COUNT = 15;
+        static const int    DATA_SIZE    = sizeof(DirectX::XMFLOAT4) * 2 * SAMPLE_COUNT;
 
     public:
 
-        void SetBlurEffectParameters(float, 
-                                     float,
-                                     const BloomCamera::VS_BLOOM_PARAMETERS&);
+        static inline int GetDataSize() { return DATA_SIZE; }
+
+    public:
+
+        VS_BLUR_PARAMETERS();
+        VS_BLUR_PARAMETERS(const VS_BLUR_PARAMETERS&);
+        ~VS_BLUR_PARAMETERS();
+
+
+
+        void                SetBlurEffectParameters(float, 
+                                                    float,
+                                                    const BloomCamera::VS_BLOOM_PARAMETERS&);
+        char*               GetData();
+
+        VS_BLUR_PARAMETERS& operator=(const VS_BLUR_PARAMETERS&);
 
     private:
 
@@ -64,8 +79,10 @@ private:
                               float);
     private:
 
-        DirectX::XMFLOAT4 m_sampleOffsets[SAMPLE_COUNT];
-        DirectX::XMFLOAT4 m_sampleWeights[SAMPLE_COUNT];
+        char*              m_data;
+
+        DirectX::XMFLOAT4* m_sampleOffsets;
+        DirectX::XMFLOAT4* m_sampleWeights;
     };
 
 private:

@@ -20,8 +20,8 @@ private:
     const float ACCUMULATE_TO_CHANGE_ZONE  = 50.0f;
     const float BORDER_ACCUMULATE_TO_SPAWN = 0.5f;
     const float MAX_OBJECT_DISPLACEMENT    = 3.0f;
-    const float CAR_CHANCE                 = 0.5f;
-    const float MOTOR_CHANCE               = 1.0f;
+    const float CAR_CHANCE                 = 1.0f;
+    const float MOTOR_CHANCE               = 2.0f;
     const float LIFE_CHANCE                = 4.0f;
     const float MIN_CAR_SPEED              = 0.5f;
     const float MAX_CAR_SPEED              = 4.0f;

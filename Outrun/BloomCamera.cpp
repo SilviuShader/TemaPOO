@@ -35,6 +35,57 @@ BloomCamera::VS_BLOOM_PARAMETERS::VS_BLOOM_PARAMETERS(float bloomThreshold,
 {
 }
 
+BloomCamera::VS_BLUR_PARAMETERS::VS_BLUR_PARAMETERS()
+{
+    static_assert(!(DATA_SIZE % 16), 
+                  "Data hold by the VS_BLUR_PARAMETERS class  needs to be 16 bytes aligned");
+
+    m_data = new char[GetDataSize()];
+    memset(m_data, 0, GetDataSize());
+
+    m_sampleOffsets = new XMFLOAT4[SAMPLE_COUNT];
+    memset(m_sampleOffsets, 0, sizeof(XMFLOAT4) * SAMPLE_COUNT);
+
+    m_sampleWeights = new XMFLOAT4[SAMPLE_COUNT];
+    memset(m_sampleWeights, 0, sizeof(XMFLOAT4) * SAMPLE_COUNT);
+}
+
+BloomCamera::VS_BLUR_PARAMETERS::VS_BLUR_PARAMETERS(const VS_BLUR_PARAMETERS& other)
+{
+    static_assert(!(DATA_SIZE % 16),
+                  "Data hold by the VS_BLUR_PARAMETERS class  needs to be 16 bytes aligned");
+
+    m_data = new char[GetDataSize()];
+    memcpy(m_data, other.m_data, GetDataSize());
+
+    m_sampleOffsets = new XMFLOAT4[SAMPLE_COUNT];
+    memcpy(m_sampleOffsets, other.m_sampleOffsets, sizeof(XMFLOAT4) * SAMPLE_COUNT);
+
+    m_sampleWeights = new XMFLOAT4[SAMPLE_COUNT];
+    memcpy(m_sampleWeights, other.m_sampleWeights, sizeof(XMFLOAT4) * SAMPLE_COUNT);
+}
+
+BloomCamera::VS_BLUR_PARAMETERS::~VS_BLUR_PARAMETERS()
+{
+    if (m_sampleWeights)
+    {
+        delete[] m_sampleWeights;
+        m_sampleWeights = NULL;
+    }
+
+    if (m_sampleOffsets)
+    {
+        delete[] m_sampleOffsets;
+        m_sampleOffsets = NULL;
+    }
+
+    if (m_data)
+    {
+        delete[] m_data;
+        m_data = NULL;
+    }
+}
+
 void BloomCamera::VS_BLUR_PARAMETERS::SetBlurEffectParameters(float dx, float dy, const BloomCamera::VS_BLOOM_PARAMETERS& params)
 {
     m_sampleWeights[0].x = ComputeGaussian(0, params.GetBlurAmount());
@@ -77,6 +128,31 @@ void BloomCamera::VS_BLUR_PARAMETERS::SetBlurEffectParameters(float dx, float dy
         m_sampleWeights[i].x /= totalWeights;
 }
 
+char* BloomCamera::VS_BLUR_PARAMETERS::GetData()
+{
+    memcpy(m_data, m_sampleOffsets, sizeof(XMFLOAT4) * SAMPLE_COUNT);
+    memcpy(m_data + (sizeof(XMFLOAT4) * SAMPLE_COUNT), m_sampleWeights, sizeof(XMFLOAT4) * SAMPLE_COUNT);
+    return m_data;
+}
+
+BloomCamera::VS_BLUR_PARAMETERS& BloomCamera::VS_BLUR_PARAMETERS::operator=(const VS_BLUR_PARAMETERS& rhs)
+{
+    if (!m_data)
+        m_data = new char[GetDataSize()];
+
+    if (!m_sampleOffsets)
+        m_sampleOffsets = new XMFLOAT4[SAMPLE_COUNT];
+    
+    if (!m_sampleWeights)
+        m_sampleWeights = new XMFLOAT4[SAMPLE_COUNT];
+
+    memcpy(m_data, rhs.m_data, GetDataSize());
+    memcpy(m_sampleOffsets, rhs.m_sampleOffsets, sizeof(XMFLOAT4) * SAMPLE_COUNT);
+    memcpy(m_sampleWeights, rhs.m_sampleWeights, sizeof(XMFLOAT4) * SAMPLE_COUNT);
+
+    return *this;
+}
+
 float BloomCamera::VS_BLUR_PARAMETERS::ComputeGaussian(float n, float theta)
 {
     return (float)((1.0 / sqrtf(2 * XM_PI * theta))
@@ -100,9 +176,6 @@ BloomCamera::BloomCamera(ComPtr<ID3D11Device>        d3dDevice,
 {
     static_assert(!(sizeof(BloomCamera::VS_BLOOM_PARAMETERS) % 16),
         "VS_BLOOM_PARAMETERS needs to be 16 bytes aligned");
-
-    static_assert(!(sizeof(BloomCamera::VS_BLUR_PARAMETERS) % 16),
-        "VS_BLUR_PARAMETERS needs to be 16 bytes aligned");
 
     FileManager::GetInstance()->PushToLog("Creating BloomCamera");
 
@@ -131,7 +204,7 @@ BloomCamera::BloomCamera(ComPtr<ID3D11Device>        d3dDevice,
     }
 
     {
-        CD3D11_BUFFER_DESC cbDesc(sizeof(VS_BLUR_PARAMETERS),
+        CD3D11_BUFFER_DESC cbDesc(VS_BLUR_PARAMETERS::GetDataSize(),
             D3D11_BIND_CONSTANT_BUFFER);
         ThrowIfFailed(d3dDevice->CreateBuffer(&cbDesc, nullptr,
             m_blurParamsWidth.ReleaseAndGetAddressOf()));
@@ -304,10 +377,13 @@ void BloomCamera::SetBloomParameters()
     blurData.SetBlurEffectParameters(1.f / (m_width / 2), 0,
         g_bloomPresets[(int)m_bloomPreset]);
     m_d3dContext->UpdateSubresource(m_blurParamsWidth.Get(), 0, nullptr,
-        &blurData, sizeof(VS_BLUR_PARAMETERS), 0);
+                                    blurData.GetData(), VS_BLUR_PARAMETERS::GetDataSize(), 0);
 
-    blurData.SetBlurEffectParameters(0, 1.f / (m_height / 2),
+    VS_BLUR_PARAMETERS blurData2;
+    blurData2 = blurData;
+
+    blurData2.SetBlurEffectParameters(0, 1.f / (m_height / 2),
         g_bloomPresets[(int)m_bloomPreset]);
     m_d3dContext->UpdateSubresource(m_blurParamsHeight.Get(), 0, nullptr,
-        &blurData, sizeof(VS_BLUR_PARAMETERS), 0);
+                                    blurData2.GetData(), VS_BLUR_PARAMETERS::GetDataSize(), 0);
 }
