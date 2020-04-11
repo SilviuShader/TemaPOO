@@ -23,5 +23,5 @@ private:
 
 private:
 
-    std::string                         m_gameLog;
+    std::string m_gameLog;
 };

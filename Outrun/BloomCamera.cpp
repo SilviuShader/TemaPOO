@@ -137,15 +137,6 @@ char* BloomCamera::VS_BLUR_PARAMETERS::GetData()
 
 BloomCamera::VS_BLUR_PARAMETERS& BloomCamera::VS_BLUR_PARAMETERS::operator=(const VS_BLUR_PARAMETERS& rhs)
 {
-    if (!m_data)
-        m_data = new char[GetDataSize()];
-
-    if (!m_sampleOffsets)
-        m_sampleOffsets = new XMFLOAT4[SAMPLE_COUNT];
-    
-    if (!m_sampleWeights)
-        m_sampleWeights = new XMFLOAT4[SAMPLE_COUNT];
-
     memcpy(m_data, rhs.m_data, GetDataSize());
     memcpy(m_sampleOffsets, rhs.m_sampleOffsets, sizeof(XMFLOAT4) * SAMPLE_COUNT);
     memcpy(m_sampleWeights, rhs.m_sampleWeights, sizeof(XMFLOAT4) * SAMPLE_COUNT);

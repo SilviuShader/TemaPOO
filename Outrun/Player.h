@@ -20,7 +20,7 @@ public:
     ~Player();
 
            void    Update(float)                                  override;
-    inline void    Render()                                       override {                     }
+           void    Render()                                       override {                     }
            void    OnCollisionUpdate(std::shared_ptr<GameObject>) override;
 
            Player& operator++();

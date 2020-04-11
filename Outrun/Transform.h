@@ -11,7 +11,7 @@ public:
     ~Transform();
 
            void  Update(float)           override;
-    inline void  Render()                override {                          }
+           void  Render()                override {                          }
 
     inline void  SetPositionZ(float positionZ)    { m_positionZ = positionZ; }
     inline void  SetPositionX(float positionX)    { m_positionX = positionX; }

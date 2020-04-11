@@ -8,7 +8,7 @@ public:
     ~ObjectTranslator();
 
            void Update(float)                                  override;
-    inline void Render()                                       override  {                        }
+           void Render()                                       override  {                        }
     inline void SetObjectSpeed(float speed)                              { m_objectSpeed = speed; }
 
 private:

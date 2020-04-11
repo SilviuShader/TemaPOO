@@ -47,7 +47,7 @@ private:
         uint8_t m_na[8];
     };
 
-    struct VS_BLUR_PARAMETERS
+    class VS_BLUR_PARAMETERS
     {
     private:
 
