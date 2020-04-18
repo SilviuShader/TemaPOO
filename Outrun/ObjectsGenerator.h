@@ -28,7 +28,7 @@ private:
 
 public:
     
-    ObjectsGenerator(std::shared_ptr<ContentManager>);
+    ObjectsGenerator(std::shared_ptr<Texture2DManager>);
     ~ObjectsGenerator();
 
     void Update(std::shared_ptr<Game>, 

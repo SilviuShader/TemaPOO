@@ -562,10 +562,13 @@ void Game::CreateGameResources()
     FileManager::GetInstance()->PushToLog("Creating Game resources");
     try
     {
-        m_gameState = Game::GameState::Playing;
+        m_gameState        = Game::GameState::Playing;
 
-        m_contentManager = make_shared<ContentManager>(m_d3dDevice,
-            "Resources/");
+        m_texture2DManager = make_shared<Texture2DManager>(m_d3dDevice,
+                                                           "Resources/");
+
+        m_gameFontManager  = make_shared<GameFontManager>(m_d3dDevice, 
+                                                          "Resources/");
 
         m_pseudo3DCamera = make_shared<Pseudo3DCamera>(m_d3dDevice,
             m_d3dContext,
@@ -588,14 +591,14 @@ void Game::CreateGameResources()
 
         m_collisionManager = make_unique<CollisionManager>();
 
-        m_sunTexture = m_contentManager->Load<Texture2D>("Sun.png");
+        m_sunTexture = m_texture2DManager->Load("Sun.png");
 
         // Add the terrain
         shared_ptr<GameObject> terrainObj = make_shared<GameObject>(shared_from_this());
 
         m_terrain = make_shared<Terrain>(terrainObj,
-            m_contentManager,
-            m_d3dDevice);
+                                         m_texture2DManager,
+                                         m_d3dDevice);
 
         terrainObj->AddComponent(m_terrain);
         m_gameObjects.push_back(terrainObj);
@@ -605,7 +608,7 @@ void Game::CreateGameResources()
         m_player = make_shared<Player>(playerObj);
         playerObj->AddComponent(m_player);
 
-        m_carTexture = m_contentManager->Load<Texture2D>("Car.png");
+        m_carTexture = m_texture2DManager->Load("Car.png");
 
         shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(playerObj,
             m_carTexture);
@@ -645,23 +648,23 @@ void Game::CreateUI()
                                                  Vector2(GAME_WIDTH, 
                                                          GAME_HEIGHT));
 
-        shared_ptr<Texture2D> replayTexture        = m_contentManager->Load<Texture2D>("UI/Replay.png");
-        shared_ptr<Texture2D> replayPressedTexture = m_contentManager->Load<Texture2D>("UI/ReplayPressed.png");
+        shared_ptr<Texture2D> replayTexture        = m_texture2DManager->Load("UI/Replay.png");
+        shared_ptr<Texture2D> replayPressedTexture = m_texture2DManager->Load("UI/ReplayPressed.png");
 
-        shared_ptr<Texture2D> quitTexture          = m_contentManager->Load<Texture2D>("UI/Quit.png");
-        shared_ptr<Texture2D> quitPressedTexture   = m_contentManager->Load<Texture2D>("UI/QuitPressed.png");
+        shared_ptr<Texture2D> quitTexture          = m_texture2DManager->Load("UI/Quit.png");
+        shared_ptr<Texture2D> quitPressedTexture   = m_texture2DManager->Load("UI/QuitPressed.png");
 
-        shared_ptr<Texture2D> resumeTexture        = m_contentManager->Load<Texture2D>("UI/Resume.png");
-        shared_ptr<Texture2D> resumePressedTexture = m_contentManager->Load<Texture2D>("UI/ResumePressed.png");
+        shared_ptr<Texture2D> resumeTexture        = m_texture2DManager->Load("UI/Resume.png");
+        shared_ptr<Texture2D> resumePressedTexture = m_texture2DManager->Load("UI/ResumePressed.png");
 
-        shared_ptr<Texture2D> pauseTexture         = m_contentManager->Load<Texture2D>("UI/Pause.png");
-        shared_ptr<Texture2D> pausePressedTexture  = m_contentManager->Load<Texture2D>("UI/PausePressed.png");
+        shared_ptr<Texture2D> pauseTexture         = m_texture2DManager->Load("UI/Pause.png");
+        shared_ptr<Texture2D> pausePressedTexture  = m_texture2DManager->Load("UI/PausePressed.png");
 
-        shared_ptr<Texture2D> speedometerTexture   = m_contentManager->Load<Texture2D>("UI/Speedometer.png");
-        shared_ptr<Texture2D> speedPointerTexture  = m_contentManager->Load<Texture2D>("UI/SpeedPointer.png");
-        shared_ptr<Texture2D> life17Texture        = m_contentManager->Load<Texture2D>("UI/Life17.png");
-
-        shared_ptr<GameFont> vcr17FontRed          = m_contentManager->Load<GameFont>("Fonts/VCR17.spritefont");
+        shared_ptr<Texture2D> speedometerTexture   = m_texture2DManager->Load("UI/Speedometer.png");
+        shared_ptr<Texture2D> speedPointerTexture  = m_texture2DManager->Load("UI/SpeedPointer.png");
+        shared_ptr<Texture2D> life17Texture        = m_texture2DManager->Load("UI/Life17.png");
+        
+        shared_ptr<GameFont> vcr17FontRed          = m_gameFontManager->Load("Fonts/VCR17.spritefont");
         vcr17FontRed->SetColor(Vector4(1, 0, 0.447, 1.0f));
 
         // create the ending screen
@@ -790,12 +793,12 @@ void Game::CreateScoreUI(shared_ptr<UILayer> layer,
                          float               MARGIN)
 {
     float currentUIHeight = 0.0f;
-    shared_ptr<Texture2D> scoreBarTexture = m_contentManager->Load<Texture2D>("UI/ScoreBar.png");
+    shared_ptr<Texture2D> scoreBarTexture = m_texture2DManager->Load("UI/ScoreBar.png");
 
-    shared_ptr<GameFont> vcr32FontBlack = m_contentManager->Load<GameFont>("Fonts/VCR32.spritefont");
+    shared_ptr<GameFont> vcr32FontBlack = m_gameFontManager->Load("Fonts/VCR32.spritefont");
     // make the vcr32FontBlack the color black.
     vcr32FontBlack->SetColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-    shared_ptr<GameFont> vcr32FontRed = m_contentManager->Load<GameFont>("Fonts/VCR32.spritefont");
+    shared_ptr<GameFont> vcr32FontRed = m_gameFontManager->Load("Fonts/VCR32.spritefont");
     vcr32FontRed->SetColor(Vector4(1, 0, 0.447, 1.0f));
 
     shared_ptr<UIImage> endHighScoreImage = make_shared<UIImage>(scoreBarTexture,
@@ -882,7 +885,8 @@ void Game::ReleaseGameResources()
     m_carTexture.reset();
     m_bloomCamera.reset();
     m_pseudo3DCamera.reset();
-    m_contentManager.reset();
+    m_texture2DManager.reset();
+    m_gameFontManager.reset();
 }
 
 void Game::OnReplayButtonReleased()

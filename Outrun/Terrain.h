@@ -6,12 +6,12 @@ private:
 
 	const float MIN_MAX_ROAD_X  = 1.0f;
 	const float ROAD_MOVE_SPEED = 0.03f;
-	const float MAX_CURVE_SLOPE = 5.0f;
+	const float MAX_CURVE_SLOPE = 1.0f;
 
 public:
 
 	Terrain(std::shared_ptr<GameObject>,
-		    std::shared_ptr<ContentManager>,
+		    std::shared_ptr<Texture2DManager>,
 		    Microsoft::WRL::ComPtr<ID3D11Device>);
 
 	~Terrain();

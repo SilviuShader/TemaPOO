@@ -3,7 +3,7 @@
 
 using namespace std;
 
-ObjectsGenerator::ObjectsGenerator(shared_ptr<ContentManager> contentManager) :
+ObjectsGenerator::ObjectsGenerator(shared_ptr<Texture2DManager> contentManager) :
     m_zone(ObjectsGenerator::Zone::Beach),
     m_lastBorder(false),
     m_borderAccumulatedDistance(0.0f),
@@ -15,28 +15,28 @@ ObjectsGenerator::ObjectsGenerator(shared_ptr<ContentManager> contentManager) :
 {
     m_prevZone = m_zone;
 
-    shared_ptr<Texture2D> border = contentManager->Load<Texture2D>("Border.png");
+    shared_ptr<Texture2D> border = contentManager->Load("Border.png");
     m_textures["Border"] = border;
 
-    shared_ptr<Texture2D> palmTree = contentManager->Load<Texture2D>("Palm.png");
+    shared_ptr<Texture2D> palmTree = contentManager->Load("Palm.png");
     m_textures["Palm"] = palmTree;
 
-    shared_ptr<Texture2D> tower = contentManager->Load<Texture2D>("Tower.png");
+    shared_ptr<Texture2D> tower = contentManager->Load("Tower.png");
     m_textures["Tower"] = tower;
 
-    shared_ptr<Texture2D> mountains = contentManager->Load<Texture2D>("Mountains.png");
+    shared_ptr<Texture2D> mountains = contentManager->Load("Mountains.png");
     m_textures["Mountains"] = mountains;
 
-    shared_ptr<Texture2D> car = contentManager->Load<Texture2D>("CarBack.png");
+    shared_ptr<Texture2D> car = contentManager->Load("CarBack.png");
     m_textures["CarBack"] = car;
 
-    car = contentManager->Load<Texture2D>("CarFront.png");
+    car = contentManager->Load("CarFront.png");
     m_textures["CarFront"] = car;
 
-    shared_ptr<Texture2D> motor = contentManager->Load<Texture2D>("MotorBack.png");
+    shared_ptr<Texture2D> motor = contentManager->Load("MotorBack.png");
     m_textures["MotorBack"] = motor;
 
-    shared_ptr<Texture2D> life = contentManager->Load<Texture2D>("Life.png");
+    shared_ptr<Texture2D> life = contentManager->Load("Life.png");
     m_textures["Life"] = life;
 }
 

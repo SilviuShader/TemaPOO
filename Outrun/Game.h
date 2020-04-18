@@ -125,7 +125,8 @@ private:
 
     Game::GameState                                  m_gameState;
 
-    std::shared_ptr<ContentManager>                  m_contentManager;
+    std::shared_ptr<Texture2DManager>                m_texture2DManager;
+    std::shared_ptr<GameFontManager>                 m_gameFontManager;
     std::shared_ptr<Pseudo3DCamera>                  m_pseudo3DCamera;
     std::shared_ptr<BloomCamera>                     m_bloomCamera;
     std::list<std::shared_ptr<GameObject> >          m_gameObjects;

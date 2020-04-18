@@ -6,9 +6,9 @@ using namespace std;
 using namespace Microsoft::WRL;
 using namespace DirectX::SimpleMath;
 
-Terrain::Terrain(shared_ptr<GameObject>     gameObject, 
-	             shared_ptr<ContentManager> contentManager,
-	             ComPtr<ID3D11Device>       d3dDevice) :
+Terrain::Terrain(shared_ptr<GameObject>       gameObject, 
+	             shared_ptr<Texture2DManager> contentManager,
+	             ComPtr<ID3D11Device>         d3dDevice) :
 
 	GameComponent(gameObject),
 	m_d3dDevice(d3dDevice),
@@ -80,7 +80,7 @@ float Terrain::GetRoadX(int crtHeight)
 
 	int linesDiff = camera->GetHeight() - max(crtHeight, topSegH);
 	float dx = m_bottomSegment.y;
-	float ddx = dx * linesDiff * z;
+	float ddx = dx * linesDiff * z * z;
 
 	result = linesDiff * (dx + ddx) / 2.0f;
 
@@ -89,7 +89,7 @@ float Terrain::GetRoadX(int crtHeight)
 		linesDiff = topSegH - crtHeight;
 		dx = m_topSegment.y;
 		float prevStr = ddx;
-		ddx += dx * linesDiff * z;
+		ddx += dx * linesDiff * z * z;
 		result += linesDiff * (prevStr + ddx) / 2.0f;
 	}
 
