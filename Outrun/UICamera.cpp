@@ -8,7 +8,7 @@ using namespace DirectX::SimpleMath;
 
 UICamera::UICamera(ComPtr<ID3D11Device>        d3dDevice, 
                    ComPtr<ID3D11DeviceContext> d3dContext, 
-                   shared_ptr<Game>            game, 
+                   Game*                       game, 
                    int                         width, 
                    int                         height, 
                    int                         screenWidth, 

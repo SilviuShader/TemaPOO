@@ -4,8 +4,8 @@ class Transform : public GameComponent
 {
 public:
     
-    Transform(std::shared_ptr<GameObject>);
-    Transform(std::shared_ptr<GameObject>, 
+    Transform(GameObject*);
+    Transform(GameObject*, 
               float, 
               float);
     ~Transform();

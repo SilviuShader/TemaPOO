@@ -152,7 +152,7 @@ float BloomCamera::VS_BLUR_PARAMETERS::ComputeGaussian(float n, float theta)
 
 BloomCamera::BloomCamera(ComPtr<ID3D11Device>        d3dDevice, 
                          ComPtr<ID3D11DeviceContext> d3dContext, 
-                         shared_ptr<Game>            game, 
+                         Game*                       game, 
                          int                         width, 
                          int                         height, 
                          int                         screenWidth, 
@@ -205,11 +205,11 @@ BloomCamera::BloomCamera(ComPtr<ID3D11Device>        d3dDevice,
 
     SetBloomParameters();
 
-    m_renderTexture1 = make_shared<RenderTexture>(d3dDevice, 
+    m_renderTexture1 = make_unique<RenderTexture>(d3dDevice, 
                                                   width / 2.0f, 
                                                   height / 2.0f);
 
-    m_renderTexture2 = make_shared<RenderTexture>(d3dDevice,
+    m_renderTexture2 = make_unique<RenderTexture>(d3dDevice,
                                                   width / 2.0f,
                                                   height / 2.f);
 

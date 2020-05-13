@@ -8,6 +8,7 @@ public:
     ~FileManager();
 
     static std::shared_ptr<FileManager> GetInstance();
+    static void                         DeleteInstance();
 
 public:
 

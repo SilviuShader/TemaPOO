@@ -8,7 +8,7 @@ private:
 
 public:
     
-    SpriteRenderer(std::shared_ptr<GameObject>, 
+    SpriteRenderer(GameObject*, 
                    std::shared_ptr<Texture2D>);
     ~SpriteRenderer();
 

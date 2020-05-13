@@ -4,7 +4,7 @@ class ObjectTranslator : public GameComponent
 {
 public:
 
-    ObjectTranslator(std::shared_ptr<GameObject>);
+    ObjectTranslator(GameObject*);
     ~ObjectTranslator();
 
            void Update(float)                                  override;

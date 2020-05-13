@@ -3,7 +3,7 @@
 
 using namespace std;
 
-GameObject::GameObject(shared_ptr<Game> game) :
+GameObject::GameObject(Game* game) :
     m_game(game),
     m_dead(false),
     m_transform(nullptr)
@@ -14,7 +14,7 @@ GameObject::GameObject(shared_ptr<Game> game) :
 GameObject::~GameObject()
 {
     m_transform.reset();
-    m_game.reset();
+    m_game = nullptr;
     ClearComponents();
 }
 
@@ -44,7 +44,7 @@ shared_ptr<Transform> GameObject::GetTransform()
     // the game object.
     if (m_transform == nullptr)
     {
-        m_transform = make_shared<Transform>(shared_from_this());
+        m_transform = make_shared<Transform>(this);
         m_gameComponents.push_back(m_transform);
     }
 
@@ -57,4 +57,5 @@ void GameObject::ClearComponents()
         gc.reset();
 
     m_gameComponents.clear();
+    m_transform.reset();
 }

@@ -4,7 +4,7 @@ class Life : public GameComponent
 {
 public:
 
-    Life(std::shared_ptr<GameObject>);
+    Life(GameObject*);
     ~Life();
 
     void Update(float) override { };

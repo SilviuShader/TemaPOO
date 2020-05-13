@@ -1,6 +1,6 @@
 #pragma once
 
-class UIElement : public std::enable_shared_from_this<UIElement>
+class UIElement
 {
 public:
 
@@ -27,7 +27,7 @@ protected:
 
     DirectX::SimpleMath::Vector2 m_relativePosition;
     DirectX::SimpleMath::Vector2 m_size;
-    std::shared_ptr<UIElement>   m_parent;
+    UIElement*                   m_parent;
     bool                         m_active;
 
 private:

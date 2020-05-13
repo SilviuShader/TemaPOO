@@ -54,6 +54,11 @@ void InputManager::Reset()
     }
 }
 
+void InputManager::DeleteInstance()
+{
+    g_inputManager.reset();
+}
+
 void InputManager::Update()
 {
     // Initialize values

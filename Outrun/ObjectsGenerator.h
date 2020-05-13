@@ -31,20 +31,20 @@ public:
     ObjectsGenerator(std::shared_ptr<Texture2DManager>);
     ~ObjectsGenerator();
 
-    void Update(std::shared_ptr<Game>, 
+    void Update(Game*, 
                 float);
 
 private:
 
-    void BorderSpawnUpdate(std::shared_ptr<Game>,
+    void BorderSpawnUpdate(Game*,
                            float);
-    void ZoneSpawnUpdate(std::shared_ptr<Game>,
+    void ZoneSpawnUpdate(Game*,
                          float);
-    void CarSpawnUpdate(std::shared_ptr<Game>, 
+    void CarSpawnUpdate(Game*, 
                         float);
-    void MotorSpawnUpdate(std::shared_ptr<Game>,
+    void MotorSpawnUpdate(Game*,
                           float);
-    void LifeSpawnUpdate(std::shared_ptr<Game>,
+    void LifeSpawnUpdate(Game*,
                          float);
 
 private:

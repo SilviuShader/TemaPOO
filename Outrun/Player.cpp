@@ -5,7 +5,7 @@ using namespace std;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-Player::Player(shared_ptr<GameObject> parent) :
+Player::Player(GameObject* parent) :
 
     GameComponent(parent),
     m_spriteRenderer(nullptr),
@@ -26,7 +26,7 @@ Player::~Player()
 void Player::Update(float deltaTime)
 {
     shared_ptr<InputManager>   inputManager = InputManager::GetInstance();
-    shared_ptr<Game>           game         = m_parent->GetGame();
+    Game*                      game         = m_parent->GetGame();
     shared_ptr<Pseudo3DCamera> camera       = game->GetPseudo3DCamera();
     shared_ptr<Transform>      transform    = m_parent->GetTransform();
 

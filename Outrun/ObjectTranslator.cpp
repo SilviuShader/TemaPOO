@@ -3,7 +3,7 @@
 
 using namespace std;
 
-ObjectTranslator::ObjectTranslator(shared_ptr<GameObject> parent) :
+ObjectTranslator::ObjectTranslator(GameObject* parent) :
     GameComponent(parent),
     m_objectSpeed(0.0f)
 {
@@ -17,7 +17,11 @@ ObjectTranslator::~ObjectTranslator()
 
 void ObjectTranslator::Update(float deltaTime)
 {
-    shared_ptr<Player>    player    = m_parent->GetGame()->GetPlayer();
+    Player*               player    = m_parent->GetGame()->GetPlayer();
+    
+    if (player == nullptr)
+        return;
+
     float                 speed     = player->GetSpeed();
     
     shared_ptr<Transform> transform = m_parent->GetTransform();

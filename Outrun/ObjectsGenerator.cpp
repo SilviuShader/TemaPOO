@@ -48,9 +48,12 @@ ObjectsGenerator::~ObjectsGenerator()
     m_textures.clear();
 }
 
-void ObjectsGenerator::Update(shared_ptr<Game> game,
-                              float            deltaTime)
+void ObjectsGenerator::Update(Game* game,
+                              float deltaTime)
 {
+    if (game->GetPlayer() == nullptr)
+        return;
+
     BorderSpawnUpdate(game, deltaTime);
     ZoneSpawnUpdate(game, deltaTime);
     CarSpawnUpdate(game, deltaTime);
@@ -58,7 +61,7 @@ void ObjectsGenerator::Update(shared_ptr<Game> game,
     LifeSpawnUpdate(game, deltaTime);
 }
 
-void ObjectsGenerator::BorderSpawnUpdate(shared_ptr<Game> game, float deltaTime)
+void ObjectsGenerator::BorderSpawnUpdate(Game* game, float deltaTime)
 {
     float                          playerSpeed = game->GetPlayer()->GetSpeed();
     list<shared_ptr<GameObject> >& gameObjects = game->GetGameObjects();
@@ -68,12 +71,12 @@ void ObjectsGenerator::BorderSpawnUpdate(shared_ptr<Game> game, float deltaTime)
     if (m_borderAccumulatedDistance >= BORDER_ACCUMULATE_TO_SPAWN)
     {
         shared_ptr<GameObject> gameObject = make_shared<GameObject>(game);
-        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject);
+        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject.get());
         gameObject->AddComponent(objTranslator);
 
         gameObject->GetTransform()->SetPositionX((m_lastBorder ? 1.0f : -1.0f) * (game->GetRoadWidth() + 0.05f));
 
-        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject,
+        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject.get(),
             m_textures["Border"]);
         gameObject->AddComponent(spriteRenderer);
 
@@ -84,8 +87,8 @@ void ObjectsGenerator::BorderSpawnUpdate(shared_ptr<Game> game, float deltaTime)
     }
 }
 
-void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game, 
-                                       float            deltaTime)
+void ObjectsGenerator::ZoneSpawnUpdate(Game* game,
+                                       float deltaTime)
 {
     float                          playerSpeed = game->GetPlayer()->GetSpeed();
     list<shared_ptr<GameObject> >& gameObjects = game->GetGameObjects();
@@ -127,18 +130,18 @@ void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game,
         if (m_textures.find(textureIndex) != m_textures.end())
         {
             shared_ptr<GameObject> gameObject = make_shared<GameObject>(game);
-            shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject);
+            shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject.get());
             gameObject->AddComponent(objTranslator);
 
             float displacement = Utils::RandomFloat() * MAX_OBJECT_DISPLACEMENT;
 
             gameObject->GetTransform()->SetPositionX((rand() % 2 ? 1.0f : -1.0f) * (game->GetRoadWidth() / 2.0f + 3.0f + displacement));
 
-            shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject,
+            shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject.get(),
                 m_textures[textureIndex]);
             gameObject->AddComponent(spriteRenderer);
 
-            shared_ptr<Killer> killer = make_shared<Killer>(gameObject);
+            shared_ptr<Killer> killer = make_shared<Killer>(gameObject.get());
             gameObject->AddComponent(killer);
 
             gameObjects.push_back(gameObject);
@@ -148,8 +151,8 @@ void ObjectsGenerator::ZoneSpawnUpdate(shared_ptr<Game> game,
     }
 }
 
-void ObjectsGenerator::CarSpawnUpdate(shared_ptr<Game> game,
-                                      float            deltaTime)
+void ObjectsGenerator::CarSpawnUpdate(Game* game,
+                                      float deltaTime)
 {
     list<shared_ptr<GameObject> >& gameObjects = game->GetGameObjects();
 
@@ -161,7 +164,7 @@ void ObjectsGenerator::CarSpawnUpdate(shared_ptr<Game> game,
 
         shared_ptr<GameObject> gameObject = make_shared<GameObject>(game);
 
-        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject);
+        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject.get());
         objTranslator->SetObjectSpeed(Utils::Lerp(Utils::RandomFloat(),
                                                   MIN_CAR_SPEED, 
                                                   MAX_CAR_SPEED) * 
@@ -171,11 +174,11 @@ void ObjectsGenerator::CarSpawnUpdate(shared_ptr<Game> game,
 
         gameObject->GetTransform()->SetPositionX((goingForward ? 1.0f : -1.0f) * (game->GetRoadWidth() / 2.0f));
 
-        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject,
+        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject.get(),
                                                                                 m_textures[(goingForward ? "CarBack" : "CarFront")]);
         gameObject->AddComponent(spriteRenderer);
 
-        shared_ptr<Killer> killer = make_shared<Killer>(gameObject);
+        shared_ptr<Killer> killer = make_shared<Killer>(gameObject.get());
         gameObject->AddComponent(killer);
 
         gameObjects.push_back(gameObject);
@@ -184,8 +187,8 @@ void ObjectsGenerator::CarSpawnUpdate(shared_ptr<Game> game,
     }
 }
 
-void ObjectsGenerator::MotorSpawnUpdate(shared_ptr<Game> game, 
-                                        float            deltaTime)
+void ObjectsGenerator::MotorSpawnUpdate(Game* game,
+                                        float deltaTime)
 {
     list<shared_ptr<GameObject> >& gameObjects = game->GetGameObjects();
 
@@ -194,7 +197,7 @@ void ObjectsGenerator::MotorSpawnUpdate(shared_ptr<Game> game,
     {
         shared_ptr<GameObject> gameObject = make_shared<GameObject>(game);
 
-        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject);
+        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject.get());
         objTranslator->SetObjectSpeed(Utils::Lerp(Utils::RandomFloat(),
                                                   MIN_CAR_SPEED,
                                                   MAX_CAR_SPEED) * -1.0f);
@@ -203,11 +206,11 @@ void ObjectsGenerator::MotorSpawnUpdate(shared_ptr<Game> game,
 
         gameObject->GetTransform()->SetPositionX(0.0f);
 
-        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject,
+        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject.get(),
             m_textures["MotorBack"]);
         gameObject->AddComponent(spriteRenderer);
 
-        shared_ptr<Killer> killer = make_shared<Killer>(gameObject);
+        shared_ptr<Killer> killer = make_shared<Killer>(gameObject.get());
         gameObject->AddComponent(killer);
 
         gameObjects.push_back(gameObject);
@@ -216,8 +219,8 @@ void ObjectsGenerator::MotorSpawnUpdate(shared_ptr<Game> game,
     }
 }
 
-void ObjectsGenerator::LifeSpawnUpdate(shared_ptr<Game> game, 
-                                       float            deltaTime)
+void ObjectsGenerator::LifeSpawnUpdate(Game* game,
+                                       float deltaTime)
 {
     list<shared_ptr<GameObject> >& gameObjects = game->GetGameObjects();
 
@@ -225,15 +228,15 @@ void ObjectsGenerator::LifeSpawnUpdate(shared_ptr<Game> game,
     if (m_accumulatedLifeChance >= LIFE_CHANCE)
     {
         shared_ptr<GameObject> gameObject = make_shared<GameObject>(game);
-        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject);
+        shared_ptr<ObjectTranslator> objTranslator = make_shared<ObjectTranslator>(gameObject.get());
         gameObject->AddComponent(objTranslator);
         gameObject->GetTransform()->SetPositionX((rand() % 2 ? 1.0f : -1.0f) * ((game->GetRoadWidth() / 2.0f) * Utils::RandomFloat()));
 
-        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject,
+        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(gameObject.get(),
                                                                                 m_textures["Life"]);
         gameObject->AddComponent(spriteRenderer);
 
-        shared_ptr<Life> life = make_shared<Life>(gameObject);
+        shared_ptr<Life> life = make_shared<Life>(gameObject.get());
         gameObject->AddComponent(life);
 
         gameObjects.push_back(gameObject);

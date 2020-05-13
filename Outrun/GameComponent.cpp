@@ -3,12 +3,12 @@
 
 using namespace std;
 
-GameComponent::GameComponent(shared_ptr<GameObject> parent) : 
+GameComponent::GameComponent(GameObject* parent) : 
     m_parent(parent)
 {
 }
 
 GameComponent::~GameComponent()
 {
-    m_parent.reset();
+    m_parent = nullptr;
 }

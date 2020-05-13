@@ -15,7 +15,7 @@ Camera::CameraBeginFunction::CameraBeginFunction(function<void _cdecl()> functio
 
 Camera::Camera(ComPtr<ID3D11Device>        d3dDevice,
 	           ComPtr<ID3D11DeviceContext> d3dContext,
-	           shared_ptr<Game>            game,
+	           Game*                       game,
 	  		   int                         width,
 			   int                         height,
 			   int                         screenWidth,
@@ -32,7 +32,6 @@ Camera::Camera(ComPtr<ID3D11Device>        d3dDevice,
 	m_height(height),
 	m_screenWidth(screenWidth),
 	m_screenHeight(screenHeight),
-	m_states(make_unique<CommonStates>(d3dDevice.Get())),
 	m_customBeginFunction(nullptr)
 {
 }
@@ -40,11 +39,10 @@ Camera::Camera(ComPtr<ID3D11Device>        d3dDevice,
 Camera::~Camera()
 {
 	m_d3dContext.Reset();
-	m_game.reset();
+	m_game = nullptr;
 	m_spriteBatch.reset();
 	m_renderTexture.reset();
 	m_customBeginFunction.reset();
-	m_states.reset();
 }
 
 void Camera::Present(shared_ptr<SpriteBatch> spriteBatch)
@@ -186,8 +184,8 @@ void Camera::Begin2D(shared_ptr<CameraBeginFunction> customFunction)
 	{
 		m_customBeginFunction = customFunction;
 		m_spriteBatch->Begin(DirectX::SpriteSortMode_FrontToBack,
-			                 m_states->NonPremultiplied(),
-			                 m_states->PointClamp(), 
+			                 m_game->GetCommonStates()->NonPremultiplied(),
+			                 m_game->GetCommonStates()->PointClamp(), 
 			                 nullptr, 
 			                 nullptr, 
 			                 m_customBeginFunction == nullptr ? nullptr : m_customBeginFunction->GetFunction());

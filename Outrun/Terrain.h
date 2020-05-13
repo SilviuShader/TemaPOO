@@ -10,7 +10,7 @@ private:
 
 public:
 
-	Terrain(std::shared_ptr<GameObject>,
+	Terrain(GameObject*,
 		    std::shared_ptr<Texture2DManager>,
 		    Microsoft::WRL::ComPtr<ID3D11Device>);
 

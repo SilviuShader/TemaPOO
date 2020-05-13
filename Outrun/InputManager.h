@@ -37,6 +37,7 @@ public:
                                                         std::shared_ptr<DirectX::Mouse>);
     static void                          Reset();
     static std::shared_ptr<InputManager> GetInstance() { return g_inputManager; }
+    static void                          DeleteInstance();
 
 public:
 

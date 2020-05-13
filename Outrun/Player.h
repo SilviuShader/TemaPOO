@@ -16,7 +16,7 @@ private:
 
 public:
 
-    Player(std::shared_ptr<GameObject>);
+    Player(GameObject*);
     ~Player();
 
            void    Update(float)                                  override;

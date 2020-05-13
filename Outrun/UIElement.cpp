@@ -15,7 +15,7 @@ UIElement::UIElement() :
 UIElement::~UIElement()
 {
     DeleteChildren();
-    m_parent.reset();
+    m_parent = nullptr;
 }
 
 void UIElement::DeleteChildren()
@@ -23,7 +23,7 @@ void UIElement::DeleteChildren()
     for (auto& child : m_children)
     {
         child->DeleteChildren();
-        child->m_parent.reset();
+        child->m_parent = nullptr;
         child.reset();
     }
 
@@ -32,7 +32,7 @@ void UIElement::DeleteChildren()
 
 void UIElement::AddChild(shared_ptr<UIElement> child)
 {
-    shared_ptr<UIElement> prevParent = child->m_parent;
+    UIElement* prevParent = child->m_parent;
 
     if (prevParent != nullptr)
         prevParent->m_children.remove_if([&](const shared_ptr<UIElement> uiElement)
@@ -40,7 +40,7 @@ void UIElement::AddChild(shared_ptr<UIElement> child)
                 return child.get() == uiElement.get();
             });
 
-    child->m_parent = shared_from_this();
+    child->m_parent = this;
     m_children.push_back(child);
 }
 

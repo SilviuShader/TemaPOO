@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Transform::Transform(shared_ptr<GameObject> parent) :
+Transform::Transform(GameObject* parent) :
     GameComponent(parent),
     m_positionX(0.0f),
     m_positionZ(0.0f),
@@ -11,7 +11,7 @@ Transform::Transform(shared_ptr<GameObject> parent) :
 {
 }
 
-Transform::Transform(shared_ptr<GameObject> parent, 
+Transform::Transform(GameObject* parent, 
                      float                  positionX, 
                      float                  positionZ) :
     GameComponent(parent),

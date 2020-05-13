@@ -26,7 +26,7 @@ public:
 	
 	Camera(Microsoft::WRL::ComPtr<ID3D11Device>,
 		   Microsoft::WRL::ComPtr<ID3D11DeviceContext>,
-		   std::shared_ptr<Game>,
+		   Game*,
 		   int, 
 		   int, 
 		   int, 
@@ -65,8 +65,7 @@ protected:
 protected:
 
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_d3dContext;
-	std::unique_ptr<DirectX::CommonStates>      m_states;
-	std::shared_ptr<Game>                       m_game;
+	Game*                                       m_game;
 
 	int                                         m_width;
 	int                                         m_height;

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Killer::Killer(shared_ptr<GameObject> parent) :
+Killer::Killer(GameObject* parent) :
     GameComponent(parent)
 {
 }

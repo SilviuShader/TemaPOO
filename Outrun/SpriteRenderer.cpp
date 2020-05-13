@@ -6,8 +6,8 @@ using namespace std;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-SpriteRenderer::SpriteRenderer(shared_ptr<GameObject> parent, 
-                               shared_ptr<Texture2D>  texture) :
+SpriteRenderer::SpriteRenderer(GameObject*           parent, 
+                               shared_ptr<Texture2D> texture) :
     GameComponent(parent),
     m_texture(texture)
 {
@@ -21,10 +21,13 @@ SpriteRenderer::~SpriteRenderer()
 void SpriteRenderer::Render()
 {
     shared_ptr<Transform>      transform = m_parent->GetTransform();
-    shared_ptr<Game>           game      = m_parent->GetGame();
+    Game*                      game      = m_parent->GetGame();
 
-    shared_ptr<Terrain>        terrain   = game->GetTerrain();
-    shared_ptr<Player>         player    = game->GetPlayer();
+    if (game->GetPlayer() == nullptr)
+        return;
+
+    Terrain*                   terrain   = game->GetTerrain();
+    Player*                    player    = game->GetPlayer();
     shared_ptr<Pseudo3DCamera> camera    = game->GetPseudo3DCamera();
 
     float scale = transform->GetScale() * GetSpriteScaleFactor();
@@ -51,7 +54,7 @@ void SpriteRenderer::Render()
 
 float SpriteRenderer::GetSpriteScaleFactor()
 {
-    shared_ptr<Game>           game   = m_parent->GetGame();
+    Game*                      game   = m_parent->GetGame();
     shared_ptr<Pseudo3DCamera> camera = game->GetPseudo3DCamera();
 
     return (float)camera->GetHeight() / BASE_TEXTURES_RESOLUTION;

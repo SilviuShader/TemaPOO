@@ -126,6 +126,7 @@ int WINAPI wWinMain(_In_     HINSTANCE hInstance,
         }
     }
 
+    g_game->Cleanup();
     g_game.reset();
 
     CoUninitialize();

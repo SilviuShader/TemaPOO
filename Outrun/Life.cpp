@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Life::Life(shared_ptr<GameObject> parent) :
+Life::Life(GameObject* parent) :
     GameComponent(parent)
 {
 }

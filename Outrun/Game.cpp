@@ -29,6 +29,10 @@ Game::Game() noexcept :
 #endif // _DEBUG
 }
 
+Game::~Game()
+{
+}
+
 // Initialize the Direct3D resources required to run.
 void Game::Initialize(HWND window, int width, int height)
 {
@@ -94,35 +98,38 @@ void Game::Update(DX::StepTimer const& timer)
 
             for (shared_ptr<GameObject>& gameObj : m_gameObjects)
                 gameObj->Update(elapsedTime);
-            RemoveDeadObjects();
 
             m_collisionManager->Update(m_gameObjects);
-            RemoveDeadObjects();
-
-            (*m_speedPointerImage.get()) = Utils::Lerp(m_player->GetSpeed() / m_player->GetMaxSpeed(),
+            
+            (*m_speedPointerImage.get()) = Utils::Lerp(GetPlayer()->GetSpeed() / GetPlayer()->GetMaxSpeed(),
                                                        -1.75f,
                                                        1.1f);
 
-            m_distanceText->SetText(to_string((int)m_player->GetDistance()));
+            m_distanceText->SetText(to_string((int)GetPlayer()->GetDistance()));
             for (int i = 0; i < m_scoreLabels.size(); i++)
-                m_scoreLabels[i]->SetText(to_string((int)m_player->GetDistance()));
+                m_scoreLabels[i]->SetText(to_string((int)GetPlayer()->GetDistance()));
 
-            m_livesLabel->SetText(to_string(m_player->GetLivesCount()));
+            m_livesLabel->SetText(to_string(GetPlayer()->GetLivesCount()));
 
             // Wait wasn't the player removed from the list at this point?
             // Well, no, it's a smart pointer, the player is still there, event though it was removed from the list
             // This isn't a leak of any sort because it is completely removed in the ReleaseGameResources method.
             // also, the player is still needed for this step... same applies for terrain.
-            if (m_player->GetParent()->Dead())
+            if (m_player->Dead())
             {
                 int bestScore = FileManager::GetInstance()->ReadScore();
-                bestScore = max(bestScore, (int)m_player->GetDistance());
+                bestScore = max(bestScore, (int)GetPlayer()->GetDistance());
                 FileManager::GetInstance()->WriteScore(bestScore);
 
                 ChangeGameState(Game::GameState::End);
 
                 UpdateBestScoreLabels();
+                m_player.reset();
+                m_player = nullptr;
             }
+
+            RemoveDeadObjects();
+
             break;
         case Game::GameState::End:
 
@@ -346,7 +353,6 @@ void Game::GetDefaultSize(int& width, int& height) const
     height = 480;
 }
 
-
 void Game::OnDeviceLost()
 {
     ReleaseGameResources();
@@ -377,6 +383,40 @@ void Game::ChangeGameState(Game::GameState gameState)
         else
             m_bloomCamera->SetBloomPreset(BloomCamera::BloomPresets::Blurry);
     }
+}
+
+void Game::Cleanup()
+{
+    FileManager::DeleteInstance();
+    InputManager::DeleteInstance();
+    
+    m_mouse.reset();
+    m_keyboard.reset();
+
+    m_window = NULL;
+    m_d3dDevice.Reset();
+    m_d3dContext.Reset();
+    m_swapChain.Reset();
+    m_renderTargetView.Reset();
+    m_depthStencilView.Reset();
+    m_spriteBatch.reset();
+    m_states.reset();
+    m_texture2DManager.reset();
+    m_gameFontManager.reset();
+    m_pseudo3DCamera.reset();
+    m_bloomCamera.reset();
+    m_collisionManager.reset();
+
+    m_terrain.reset();
+    m_player.reset();
+    m_carTexture.reset();
+    m_sunTexture.reset();
+    m_uiCamera.reset();
+    m_speedPointerImage.reset();
+    m_distanceText.reset();
+    m_scoreLabels.clear();
+    m_bestScoreLabels.clear();
+    m_livesLabel.reset();
 }
 
 // These are the resources that depend on the device.
@@ -566,7 +606,7 @@ void Game::RemoveDeadObjects()
         {
             if (gameObj->Dead())
                 gameObj->ClearComponents();
-
+            
             return gameObj->Dead();
         });
 }
@@ -586,7 +626,7 @@ void Game::CreateGameResources()
 
         m_pseudo3DCamera = make_shared<Pseudo3DCamera>(m_d3dDevice,
             m_d3dContext,
-            shared_from_this(),
+            this,
             GAME_WIDTH,
             GAME_HEIGHT,
             m_outputWidth,
@@ -595,7 +635,7 @@ void Game::CreateGameResources()
 
         m_bloomCamera = make_shared<BloomCamera>(m_d3dDevice,
             m_d3dContext,
-            shared_from_this(),
+            this,
             GAME_WIDTH,
             GAME_HEIGHT,
             m_outputWidth,
@@ -608,23 +648,27 @@ void Game::CreateGameResources()
         m_sunTexture = m_texture2DManager->Load("Sun.png");
 
         // Add the terrain
-        shared_ptr<GameObject> terrainObj = make_shared<GameObject>(shared_from_this());
+        shared_ptr<GameObject> terrainObj = make_shared<GameObject>(this);
 
-        m_terrain = make_shared<Terrain>(terrainObj,
+        shared_ptr<Terrain> terrain;
+
+        terrain = make_shared<Terrain>(terrainObj.get(),
                                          m_texture2DManager,
                                          m_d3dDevice);
 
-        terrainObj->AddComponent(m_terrain);
+        terrainObj->AddComponent(terrain);
         m_gameObjects.push_back(terrainObj);
+        m_terrain = terrainObj;
 
         // Add the player
-        shared_ptr<GameObject> playerObj = make_shared<GameObject>(shared_from_this());
-        m_player = make_shared<Player>(playerObj);
-        playerObj->AddComponent(m_player);
+        shared_ptr<GameObject> playerObj = make_shared<GameObject>(this);
+        shared_ptr<Player> player = make_shared<Player>(playerObj.get());
+        playerObj->AddComponent(player);
+        m_player = playerObj;
 
         m_carTexture = m_texture2DManager->Load("Car.png");
 
-        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(playerObj,
+        shared_ptr<SpriteRenderer> spriteRenderer = make_shared<SpriteRenderer>(playerObj.get(),
             m_carTexture);
         playerObj->AddComponent(spriteRenderer);
 
@@ -651,7 +695,7 @@ void Game::CreateUI()
 
         m_uiCamera = make_shared<UICamera>(m_d3dDevice, 
                                            m_d3dContext, 
-                                           shared_from_this(), 
+                                           this, 
                                            GAME_WIDTH, 
                                            GAME_HEIGHT, 
                                            m_outputWidth, 
@@ -899,13 +943,6 @@ void Game::ReleaseGameResources()
     m_texture2DManager.reset();
     m_gameFontManager.reset();
 
-
-    for (int i = 0; i < (int)Game::GameState::Last; i++)
-        m_uiLayers[i]->DeleteChildren();
-
-    for (int i = 0; i < (int)Game::GameState::Last; i++)
-        m_uiLayers[i].reset();
-
     m_speedPointerImage.reset();
     m_distanceText.reset();
     for (auto& scoreLabel : m_scoreLabels)
@@ -915,6 +952,12 @@ void Game::ReleaseGameResources()
         bestScoreLabel.reset();
 
     m_livesLabel.reset();
+
+    for (int i = 0; i < (int)Game::GameState::Last; i++)
+        m_uiLayers[i]->DeleteChildren();
+
+    for (int i = 0; i < (int)Game::GameState::Last; i++)
+        m_uiLayers[i].reset();
 }
 
 void Game::OnReplayButtonReleased()

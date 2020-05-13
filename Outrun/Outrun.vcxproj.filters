@@ -77,8 +77,8 @@
     <ClCompile Include="UIImage.cpp" />
     <ClCompile Include="GameFont.cpp" />
     <ClCompile Include="FileManager.cpp" />
-    <ClCompile Include="BloomCamera.cpp" />
     <ClCompile Include="Life.cpp" />
+    <ClCompile Include="BloomCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

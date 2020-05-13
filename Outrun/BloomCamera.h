@@ -93,7 +93,7 @@ public:
 
 	BloomCamera(Microsoft::WRL::ComPtr<ID3D11Device>,
                 Microsoft::WRL::ComPtr<ID3D11DeviceContext>,
-                std::shared_ptr<Game>,
+                Game*,
                 int,
                 int,
                 int,
@@ -127,8 +127,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer>      m_blurParamsWidth;
     Microsoft::WRL::ComPtr<ID3D11Buffer>      m_blurParamsHeight;
 
-    std::shared_ptr<RenderTexture>            m_renderTexture1;
-    std::shared_ptr<RenderTexture>            m_renderTexture2;
+    std::unique_ptr<RenderTexture>            m_renderTexture1;
+    std::unique_ptr<RenderTexture>            m_renderTexture2;
     RECT                                      m_bloomRect;
 
     BloomCamera::BloomPresets                 m_bloomPreset;

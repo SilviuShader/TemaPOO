@@ -6,7 +6,7 @@ using namespace std;
 using namespace Microsoft::WRL;
 using namespace DirectX::SimpleMath;
 
-Terrain::Terrain(shared_ptr<GameObject>       gameObject, 
+Terrain::Terrain(GameObject*                  gameObject, 
 	             shared_ptr<Texture2DManager> contentManager,
 	             ComPtr<ID3D11Device>         d3dDevice) :
 
@@ -38,7 +38,7 @@ void Terrain::Update(float deltaTime)
 	m_maxRoadX                              = MIN_MAX_ROAD_X;
 	CreateTexture();
 
-	shared_ptr<Game>           game         = m_parent->GetGame();
+	Game*                      game         = m_parent->GetGame();
 	shared_ptr<Pseudo3DCamera> camera       = game->GetPseudo3DCamera();
 	float                      cameraHeight = camera->GetHeight();
 
@@ -98,7 +98,7 @@ float Terrain::GetRoadX(int crtHeight)
 
 void Terrain::CreateTexture()
 {
-	shared_ptr<Game>           game         = m_parent->GetGame();
+	Game*                      game         = m_parent->GetGame();
 	shared_ptr<Pseudo3DCamera> camera       = game->GetPseudo3DCamera();
 	int                        cameraHeight = camera->GetHeight();
 

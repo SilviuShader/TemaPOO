@@ -21,6 +21,11 @@ shared_ptr<FileManager> FileManager::GetInstance()
     return g_fileManager;
 }
 
+void FileManager::DeleteInstance()
+{
+    g_fileManager.reset();
+}
+
 int FileManager::ReadScore()
 {
     ifstream fin("data.poo", ios::binary);

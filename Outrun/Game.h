@@ -8,7 +8,7 @@
 
 #include "StepTimer.h"
 
-class Game : public std::enable_shared_from_this<Game>
+class Game
 {
 public:
 
@@ -41,6 +41,7 @@ private:
 public:
 
     Game() noexcept;
+    ~Game();
 
     // Initialization and management
     void                                            Initialize(HWND, 
@@ -65,16 +66,18 @@ public:
     void                                            OnDeviceLost();
 
     void                                            ChangeGameState(Game::GameState);
+    void                                            Cleanup();
 
     // Getters
     inline std::shared_ptr<Pseudo3DCamera>          GetPseudo3DCamera()          const { return m_pseudo3DCamera;       }
-    inline std::shared_ptr<Terrain>                 GetTerrain()                 const { return m_terrain;              }
-    inline std::shared_ptr<Player>                  GetPlayer()                  const { return m_player;               }
+    inline Terrain*                                 GetTerrain()                 const { return (Terrain*)m_terrain->GetComponent<Terrain>().get(); }
+    inline Player*                                  GetPlayer()                  const { return m_player == nullptr ? nullptr : (Player*)m_player->GetComponent<Player>().get();   }
     inline float                                    GetObjectDisappearDepth()    const { return OBJECT_DISAPPEAR_DEPTH; }
     inline float                                    GetRoadWidth()               const { return ROAD_WIDTH;             }
     inline float                                    GetRoadHeight()              const { return ROAD_HEIGHT;            }
     inline float                                    GetSideWidth()               const { return SIDE_WIDTH;             }
     inline float                                    GetSegmentLength()           const { return SEGMENT_LENGTH;         }
+    inline DirectX::CommonStates*                   GetCommonStates()            const { return m_states.get();         }
 
     inline std::list<std::shared_ptr<GameObject> >& GetGameObjects()                   { return m_gameObjects;          }
 
@@ -134,8 +137,8 @@ private:
     std::list<std::shared_ptr<GameObject> >          m_gameObjects;
     std::unique_ptr<CollisionManager>                m_collisionManager;
 
-    std::shared_ptr<Terrain>                         m_terrain;
-    std::shared_ptr<Player>                          m_player;
+    std::shared_ptr<GameObject>                      m_terrain;
+    std::shared_ptr<GameObject>                      m_player;
 
     std::shared_ptr<Texture2D>                       m_carTexture;
     std::shared_ptr<Texture2D>                       m_sunTexture;

@@ -52,7 +52,7 @@ Pseudo3DCamera::TerrainShaderParameters& Pseudo3DCamera::TerrainShaderParameters
 
 Pseudo3DCamera::Pseudo3DCamera(ComPtr<ID3D11Device>        device,
 							   ComPtr<ID3D11DeviceContext> deviceContext, 
-	                           shared_ptr<Game>            game,
+	                           Game*                       game,
 							   int                         width, 
 							   int                         height, 
 							   int                         screenWidth, 
