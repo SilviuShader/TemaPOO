@@ -32,7 +32,7 @@ public:
 		   int, 
 		   int);
 
-	~Camera();
+	virtual ~Camera();
 
 	       void Present(std::shared_ptr<DirectX::SpriteBatch>);
 	       void OnScreenResize(int, 

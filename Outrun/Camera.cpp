@@ -39,6 +39,8 @@ Camera::Camera(ComPtr<ID3D11Device>        d3dDevice,
 
 Camera::~Camera()
 {
+	m_d3dContext.Reset();
+	m_game.reset();
 	m_spriteBatch.reset();
 	m_renderTexture.reset();
 	m_customBeginFunction.reset();

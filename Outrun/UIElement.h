@@ -4,8 +4,10 @@ class UIElement : public std::enable_shared_from_this<UIElement>
 {
 public:
 
-    UIElement();
-    ~UIElement();
+             UIElement();
+    virtual ~UIElement();
+
+           void DeleteChildren();
 
            void AddChild(std::shared_ptr<UIElement>);
            void Update(std::shared_ptr<UICamera>);

@@ -8,8 +8,8 @@ class GameComponent
 {
 public:
 
-    GameComponent(std::shared_ptr<GameObject>);
-    ~GameComponent();
+             GameComponent(std::shared_ptr<GameObject>);
+    virtual ~GameComponent();
 
     virtual void                        Update(float) = 0;
     virtual void                        Render()      = 0;

@@ -36,7 +36,7 @@ void GameObject::OnCollisionUpdate(shared_ptr<GameObject> other)
         gc->OnCollisionUpdate(other);
 }
 
-std::shared_ptr<Transform> GameObject::GetTransform()
+shared_ptr<Transform> GameObject::GetTransform()
 {
     // Every objects needs a transform,
     // unfortunately it can't be created in the constructor
@@ -44,7 +44,7 @@ std::shared_ptr<Transform> GameObject::GetTransform()
     // the game object.
     if (m_transform == nullptr)
     {
-        m_transform = std::make_shared<Transform>(shared_from_this());
+        m_transform = make_shared<Transform>(shared_from_this());
         m_gameComponents.push_back(m_transform);
     }
 

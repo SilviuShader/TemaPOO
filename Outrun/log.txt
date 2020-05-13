@@ -1,36 +1,46 @@
-[2020-Apr-18 13:34:26] Creating Device
-[2020-Apr-18 13:34:26] Creating Game resources
-[2020-Apr-18 13:34:26] Creating Pseudo3DCamera
-[2020-Apr-18 13:34:26] Creating BloomCamera
-[2020-Apr-18 13:34:26] Loading: "Resources/Sun.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/Border.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/Palm.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/Tower.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/Mountains.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/CarBack.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/CarFront.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/MotorBack.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/Life.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/Car.png"
-[2020-Apr-18 13:34:26] Creating UI
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/Replay.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/ReplayPressed.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/Quit.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/QuitPressed.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/Resume.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/ResumePressed.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/Pause.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/PausePressed.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/Speedometer.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/SpeedPointer.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/Life17.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/Fonts/VCR17.spritefont"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/ScoreBar.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/Fonts/VCR32.spritefont"
-[2020-Apr-18 13:34:26] Loading: "Resources/Fonts/VCR32.spritefont"
-[2020-Apr-18 13:34:26] Loading: "Resources/UI/ScoreBar.png"
-[2020-Apr-18 13:34:26] Loading: "Resources/Fonts/VCR32.spritefont"
-[2020-Apr-18 13:34:26] Loading: "Resources/Fonts/VCR32.spritefont"
-[2020-Apr-18 13:34:26] Creating window size dependent resources
-[2020-Apr-18 13:35:30] Creating window size dependent resources
-[2020-Apr-18 13:35:30] Creating window size dependent resources
+[2020-May-13 14:00:46] Creating Device
+[2020-May-13 14:00:47] Creating Game resources
+[2020-May-13 14:01:03] Creating Pseudo3DCamera
+[2020-May-13 14:01:03] Creating BloomCamera
+[2020-May-13 14:01:03] Loading: "Resources/Sun.png"
+[2020-May-13 14:01:03] Loading: "Resources/Border.png"
+[2020-May-13 14:01:03] Loading: "Resources/Palm.png"
+[2020-May-13 14:01:03] Loading: "Resources/Tower.png"
+[2020-May-13 14:01:03] Loading: "Resources/Mountains.png"
+[2020-May-13 14:01:03] Loading: "Resources/CarBack.png"
+[2020-May-13 14:01:03] Loading: "Resources/CarFront.png"
+[2020-May-13 14:01:03] Loading: "Resources/MotorBack.png"
+[2020-May-13 14:01:03] Loading: "Resources/Life.png"
+[2020-May-13 14:01:03] Loading: "Resources/Car.png"
+[2020-May-13 14:01:03] Creating UI
+[2020-May-13 14:01:03] Loading: "Resources/UI/Replay.png"
+[2020-May-13 14:01:03] Loading: "Resources/UI/ReplayPressed.png"
+[2020-May-13 14:01:03] Loading: "Resources/UI/Quit.png"
+[2020-May-13 14:01:03] Loading: "Resources/UI/QuitPressed.png"
+[2020-May-13 14:01:03] Loading: "Resources/UI/Resume.png"
+[2020-May-13 14:01:03] Loading: "Resources/UI/ResumePressed.png"
+[2020-May-13 14:01:03] Loading: "Resources/UI/Pause.png"
+[2020-May-13 14:01:03] Loading: "Resources/UI/PausePressed.png"
+[2020-May-13 14:01:03] Loading: "Resources/UI/Speedometer.png"
+[2020-May-13 14:01:03] Loading: "Resources/UI/SpeedPointer.png"
+[2020-May-13 14:01:03] Loading: "Resources/UI/Life17.png"
+[2020-May-13 14:01:03] Loading: "Resources/Fonts/VCR17.spritefont"
+[2020-May-13 14:01:03] Loading: "Resources/UI/ScoreBar.png"
+[2020-May-13 14:01:03] Loading: "Resources/Fonts/VCR32.spritefont"
+[2020-May-13 14:01:03] Loading: "Resources/Fonts/VCR32.spritefont"
+[2020-May-13 14:01:03] Loading: "Resources/UI/ScoreBar.png"
+[2020-May-13 14:01:03] Loading: "Resources/Fonts/VCR32.spritefont"
+[2020-May-13 14:01:03] Loading: "Resources/Fonts/VCR32.spritefont"
+[2020-May-13 14:01:03] Creating window size dependent resources
+[2020-May-13 14:01:08] Creating window size dependent resources
+[2020-May-13 14:01:09] Creating window size dependent resources
+[2020-May-13 14:01:11] Creating window size dependent resources
+[2020-May-13 14:01:25] Creating window size dependent resources
+[2020-May-13 14:01:26] Creating window size dependent resources
+[2020-May-13 14:01:27] Creating window size dependent resources
+[2020-May-13 14:01:28] Creating window size dependent resources
+[2020-May-13 14:01:29] Creating window size dependent resources
+[2020-May-13 14:01:30] Creating window size dependent resources
+[2020-May-13 14:01:30] Creating window size dependent resources
+[2020-May-13 14:01:32] Creating window size dependent resources
+[2020-May-13 14:02:01] Creating window size dependent resources

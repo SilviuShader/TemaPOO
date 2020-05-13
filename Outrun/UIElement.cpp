@@ -14,8 +14,20 @@ UIElement::UIElement() :
 
 UIElement::~UIElement()
 {
+    DeleteChildren();
+    m_parent.reset();
+}
+
+void UIElement::DeleteChildren()
+{
     for (auto& child : m_children)
+    {
+        child->DeleteChildren();
+        child->m_parent.reset();
         child.reset();
+    }
+
+    m_children.clear();
 }
 
 void UIElement::AddChild(shared_ptr<UIElement> child)

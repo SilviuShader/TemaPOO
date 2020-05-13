@@ -60,6 +60,5 @@ void FileManager::PushToLog(string str)
 #ifdef _DEBUG
         cout << logLine;
 #endif // _DEBUG
-
     }
 }

@@ -6,6 +6,7 @@
 #include "Game.h"
 
 extern void ExitGame();
+extern void QuitGame();
 
 using namespace std;
 
@@ -81,6 +82,12 @@ void Game::Update(DX::StepTimer const& timer)
             }
         }
 
+        if (m_gameState == GameState::Exiting)
+        {
+            QuitGame();
+            return;
+        }
+
         switch (m_gameState)
         {
         case Game::GameState::Playing:
@@ -120,6 +127,14 @@ void Game::Update(DX::StepTimer const& timer)
         case Game::GameState::End:
 
             break;
+
+        case Game::GameState::Reseting:
+
+            ReleaseGameResources();
+            CreateGameResources();
+            ChangeGameState(Game::GameState::Playing);
+
+            break;
         }
         // update UI
         for (int i = 0; i < (int)Game::GameState::Last; i++)
@@ -151,8 +166,6 @@ void Game::Render()
     {
         ID3D11ShaderResourceView* const null[] = { nullptr, nullptr };
         Vector4 clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-
-
 
         m_pseudo3DCamera->Begin(clearColor);
 
@@ -333,6 +346,39 @@ void Game::GetDefaultSize(int& width, int& height) const
     height = 480;
 }
 
+
+void Game::OnDeviceLost()
+{
+    ReleaseGameResources();
+
+    m_states.reset();
+    m_spriteBatch.reset();
+
+    m_depthStencilView.Reset();
+    m_renderTargetView.Reset();
+    m_swapChain.Reset();
+    m_d3dContext.Reset();
+    m_d3dDevice.Reset();
+
+    InputManager::Reset();
+
+    CreateDevice();
+    CreateResources();
+}
+
+void Game::ChangeGameState(Game::GameState gameState)
+{
+    m_gameState = gameState;
+
+    if (m_bloomCamera != nullptr)
+    {
+        if (m_gameState == Game::GameState::Playing)
+            m_bloomCamera->SetBloomPreset(BloomCamera::BloomPresets::Default);
+        else
+            m_bloomCamera->SetBloomPreset(BloomCamera::BloomPresets::Blurry);
+    }
+}
+
 // These are the resources that depend on the device.
 void Game::CreateDevice()
 {
@@ -511,38 +557,6 @@ void Game::CreateResources()
     {
         FileManager::GetInstance()->PushToLog(e.what());
         ExitGame();
-    }
-}
-
-void Game::OnDeviceLost()
-{
-    ReleaseGameResources();
-
-    m_states.reset();
-    m_spriteBatch.reset();
-
-    m_depthStencilView.Reset();
-    m_renderTargetView.Reset();
-    m_swapChain.Reset();
-    m_d3dContext.Reset();
-    m_d3dDevice.Reset();
-
-    InputManager::Reset();
-
-    CreateDevice();
-    CreateResources();
-}
-
-void Game::ChangeGameState(Game::GameState gameState)
-{
-    m_gameState = gameState;
-
-    if (m_bloomCamera != nullptr)
-    {
-        if (m_gameState == Game::GameState::Playing)
-            m_bloomCamera->SetBloomPreset(BloomCamera::BloomPresets::Default);
-        else
-            m_bloomCamera->SetBloomPreset(BloomCamera::BloomPresets::Blurry);
     }
 }
 
@@ -861,9 +875,6 @@ void Game::UpdateBestScoreLabels()
 
 void Game::ReleaseGameResources()
 {
-    for (int i = 0; i < (int)Game::GameState::Last; i++)
-        m_uiLayers[i].reset();
-
     m_uiCamera.reset();
         
     m_carTexture.reset();
@@ -887,11 +898,26 @@ void Game::ReleaseGameResources()
     m_pseudo3DCamera.reset();
     m_texture2DManager.reset();
     m_gameFontManager.reset();
+
+
+    for (int i = 0; i < (int)Game::GameState::Last; i++)
+        m_uiLayers[i]->DeleteChildren();
+
+    for (int i = 0; i < (int)Game::GameState::Last; i++)
+        m_uiLayers[i].reset();
+
+    m_speedPointerImage.reset();
+    m_distanceText.reset();
+    for (auto& scoreLabel : m_scoreLabels)
+        scoreLabel.reset();
+
+    for (auto& bestScoreLabel : m_bestScoreLabels)
+        bestScoreLabel.reset();
+
+    m_livesLabel.reset();
 }
 
 void Game::OnReplayButtonReleased()
 {
-    ReleaseGameResources();
-    CreateGameResources();
-    ChangeGameState(Game::GameState::Playing);
+    ChangeGameState(Game::GameState::Reseting);
 }

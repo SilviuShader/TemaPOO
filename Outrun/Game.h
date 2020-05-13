@@ -10,13 +10,15 @@
 
 class Game : public std::enable_shared_from_this<Game>
 {
-private:
+public:
 
     enum class GameState
     {
         Playing,
         End,
         Pause,
+        Reseting,
+        Exiting,
         Last
     };
 
@@ -60,6 +62,10 @@ public:
     void                                            GetDefaultSize(int&, 
                                                                    int&) const;
 
+    void                                            OnDeviceLost();
+
+    void                                            ChangeGameState(Game::GameState);
+
     // Getters
     inline std::shared_ptr<Pseudo3DCamera>          GetPseudo3DCamera()          const { return m_pseudo3DCamera;       }
     inline std::shared_ptr<Terrain>                 GetTerrain()                 const { return m_terrain;              }
@@ -70,7 +76,7 @@ public:
     inline float                                    GetSideWidth()               const { return SIDE_WIDTH;             }
     inline float                                    GetSegmentLength()           const { return SEGMENT_LENGTH;         }
 
-    inline std::list<std::shared_ptr<GameObject> >& GetGameObjects()                   { return m_gameObjects;    }
+    inline std::list<std::shared_ptr<GameObject> >& GetGameObjects()                   { return m_gameObjects;          }
 
 private:
 
@@ -83,10 +89,6 @@ private:
 
     void CreateDevice();
     void CreateResources();
-
-    void OnDeviceLost();
-
-    void ChangeGameState(Game::GameState);
 
     void RemoveDeadObjects();
     void CreateGameResources();
