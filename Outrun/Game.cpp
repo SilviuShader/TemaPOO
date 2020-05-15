@@ -368,7 +368,7 @@ void Game::OnDeviceLost(bool reset)
     m_d3dContext.Reset();
     m_d3dDevice.Reset();
 
-    InputManager::Reset();
+    InputManager::DeleteInstance();
 
     if (reset)
     {

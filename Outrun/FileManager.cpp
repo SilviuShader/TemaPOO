@@ -2,28 +2,23 @@
 
 using namespace std;
 
-shared_ptr<FileManager> FileManager::g_fileManager = nullptr;
+FileManager* FileManager::g_fileManager = nullptr;
 
-FileManager::FileManager() :
-    m_gameLog("")
-{
-}
-
-FileManager::~FileManager()
-{
-}
-
-shared_ptr<FileManager> FileManager::GetInstance()
+FileManager* FileManager::GetInstance()
 {
     if (g_fileManager == nullptr)
-        g_fileManager = make_shared<FileManager>();
+        g_fileManager = new FileManager();
 
     return g_fileManager;
 }
 
 void FileManager::DeleteInstance()
 {
-    g_fileManager.reset();
+    if (g_fileManager != nullptr)
+    {
+        delete g_fileManager;
+        g_fileManager = nullptr;
+    }
 }
 
 int FileManager::ReadScore()
@@ -66,4 +61,13 @@ void FileManager::PushToLog(string str)
         cout << logLine;
 #endif // _DEBUG
     }
+}
+
+FileManager::FileManager() :
+    m_gameLog("")
+{
+}
+
+FileManager::~FileManager()
+{
 }

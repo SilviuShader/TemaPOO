@@ -4,11 +4,8 @@ class FileManager
 {
 public:
 
-    FileManager();
-    ~FileManager();
-
-    static std::shared_ptr<FileManager> GetInstance();
-    static void                         DeleteInstance();
+    static FileManager* GetInstance();
+    static void         DeleteInstance();
 
 public:
 
@@ -20,7 +17,15 @@ public:
 
 private:
 
-    static std::shared_ptr<FileManager> g_fileManager;
+    FileManager();
+    ~FileManager();
+
+    FileManager(const FileManager&)           = delete;
+    FileManager operator=(const FileManager&) = delete;
+
+private:
+
+    static FileManager* g_fileManager;
 
 private:
 

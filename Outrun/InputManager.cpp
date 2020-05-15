@@ -6,7 +6,26 @@ using namespace std;
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-std::shared_ptr<InputManager> InputManager::g_inputManager = nullptr;
+InputManager* InputManager::g_inputManager = nullptr;
+
+void InputManager::CreateInstance(shared_ptr<Keyboard> keyboard, 
+                                  shared_ptr<Mouse>    mouse)
+{
+    if (g_inputManager != nullptr)
+        DeleteInstance();
+
+    g_inputManager = new InputManager(keyboard, 
+                                      mouse);
+}
+
+void InputManager::DeleteInstance()
+{
+    if (g_inputManager != nullptr)
+    {
+        delete g_inputManager;
+        g_inputManager = nullptr;
+    }
+}
 
 InputManager::InputManager(shared_ptr<Keyboard> keyboard,
                            shared_ptr<Mouse>    mouse) :
@@ -33,30 +52,6 @@ InputManager::~InputManager()
 {
     m_mouse.reset();
     m_keyboard.reset();
-}
-
-void InputManager::CreateInstance(shared_ptr<Keyboard> keyboard, 
-                                  shared_ptr<Mouse>    mouse)
-{
-    if (g_inputManager != nullptr)
-        Reset();
-
-    g_inputManager = make_shared<InputManager>(keyboard, 
-                                               mouse);
-}
-
-void InputManager::Reset()
-{
-    if (g_inputManager != nullptr)
-    {
-        g_inputManager.reset();
-        g_inputManager = nullptr;
-    }
-}
-
-void InputManager::DeleteInstance()
-{
-    g_inputManager.reset();
 }
 
 void InputManager::Update()

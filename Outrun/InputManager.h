@@ -29,15 +29,20 @@ public:
 
 public:
     
-    InputManager(std::shared_ptr<DirectX::Keyboard>, 
+    
+    static void          CreateInstance(std::shared_ptr<DirectX::Keyboard>,
+                                        std::shared_ptr<DirectX::Mouse>);
+    static void          DeleteInstance();
+    static InputManager* GetInstance() { return g_inputManager; }
+
+private:
+
+    InputManager(std::shared_ptr<DirectX::Keyboard>,
                  std::shared_ptr<DirectX::Mouse>);
     ~InputManager();
 
-    static void                          CreateInstance(std::shared_ptr<DirectX::Keyboard>,
-                                                        std::shared_ptr<DirectX::Mouse>);
-    static void                          Reset();
-    static std::shared_ptr<InputManager> GetInstance() { return g_inputManager; }
-    static void                          DeleteInstance();
+    InputManager(const InputManager&)           = delete;
+    InputManager operator=(const InputManager&) = delete;
 
 public:
 
@@ -55,7 +60,7 @@ public:
 
 private:
 
-    static std::shared_ptr<InputManager> g_inputManager;
+    static InputManager* g_inputManager;
 
 private:
 

@@ -25,7 +25,7 @@ Player::~Player()
 
 void Player::Update(float deltaTime)
 {
-    shared_ptr<InputManager>   inputManager = InputManager::GetInstance();
+    InputManager*              inputManager = InputManager::GetInstance();
     Game*                      game         = m_parent->GetGame();
     shared_ptr<Pseudo3DCamera> camera       = game->GetPseudo3DCamera();
     shared_ptr<Transform>      transform    = m_parent->GetTransform();
