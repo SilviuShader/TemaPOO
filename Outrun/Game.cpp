@@ -165,6 +165,8 @@ void Game::Update(DX::StepTimer const& timer)
 // Draws the scene.
 void Game::Render()
 {
+    if (m_gameState == GameState::Exiting)
+        return;
     // Don't try to render anything before the first Update.
     if (m_timer.GetFrameCount() == 0)
         return;
@@ -353,7 +355,7 @@ void Game::GetDefaultSize(int& width, int& height) const
     height = 480;
 }
 
-void Game::OnDeviceLost()
+void Game::OnDeviceLost(bool reset)
 {
     ReleaseGameResources();
 
@@ -368,8 +370,11 @@ void Game::OnDeviceLost()
 
     InputManager::Reset();
 
-    CreateDevice();
-    CreateResources();
+    if (reset)
+    {
+        CreateDevice();
+        CreateResources();
+    }
 }
 
 void Game::ChangeGameState(Game::GameState gameState)
@@ -679,7 +684,6 @@ void Game::CreateGameResources()
         FileManager::GetInstance()->PushToLog(e.what());
         ExitGame();
     }
-
     CreateUI();
 }
 
@@ -954,7 +958,8 @@ void Game::ReleaseGameResources()
     m_livesLabel.reset();
 
     for (int i = 0; i < (int)Game::GameState::Last; i++)
-        m_uiLayers[i]->DeleteChildren();
+        if (m_uiLayers[i] != nullptr)
+            m_uiLayers[i]->DeleteChildren();
 
     for (int i = 0; i < (int)Game::GameState::Last; i++)
         m_uiLayers[i].reset();

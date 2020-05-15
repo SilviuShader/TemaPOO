@@ -47,6 +47,7 @@
     <ClInclude Include="FileManager.h" />
     <ClInclude Include="BloomCamera.h" />
     <ClInclude Include="Life.h" />
+    <ClInclude Include="GraphicsException.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -79,6 +80,7 @@
     <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="Life.cpp" />
     <ClCompile Include="BloomCamera.cpp" />
+    <ClCompile Include="GraphicsException.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

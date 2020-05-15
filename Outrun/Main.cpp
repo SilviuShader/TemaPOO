@@ -374,6 +374,6 @@ void ExitGame()
 void QuitGame()
 {
     FileManager::GetInstance()->WriteLog();
-    g_game->OnDeviceLost();
+    g_game->OnDeviceLost(false);
     PostQuitMessage(0);
 }

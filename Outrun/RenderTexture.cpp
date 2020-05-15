@@ -86,11 +86,9 @@ void RenderTexture::Initialize(ComPtr<ID3D11Device> device,
 	result = device->CreateTexture2D(&textureDesc, 
 		                             NULL, 
 		                             m_renderTargetTexture.ReleaseAndGetAddressOf());
-
+	
 	if (FAILED(result))
-	{
-		return;
-	}
+		throw GraphicsException({ device.Get(), m_renderTargetTexture.Get() });
 
 	renderTargetViewDesc.Format             = textureDesc.Format;
 	renderTargetViewDesc.ViewDimension      = D3D11_RTV_DIMENSION_TEXTURE2D;
@@ -100,9 +98,7 @@ void RenderTexture::Initialize(ComPtr<ID3D11Device> device,
 		                                    &renderTargetViewDesc, 
 		                                    m_renderTargetView.ReleaseAndGetAddressOf());
 	if (FAILED(result))
-	{
-		return;
-	}
+		throw GraphicsException({ device.Get(), m_renderTargetTexture.Get(), m_renderTargetView.Get() });
 
 	shaderResourceViewDesc.Format                    = textureDesc.Format;
 	shaderResourceViewDesc.ViewDimension             = D3D11_SRV_DIMENSION_TEXTURE2D;
@@ -114,9 +110,7 @@ void RenderTexture::Initialize(ComPtr<ID3D11Device> device,
 		                                      m_shaderResourceView.ReleaseAndGetAddressOf());
 	
 	if (FAILED(result))
-	{
-		return;
-	}
+		throw GraphicsException({ device.Get(), m_renderTargetTexture.Get(), m_shaderResourceView.Get() });
 
 	ZeroMemory(&depthBufferDesc, 
 		       sizeof(depthBufferDesc));
@@ -138,9 +132,7 @@ void RenderTexture::Initialize(ComPtr<ID3D11Device> device,
 		                             m_depthStencilBuffer.ReleaseAndGetAddressOf());
 	
 	if (FAILED(result))
-	{
-		return;
-	}
+		throw GraphicsException({ device.Get(), m_depthStencilBuffer.Get() });
 
 	ZeroMemory(&depthStencilViewDesc, 
 		       sizeof(depthStencilViewDesc));
@@ -154,9 +146,7 @@ void RenderTexture::Initialize(ComPtr<ID3D11Device> device,
 		                                    m_depthStencilView.ReleaseAndGetAddressOf());
 	
 	if (FAILED(result))
-	{
-		return;
-	}
+		throw GraphicsException({ device.Get(), m_depthStencilBuffer.Get(), m_depthStencilView.Get() });
 
 	m_viewport.Width    = (float)textureWidth;
 	m_viewport.Height   = (float)textureHeight;

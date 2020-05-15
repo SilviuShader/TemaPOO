@@ -171,6 +171,7 @@
     <ClInclude Include="GameComponent.h" />
     <ClInclude Include="GameFont.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GraphicsException.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Killer.h" />
     <ClInclude Include="Life.h" />
@@ -204,6 +205,7 @@
     <ClCompile Include="GameComponent.cpp" />
     <ClCompile Include="GameFont.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GraphicsException.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Killer.cpp" />
     <ClCompile Include="Life.cpp" />

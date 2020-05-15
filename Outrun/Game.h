@@ -63,7 +63,7 @@ public:
     void                                            GetDefaultSize(int&, 
                                                                    int&) const;
 
-    void                                            OnDeviceLost();
+    void                                            OnDeviceLost(bool = true);
 
     void                                            ChangeGameState(Game::GameState);
     void                                            Cleanup();

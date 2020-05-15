@@ -6,6 +6,8 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
+#include <utility>
 #include <locale>
 #include <codecvt>
 #include <string>
@@ -70,6 +72,7 @@
 #include "WICTextureLoader.h"
 
 #include "ReadData.h"
+#include "GraphicsException.h"
 
 #include "Utils.h"
 #include "InputManager.h"
