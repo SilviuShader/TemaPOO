@@ -2,7 +2,8 @@
 
 // Implements the post-processing effect: Bloom
 // most of the code is from: https://github.com/microsoft/DirectXTK/wiki/Writing-custom-shaders
-// with slight adjustmens. 
+// with slight adjustmens. (The code that meets the requirements for the project is entierly written by me.. 
+// like overloaded assignment operator and heap memory allocation and stuff like that)
 // (I added heap memory allocation and assignment operator to the VS_BLUR_PARAMETERS class)
 // The shaders used by this class are copied from that tutorial too.
 

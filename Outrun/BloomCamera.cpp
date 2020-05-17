@@ -67,22 +67,22 @@ BloomCamera::VS_BLUR_PARAMETERS::VS_BLUR_PARAMETERS(const VS_BLUR_PARAMETERS& ot
 
 BloomCamera::VS_BLUR_PARAMETERS::~VS_BLUR_PARAMETERS()
 {
-    if (m_sampleWeights)
+    if (m_sampleWeights != nullptr)
     {
         delete[] m_sampleWeights;
-        m_sampleWeights = NULL;
+        m_sampleWeights = nullptr;
     }
 
-    if (m_sampleOffsets)
+    if (m_sampleOffsets != nullptr)
     {
         delete[] m_sampleOffsets;
-        m_sampleOffsets = NULL;
+        m_sampleOffsets = nullptr;
     }
 
-    if (m_data)
+    if (m_data != nullptr)
     {
         delete[] m_data;
-        m_data = NULL;
+        m_data = nullptr;
     }
 }
 

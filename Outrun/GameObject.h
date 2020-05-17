@@ -39,7 +39,7 @@ template<class T>
 inline std::shared_ptr<GameComponent> GameObject::GetComponent() const
 {
     for (auto& component : m_gameComponents)
-        if (dynamic_cast<T*>(component.get()) != NULL)
+        if (dynamic_cast<T*>(component.get()) != nullptr)
             return component;
 
     return nullptr;
